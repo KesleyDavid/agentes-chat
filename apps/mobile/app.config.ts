@@ -119,6 +119,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#02060f",
     },
     predictiveBackGestureEnabled: false,
+    // Never read the phone's photos or play in the background: the image picker is Android's photo picker, Salvar em
+    // Fotos only adds (MediaStore needs no permission for it) and voice messages stop when the app leaves. Google
+    // Play asks a justification for the media reads and a video for a media-playback foreground service, so keep
+    // them out even if a library's manifest brings them.
+    blockedPermissions: [
+      "android.permission.READ_MEDIA_IMAGES",
+      "android.permission.READ_MEDIA_VIDEO",
+      "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+      "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+    ],
     intentFilters: [
       {
         action: "VIEW",
@@ -199,15 +209,21 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       // Mensagens de voz (ADR 0100): the app records only while the person holds or locks the button.
       "expo-audio",
-      { microphonePermission: "To record voice messages in your conversations.", recordAudioAndroid: true },
+      // No background playback (the plugin's default is on): it would add a media-playback foreground service.
+      {
+        microphonePermission: "To record voice messages in your conversations.",
+        recordAudioAndroid: true,
+        enableBackgroundPlayback: false,
+      },
     ],
     [
-      // Salvar em Fotos: add-only access (the read text matches expo-image-picker's).
+      // Salvar em Fotos: add-only access (the read text matches expo-image-picker's). No granular reads on Android:
+      // saveToPhotos asks write-only, which needs none from Android 13 on.
       "expo-media-library",
       {
         photosPermission: "To send pictures in your conversations.",
         savePhotosPermission: "To save pictures from your conversations to Photos.",
-        granularPermissions: ["photo"],
+        granularPermissions: [],
       },
     ],
   ],
