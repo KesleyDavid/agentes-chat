@@ -90,7 +90,10 @@ test("system probe ignores user curl settings and inherited proxy or loader vari
   expect(captured?.file).toBe("/usr/bin/systemd-run");
   expect(captured?.args).toContain("--slice=agents-21000.slice");
   expect(captured?.args).toContain("/usr/bin/curl");
-  expect(Object.keys(captured?.options.env ?? {}).sort()).toEqual([
+  // A host with rootless Podman adds the agent's containers service (CONTAINER_HOST, DOCKER_HOST, XDG_RUNTIME_DIR).
+  const containers = new Set(["CONTAINER_HOST", "DOCKER_HOST", "XDG_RUNTIME_DIR"]);
+  const keys = Object.keys(captured?.options.env ?? {}).filter((k) => !containers.has(k));
+  expect(keys.sort()).toEqual([
     "AGENTES_NETWORK_OBSERVATION",
     "AGENTES_SHARED_BIN",
     "ANDROID_ADB_SERVER_PORT",

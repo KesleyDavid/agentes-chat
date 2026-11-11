@@ -118,7 +118,8 @@ export const CHROMIUM_DESKTOP_ENTRY = "/usr/local/share/applications/chromium.de
 
 /**
  * `--requirements` (the self-host setup's step, ADR 0153 §6): what it can install, as root, alone. The coding CLIs go
- * to /usr/local/bin, on every agent's PATH in either mode.
+ * to /usr/local/bin, on every agent's PATH in either mode. On a Mac only the coding CLIs, for the person running it,
+ * in ~/.local/bin (the runner's PATH there has it, login-path.ts): no root.
  */
 export const REQUIREMENTS = ["browser", "desktop", "claude", "codex"] as const;
 export type Requirement = (typeof REQUIREMENTS)[number];
@@ -701,10 +702,19 @@ desktop_packages() {
 }
 
 # Claude Code for every user (an agent's PATH is /usr/local/bin:/usr/bin:/bin): Anthropic's installer, run in a home
-# of its own that is thrown away, then its binary copied to $CLAUDE_EXE.
+# of its own that is thrown away, then its binary copied to $CLAUDE_EXE. On a Mac, for this user: the installer as is,
+# into ~/.local/bin.
 install_claude() {
   command -v bash >/dev/null 2>&1 || return 1
   CL=$(mktemp -d) || return 1
+  if [ "$(uname -s)" = Darwin ]; then
+    if download "$CLAUDE_INSTALL_URL" "$CL/install.sh" && bash "$CL/install.sh" && [ -x "$CLAUDE_EXE" ]; then
+      rm -rf "$CL"
+      return 0
+    fi
+    rm -rf "$CL"
+    return 1
+  fi
   if download "$CLAUDE_INSTALL_URL" "$CL/install.sh" && HOME="$CL" CLAUDE_INSTALL_ALLOW_SUDO=1 bash "$CL/install.sh" &&
     BIN=$(readlink -f "$CL/.local/bin/claude") && [ -f "$BIN" ] && cp "$BIN" "$CLAUDE_EXE.new" &&
     chmod 755 "$CLAUDE_EXE.new" && mv -f "$CLAUDE_EXE.new" "$CLAUDE_EXE"; then
@@ -715,16 +725,20 @@ install_claude() {
   return 1
 }
 
-# Codex for every user: the latest release's static build for this processor, into $CODEX_EXE.
+# Codex for every user: the latest release's static build for this processor, into $CODEX_EXE (on a Mac, its build
+# for macOS, for this user).
 install_codex() {
   case "$(uname -m)" in
     x86_64 | amd64) CPU=x86_64 ;;
     aarch64 | arm64) CPU=aarch64 ;;
     *) return 1 ;;
   esac
+  BUILD=$CPU-unknown-linux-musl
+  if [ "$(uname -s)" = Darwin ]; then BUILD=$CPU-apple-darwin; fi
   CX=$(mktemp -d) || return 1
-  if download "$CODEX_RELEASES/codex-$CPU-unknown-linux-musl.tar.gz" "$CX/codex.tar.gz" &&
-    tar -xzf "$CX/codex.tar.gz" -C "$CX" && cp "$CX/codex-$CPU-unknown-linux-musl" "$CODEX_EXE.new" &&
+  mkdir -p "\${CODEX_EXE%/*}" || return 1
+  if download "$CODEX_RELEASES/codex-$BUILD.tar.gz" "$CX/codex.tar.gz" &&
+    tar -xzf "$CX/codex.tar.gz" -C "$CX" && cp "$CX/codex-$BUILD" "$CODEX_EXE.new" &&
     chmod 755 "$CODEX_EXE.new" && mv -f "$CODEX_EXE.new" "$CODEX_EXE"; then
     rm -rf "$CX"
     return 0
@@ -748,10 +762,16 @@ get_cli() {
 }
 
 # --requirements: only what the agents need that was asked for, as root on Linux, then stop. The self-host setup runs
-# it for the requirements the person said yes to.
+# it for the requirements the person said yes to. On a Mac: Claude Code and Codex alone, for this user, in ~/.local/bin.
 install_requirements() {
-  [ "$(id -u)" -eq 0 ] || die "--requirements installs packages: run it as root"
-  [ "$(uname -s)" = Linux ] || die "--requirements is for Linux"
+  MAC_CLIS=0
+  if [ "$(uname -s)" = Darwin ]; then
+    MAC_CLIS=1
+    CLAUDE_EXE="$HOME/.local/bin/claude" CODEX_EXE="$HOME/.local/bin/codex"
+  else
+    [ "$(id -u)" -eq 0 ] || die "--requirements installs packages: run it as root"
+    [ "$(uname -s)" = Linux ] || die "--requirements is for Linux"
+  fi
   # The list, split on its commas by the shell alone.
   R_LIST="" REST="$REQUIREMENTS,"
   while [ -n "$REST" ]; do
@@ -759,6 +779,9 @@ install_requirements() {
     [ -z "$R" ] || R_LIST="$R_LIST $R"
   done
   for R in $R_LIST; do
+    case "$R" in
+      browser | desktop) [ "$MAC_CLIS" = 0 ] || die "--requirements on a Mac takes claude and codex: not $R" ;;
+    esac
     case "$R" in
       browser | claude | codex) ;;
       desktop) DESKTOP=1 ;;

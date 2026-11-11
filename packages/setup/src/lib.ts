@@ -620,6 +620,28 @@ export function diagnoseDocker(output: string, platform: Platform): Problem {
 
 /** A `docker compose` failure people hit often, said with its fix; null for anything else. */
 export function diagnoseCompose(output: string, platform: Platform): Problem | null {
+  // A registry that refuses an image (a private one, or one this computer isn't signed in to): Compose then also says
+  // the other images are missing, which isn't the cause. Docker names it on the image's line ("Image <ref> Error …
+  // denied") or in the registry's address (".../v2/<name>/manifests/<tag>": denied).
+  const named = /Image (\S+) Error\b[^\n]*\b(?:denied|unauthorized)\b/i.exec(output)?.[1];
+  const url = /https:\/\/([^/\s"]+)\/v2\/([^\s"]+)\/manifests\/([^\s"]+)"?:\s*(?:denied|unauthorized)/i.exec(output);
+  const refused =
+    named ??
+    (url ? `${url[1]}/${url[2]}:${url[3]}` : undefined) ??
+    (/error from registry: (denied|unauthorized)|pull access denied|requested access to the resource is denied/i.test(
+      output,
+    )
+      ? "an image"
+      : undefined);
+  if (refused) {
+    const first = refused.split("/")[0] ?? "";
+    const registry = refused !== "an image" && /[.:]/.test(first) ? first : "<registry>";
+    return {
+      check: "image",
+      error: `Docker couldn't download ${refused}: the registry refused it.`,
+      fix: `It may be private: sign in with docker login ${registry} (with a token that can read packages), or set AGENTES_IMAGE in .env to an image this computer can download. Then run the setup again.`,
+    };
+  }
   const busy = output.split("\n").find((line) => /port is already allocated|address already in use/i.test(line));
   if (busy !== undefined) {
     const port = /:(\d{2,5})(?!\d)/.exec(busy)?.[1] ?? "3000";
@@ -995,17 +1017,39 @@ export interface RequirementCheck {
 /**
  * What the agents need on this Linux machine and whether it's there, where the runner looks for each: the browser
  * (Google Chrome, or Chromium on ARM), the packages for their screens, and Claude Code and Codex on an agent's PATH
- * (/usr/local/bin or /usr/bin). On a Mac nothing is checked: the person installs what they use.
+ * (/usr/local/bin or /usr/bin). On a Mac, Claude Code and Codex alone, where the runner finds them there (`home`'s
+ * ~/.local/bin, where the installer puts them, or Homebrew's): the agents run as the person, with their browser.
  */
 export function checkRequirements(m: {
   mac: boolean;
   simple: boolean;
   arch: string;
   exists: (path: string) => boolean;
+  home?: string;
 }): RequirementCheck[] {
-  if (m.mac) return [];
-  const arm = m.arch === "arm64";
   const any = (paths: string[]) => paths.some(m.exists);
+  if (m.mac) {
+    const at = (name: string) => [
+      ...(m.home ? [`${m.home}/.local/bin/${name}`] : []),
+      `/opt/homebrew/bin/${name}`,
+      `/usr/local/bin/${name}`,
+    ];
+    return [
+      {
+        id: "claude",
+        label: "Claude Code (for agents that think with a Claude plan)",
+        present: any(at("claude")),
+        withComputer: false,
+      },
+      {
+        id: "codex",
+        label: "Codex (for agents that think with a ChatGPT plan)",
+        present: any(at("codex")),
+        withComputer: false,
+      },
+    ];
+  }
+  const arm = m.arch === "arm64";
   return [
     {
       id: "browser",

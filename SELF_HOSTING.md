@@ -19,7 +19,8 @@ never sent to browsers.
 
 - A 64-bit Linux server (amd64 or arm64), or a Mac with Docker Desktop, OrbStack or Colima for
   trying it. It runs on Docker Engine with the Compose v2 plugin (`docker compose`), 2.23.1 or
-  newer, and on Linux the installer below installs both when they're missing (Docker after asking).
+  newer. The installer below starts Docker when it's stopped and installs it when it's missing (each
+  after asking): on Linux with Docker's own script, on a Mac Colima with Homebrew.
   Without Docker, it also runs as one program with its database built in (On this computer, without
   Docker).
 - Nothing else: the installer fetches the Bun it runs the setup on. With Node.js 18 or newer,
@@ -90,8 +91,10 @@ tailnet can open it: no domain, no open port, nothing on the public internet.
 
 **The installer** is [`install.sh`](install.sh), and every instance serves it at `/install`. It only
 gets the computer ready, then hands over to the setup: on Linux, Docker (with Docker's own script,
-once you say yes) and the Compose plugin; on a Mac, Docker when Docker Desktop, OrbStack or Colima
-is running; and a pinned Bun (in `.runtime`) to run the setup with. Downloads are HTTPS, and the
+once you say yes, or started with `systemctl` when it's stopped) and the Compose plugin; on a Mac,
+the Docker Desktop, OrbStack or Colima it finds, started when it isn't running, or Colima with its
+`docker` command and Compose installed with Homebrew (Homebrew first when it's missing), each once
+you say yes (`--yes` doesn't ask); and a pinned Bun (in `.runtime`) to run the setup with. Downloads are HTTPS, and the
 pinned ones are checked against the SHA-256 in the script before anything runs them. Without root
 and without access to Docker, it runs itself again with `sudo`, and a download cut short runs
 nothing. To read it before it runs:

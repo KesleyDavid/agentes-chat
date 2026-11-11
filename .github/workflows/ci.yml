@@ -1,25 +1,27 @@
 name: CI
 
-# All verification runs here: on every push to main, every `v*` release tag, and on demand
-# (`gh workflow run CI --ref <branch>` or "Run workflow" in Actions). A pull request starts nothing by
-# itself, to keep runner minutes for the runs someone asks for: before it merges, run this by hand on its
-# branch, and that run's "CI result" is the check main requires.
+# All verification runs here: on every pull request (when it opens and on each push to it, drafts included),
+# every push to main, every `v*` release tag, and on demand (`gh workflow run CI --ref <branch>` or "Run
+# workflow" in Actions). The pull request's run gives it the "CI result" check main requires. A branch with
+# no pull request starts nothing by itself.
 #
-# The `changes` job narrows a run to the jobs its files touch: a push to main by what the push changed, a
-# manual run on a branch by what the branch changed since it left main. A manual run on main, one started
-# with `scope: all`, and a release tag check everything.
+# The `changes` job narrows a run to the jobs its files touch: a pull request by the files it changes, a push
+# to main by what the push changed, a manual run on a branch by what the branch changed since it left main. A
+# manual run on main, one started with `scope: all`, and a release tag check everything.
 #
 # Only jobs gated on a push or a tag (the images, the release assets) write anything or read a secret.
 #
-# Runners: no label is written here. Each job names a repository variable (Settings → Secrets and
-# variables → Actions → Variables) and falls back to GitHub's own runner, so moving to another provider,
-# or back, is a change of variables:
-#   CI_RUNNER        the light jobs (4 vCPU is plenty)
-#   CI_RUNNER_LARGE  the tests and the isolation job's QEMU guest (8 vCPU, 16 GB: the guest takes 8 GB)
+# Runners: GitHub's own (4 vCPU, 16 GB on Linux), which cost a public repository nothing; no variable is set.
+# No label is written here: each job names a repository variable (Settings → Secrets and variables → Actions
+# → Variables) and falls back to GitHub's runner, so moving to another provider, or back, is a change of
+# variables:
+#   CI_RUNNER        the light jobs
+#   CI_RUNNER_LARGE  the tests and the isolation job's QEMU guest (16 GB: the guest takes 8)
 #   CI_RUNNER_ARM    the arm64 image, built natively
 # The tests use the cores the runner has, so a smaller runner is slower, not broken. Everything else runs
 # on x64: on ARM the backend shards took 2.5x as long (603 and 667 s against 229 and 275 s, 2026-10-26).
 on:
+  pull_request:
   push:
     branches: [main]
     tags: ["v*"]
@@ -39,8 +41,9 @@ env:
   BACKUP_IMAGE: ghcr.io/agentes-chat/backup
   SPEECH_IMAGE: ghcr.io/agentes-chat/speech
 
-# A newer push supersedes a running check of the same branch or PR (on main only the newest
-# commit's image matters); a release tag's run is never cancelled.
+# A newer push supersedes a running check of the same branch or pull request (on main only the newest
+# commit's image matters); a release tag's run is never cancelled. A pull request's runs and a manual run
+# on its branch are two groups.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_type != 'tag' }}
@@ -59,8 +62,10 @@ jobs:
       ALL: >-
         ${{ github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' &&
         (inputs.scope == 'all' || github.ref_name == github.event.repository.default_branch)) }}
+    # pull-requests: on a pull request the filter asks the API for its files.
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       code: ${{ steps.groups.outputs.code }}
       shared: ${{ steps.groups.outputs.shared }}
@@ -72,8 +77,8 @@ jobs:
       docker: ${{ steps.groups.outputs.docker }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # A push to main: what the push changed. A manual run on a branch: what the branch changed since it left
-      # main (the merge base), which is what its pull request would change.
+      # A pull request: the files it changes. A push to main: what the push changed. A manual run on a branch:
+      # what the branch changed since it left main (the merge base), which is what its pull request would change.
       - name: Changed files
         id: filter
         if: env.ALL != 'true'
@@ -250,11 +255,12 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # The backend suite (PGlite, servers) on three runners at once. One file after another, a third of it took
+  # The backend suite (PGlite, servers) on five runners at once. One file after another, a third of it took
   # 13 to 20 minutes on a runner whose other cores sat idle (2026-11-10), so each runner now spreads its files
-  # over its cores and Bun does the split in three. The paths select the same test files as before.
+  # over its cores and Bun does the split. In three, a shard took 9 to 17 minutes on GitHub's 4 vCPU runners
+  # (2026-11-11), so the split is in five. The paths select the same test files as before.
   test-backend:
-    name: Test (backend ${{ matrix.shard }}/3)
+    name: Test (backend ${{ matrix.shard }}/5)
     needs: changes
     if: needs.changes.outputs.shared == 'true' || needs.changes.outputs.backend == 'true'
     runs-on: ${{ vars.CI_RUNNER_LARGE || 'ubuntu-latest' }}
@@ -262,7 +268,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4, 5]
     env:
       # The engine's own folder only: the suites in its subfolders are not part of this job.
       PATHS: >-
@@ -274,11 +280,11 @@ jobs:
       - *cache-bun
       - *install
       # Test files run on every core, each in a process and with modules of its own (--parallel), and Bun splits
-      # them in three by count. Splitting by each file's measured time was tried (2026-11-10): the shards then
+      # them in five by count. Splitting by each file's measured time was tried (2026-11-10): the shards then
       # opened with their heaviest files all at once and ran 40 to 60% longer.
       - name: Test
         timeout-minutes: 25
-        run: bun test --parallel --shard=${{ matrix.shard }}/3 $PATHS 2>&1 | tee test.log
+        run: bun test --parallel --shard=${{ matrix.shard }}/5 $PATHS 2>&1 | tee test.log
       - &keep-test-errors
         name: Keep errors
         if: always()
@@ -417,8 +423,8 @@ jobs:
           fetch-depth: 0
       # Bun first: the boundaries check below still runs when the scan fails.
       - *setup-bun
-      # main and a release tag scan the whole history (about two minutes); a branch scans the commits it adds to
-      # main, which main's own runs have already scanned up to there.
+      # main and a release tag scan the whole history (about two minutes); a branch or a pull request scans the
+      # commits it adds to main, which main's own runs have already scanned up to there.
       - name: Secret scan
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}

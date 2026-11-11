@@ -63,6 +63,8 @@ interface Machine {
   bun?: string;
   sudo?: boolean;
   musl?: boolean;
+  /** Other commands this machine has (colima, brew): stubs that only note their call. */
+  has?: string[];
 }
 
 /** What the installer asks the machine, as `command args` lines. Anything else it runs is a change. */
@@ -101,6 +103,7 @@ async function plan(machine: Machine, args: string[] = [], o: RunOptions = {}) {
     stub("bun", `case "$1" in --version) echo ${machine.bun} ;; *) ${setup} ;; esac`);
   }
   if (machine.musl) stub("ldd", `echo "musl libc (x86_64)" >&2; exit 1`);
+  for (const name of machine.has ?? []) stub(name);
   for (const name of [
     "curl",
     "unzip",
@@ -522,12 +525,55 @@ describe("install.sh", () => {
     expect(stopped.code).toBe(1);
     expect(stopped.err).toContain("Docker is on this Mac, but it doesn't answer.");
 
+    // With no terminal to ask and no --yes, it starts and installs nothing.
+    const colima = await plan({ ...mac, docker: "down", has: ["colima"] });
+    expect(colima.code).toBe(1);
+    expect(colima.err).toContain("pass --yes to start it");
+    expect(colima.changes).toEqual([]);
+
     for (const machine of [mac, linuxRoot]) {
       const native = await plan(machine, ["--native"]);
       expect(native.code).toBe(1);
       expect(native.err).toContain("can't run agentes.chat without Docker yet (--native)");
       expect(native.calls).toEqual([]);
     }
+  });
+
+  test("a Mac with Colima stopped: started (--yes), then the wait for Docker to answer", async () => {
+    const run = await plan({ ...mac, docker: "down", has: ["colima"], bun: "1.4.4" }, ["--yes"]);
+    expect(run.code).toBe(0);
+    expect(run.out).toContain("◇  Colima isn't running: starting it, once you say yes (--yes doesn't ask)");
+    expect(run.out).toContain("$ colima start");
+    expect(run.out).toContain("◇  Then waits for Docker to answer");
+    expect(run.changes).toEqual([]);
+  });
+
+  test("a Mac with no Docker: Colima with Homebrew (--yes), and Homebrew first only on a terminal", async () => {
+    const brew = await plan({ ...mac, has: ["brew"], bun: "1.4.4" }, ["--yes"]);
+    expect(brew.code).toBe(0);
+    expect(brew.out).toContain("◇  No Docker: installing Colima with Homebrew and starting it");
+    expect(brew.out).toContain(`$ ${brew.bin}/brew install colima docker docker-compose`);
+    expect(brew.out).toContain("$ colima start");
+    expect(brew.changes).toEqual([]);
+
+    // Homebrew's own installer asks for a password: without a terminal it stops before it.
+    const noBrew = await plan(mac, ["--yes"]);
+    expect(noBrew.code).toBe(1);
+    expect(noBrew.err).toContain("Homebrew's installer needs a terminal");
+    expect(noBrew.changes).toEqual([]);
+  });
+
+  test("Linux with Docker stopped: started (--yes), else told how without a terminal", async () => {
+    const run = await plan({ ...linuxRoot, docker: "down", compose: "2.26.1" }, ["--yes"]);
+    expect(run.code).toBe(0);
+    expect(run.out).toContain("$ systemctl enable --now docker");
+    expect(run.out).toContain("◇  Then waits for Docker to answer");
+    expect(run.changes).toEqual([]);
+
+    const stopped = await plan({ ...linuxRoot, docker: "down" });
+    expect(stopped.code).toBe(1);
+    expect(stopped.err).toContain("Docker is installed, but its engine doesn't answer.");
+    expect(stopped.err).toContain("pass --yes to start it");
   });
 
   test("every option it hands the setup is one the setup knows", async () => {

@@ -741,7 +741,13 @@ async function run(opts: Options, ui: Ui, image: boolean): Promise<Result> {
   });
   const checks =
     computer.state === "on"
-      ? checkRequirements({ mac: computer.mac, simple: computer.simple, arch: process.arch, exists: existsSync })
+      ? checkRequirements({
+          mac: computer.mac,
+          simple: computer.simple,
+          arch: process.arch,
+          exists: existsSync,
+          home: homedir(),
+        })
       : [];
   const requirements = await chooseRequirements(opts, ui, checks, asked);
   const telemetry = await chooseTelemetry(opts, ui, content, asked, entries);
@@ -1484,7 +1490,7 @@ async function setUpComputer(
       });
     }
   };
-  // What the agents need, first: as root, whatever mode they run in.
+  // What the agents need, first: as root on Linux, whatever mode they run in; for this user on a Mac.
   if (requirements.length) {
     ui.wait(`Installing for the agents: ${requirements.join(", ")}`, "A few minutes the first time.");
     const run = await streamed(ui, "sh", ["-s", "--", "--requirements", requirements.join(",")], await installer());
