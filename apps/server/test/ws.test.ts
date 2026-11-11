@@ -4,10 +4,10 @@ import { schema } from "@agenteschat/db";
 import { createLogger } from "../src/logger";
 import {
   authorizeSubscription,
+  type BrowserSocketData,
   createRealtime,
   currentSubscriptions,
   parseClientFrame,
-  type BrowserSocketData,
   type SocketData,
 } from "../src/realtime/ws";
 import {
@@ -367,7 +367,7 @@ test("a removal that lands while two subscribes to the channel are being checked
   } finally {
     for (const release of held.splice(0)) release();
     await Promise.allSettled(pending);
-    (socket as unknown as { readyState: number }).readyState = 3;
+    readyState = 3;
     await realtime.websocket.close(socket, 1000);
   }
 }, 30_000);
