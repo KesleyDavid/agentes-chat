@@ -22,7 +22,7 @@ import type { Level } from "./access-levels";
 import { workspaceActionContext, workspaceActionWords } from "./actions";
 import { type AppPage, isAppPage } from "./app-pages";
 import type { ConnectedItem } from "./connected";
-import { isHttpsUrl, sameServer } from "./custom-tools";
+import { isHttpsUrl, serverCovers } from "./custom-tools";
 import { formatUsd, joinNames } from "./format";
 import { aiStateOf, PLAN_BRAIN } from "./no-ai";
 import type { Permission } from "./permissions";
@@ -537,7 +537,7 @@ export const connectAppDone = (
   const working = items.filter((i) => !i.needsReconnect);
   return card.connector
     ? working.some((i) => i.def?.id === card.connector)
-    : Boolean(card.url) && working.some((i) => sameServer(i.server?.serverUrl, card.url));
+    : Boolean(card.url) && working.some((i) => serverCovers(i.server?.serverUrl, card.url));
 };
 
 const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);

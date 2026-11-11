@@ -11579,6 +11579,7 @@
     "notVisible": "Votre compte GitHub ne voit pas cette installation. Installez-la avec un compte qui y a accès.",
     "otherWorkspace": "Ce compte GitHub est déjà lié à un autre espace de travail. Retirez l'app là-bas avant de l'installer ici.",
     "installedOutside": "L'app a été installée sur ce compte GitHub en dehors d'agentes.chat. Retirez-la sur GitHub, puis réinstallez-la depuis Connecteurs › GitHub.",
+    "ownerUnknown": "GitHub n'a pas indiqué qui est propriétaire de cette organisation. La personne qui gère le serveur doit ajouter l'autorisation d'organisation Members (lecture seule) à l'app GitHub, puis vous la réinstallez.",
     "misconfigured": "L'app GitHub a la mauvaise clé secrète sur le serveur, donc l'installation ne peut pas aboutir. La personne qui gère le serveur doit remplacer la clé dans les paramètres de l'app.",
     "connectAccount": "Connecter un compte GitHub",
     "ownerHint": "Le propriétaire de ce serveur peut créer l'app GitHub ici, dans Connecteurs.",

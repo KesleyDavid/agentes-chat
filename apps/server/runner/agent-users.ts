@@ -540,8 +540,9 @@ function agentEnv(u: AgentUser, containers: boolean): Record<string, string> {
     USER: u.user,
     LOGNAME: u.user,
     SHELL: AGENT_SHELL,
-    // Last, so a tool an agent put in the shared `bin/` never stands in for the computer's own.
-    PATH: `${AGENT_PATH}:${home}/${SHARED_LINK}/bin`,
+    // The shared `bin/` is never on it: every agent can write there, and a tool found by name would run as
+    // whichever agent called it, with that agent's files and sign-ins. Agents reach it by full path.
+    PATH: AGENT_PATH,
     [SHARED_BIN_ENV]: `${home}/${SHARED_LINK}/bin`,
     LANG: "C.UTF-8",
     ANDROID_ADB_SERVER_PORT: String(adbServerPort(u.uid)),

@@ -2,7 +2,13 @@ import { expect, test } from "bun:test";
 import { EventEmitter } from "node:events";
 import type { request as httpsRequest } from "node:https";
 import { OutboundAddressError } from "@agenteschat/adapters";
-import { assertPublicHttpsUrl, isBlockedAddress, publicHttpsFetch } from "../src/net-guard";
+import {
+  allowPrivateOutbound,
+  assertPublicHttpsUrl,
+  isBlockedAddress,
+  outboundFetch,
+  publicHttpsFetch,
+} from "../src/net-guard";
 
 /**
  * The SSRF guard must classify an address by what the socket connects to, not by
@@ -55,7 +61,8 @@ test("assertPublicHttpsUrl still accepts a public host", async () => {
  * `node:https`'s `request` as far as the guarded fetch uses it: what it was asked (its options and body), answered
  * with `reply` once the request ends. Nothing touches the network.
  */
-function fakeHttps(reply: { status: number; headers?: Record<string, string>; body?: string }) {
+type FakeReply = { status: number; headers?: Record<string, string>; body?: string };
+function fakeHttps(answer: FakeReply | ((options: Record<string, unknown>) => FakeReply)) {
   const sent: { options: Record<string, unknown>; body: unknown }[] = [];
   const request = ((options: Record<string, unknown>, callback: (res: unknown) => void) => {
     const req = new EventEmitter() as EventEmitter & { end(body?: unknown): void; destroy(error?: Error): void };
@@ -65,6 +72,7 @@ function fakeHttps(reply: { status: number; headers?: Record<string, string>; bo
     };
     req.end = (body) => {
       sent.push({ options, body });
+      const reply = typeof answer === "function" ? answer(options) : answer;
       const res = Object.assign(new EventEmitter(), {
         statusCode: reply.status,
         headers: reply.headers ?? {},
@@ -156,4 +164,71 @@ test("publicHttpsFetch connects to the address it checked (IPv4 first), never fo
     request: fakeHttps({ status: 302, headers: { location: "https://169.254.169.254/" } }).request,
   });
   expect(await refusal(moved("https://vault.acme.example/api/sync"))).toBeInstanceOf(TypeError);
+});
+
+test("publicHttpsFetch hands a redirect back unfollowed when asked with redirect: manual", async () => {
+  const https = fakeHttps({ status: 301, headers: { location: "https://169.254.169.254/" }, body: "<Error/>" });
+  const guarded = publicHttpsFetch({
+    resolve: async () => [{ address: "93.184.216.34", family: 4 }],
+    request: https.request,
+  });
+  const res = await guarded("https://files.acme.example/bucket", { redirect: "manual" });
+  expect(res.status).toBe(301);
+  expect(res.headers.get("location")).toBe("https://169.254.169.254/");
+  expect(await res.text()).toBe("<Error/>");
+  expect(https.sent).toHaveLength(1);
+});
+
+test("outboundFetch checks the address at every request, with the caller's DNS", async () => {
+  allowPrivateOutbound(false);
+  const https = fakeHttps({ status: 200, body: "ok" });
+  // The name was public when it was saved; by now it answers with an address on our own network.
+  const addresses = [["93.184.216.34"], ["10.0.0.5"]];
+  const guarded = outboundFetch({
+    resolveHost: async () => addresses.shift() ?? ["10.0.0.5"],
+    request: https.request,
+  });
+  expect(await (await guarded("https://mcp.acme.example/mcp")).text()).toBe("ok");
+  expect(await refusal(guarded("https://mcp.acme.example/mcp"))).toBeInstanceOf(OutboundAddressError);
+  expect(https.sent).toHaveLength(1);
+});
+
+test("outboundFetch with ownRedirects follows a 307 or 308 on the same origin only", async () => {
+  allowPrivateOutbound(false);
+  const replies: Record<string, FakeReply> = {
+    "mcp.acme.example/mcp": { status: 308, headers: { location: "/mcp/" } },
+    "mcp.acme.example/mcp/": { status: 200, body: "here" },
+    "mcp.acme.example/away": { status: 307, headers: { location: "https://other.acme.example/mcp" } },
+    "mcp.acme.example/found": { status: 302, headers: { location: "/mcp/" } },
+  };
+  const https = fakeHttps((options) => replies[`${options.hostname}${options.path}`] ?? { status: 404 });
+  const guarded = outboundFetch({
+    resolveHost: async () => ["93.184.216.34"],
+    ownRedirects: true,
+    request: https.request,
+  });
+  const init = { method: "POST", headers: { authorization: "Bearer tk_fake" }, body: '{"jsonrpc":"2.0"}' };
+  const res = await guarded("https://mcp.acme.example/mcp", init);
+  expect(await res.text()).toBe("here");
+  // The second hop is the same request again: method, sign-in and body.
+  expect(https.sent.map((s) => [s.options.method, s.options.path])).toEqual([
+    ["POST", "/mcp"],
+    ["POST", "/mcp/"],
+  ]);
+  expect(new TextDecoder().decode(https.sent[1]?.body as Uint8Array)).toBe('{"jsonrpc":"2.0"}');
+  // Another origin, or a redirect that would change the method, comes back as it is.
+  expect((await guarded("https://mcp.acme.example/away", init)).status).toBe(307);
+  expect((await guarded("https://mcp.acme.example/found", init)).status).toBe(302);
+  expect(https.sent.some((s) => s.options.hostname === "other.acme.example")).toBe(false);
+});
+
+test("outboundFetch is the plain fetch where the operator lets workspaces reach this server's network", () => {
+  allowPrivateOutbound(false);
+  try {
+    allowPrivateOutbound();
+    expect(outboundFetch()).toBe(fetch);
+  } finally {
+    allowPrivateOutbound(false);
+  }
+  expect(outboundFetch()).not.toBe(fetch);
 });

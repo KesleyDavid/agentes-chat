@@ -229,7 +229,7 @@ interface AskOptions {
   description?: string[];
   initial?: string;
   placeholder?: string;
-  /** Typed unseen, and shown cut short once answered. */
+  /** Typed unseen, and never shown once answered. */
   secret?: boolean;
   /** Without an answer: asked again on a terminal, this problem when piped. */
   missing?: Problem;
@@ -344,7 +344,7 @@ function createUi(opts: Options) {
           const answer = (line ?? "").trim() || o.initial || "";
           const problem = answer ? (o.validate?.(answer) ?? null) : o.missing ? "an answer is needed." : null;
           if (!problem) {
-            term.answered(title, o.secret ? `${answer.slice(0, 12)}…` : answer, o.label ? `${o.label}: ` : "");
+            term.answered(title, answer, o.label ? `${o.label}: ` : "", o.secret);
             return answer;
           }
           if (!interactive || line === null) {

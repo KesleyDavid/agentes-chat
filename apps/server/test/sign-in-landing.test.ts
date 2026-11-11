@@ -45,6 +45,8 @@ test("a provider's return that didn't connect is said by a code of what happened
   expect(oauthFailure(new ConflictError("This install link was already used", "oauth.link_used"))).toBe("used");
   expect(oauthFailure(new ForbiddenError("Finish installing with…", "oauth.other_account"))).toBe("other_account");
   expect(oauthFailure(new ForbiddenError("Not visible", "github_app.not_visible"))).toBe("not_visible");
+  expect(oauthFailure(new ForbiddenError("Owners only", "github_app.owner_required"))).toBe("owner_required");
+  expect(oauthFailure(new ForbiddenError("GitHub didn't say", "github_app.owner_unknown"))).toBe("owner_unknown");
   expect(oauthFailure(new ForbiddenError())).toBe("not_allowed");
   expect(oauthFailure(new NotFoundError("Organization not found"))).toBe("failed");
   expect(oauthFailure(new TypeError("fetch failed"))).toBe("failed");

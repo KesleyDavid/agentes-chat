@@ -523,6 +523,8 @@ const KNOWN = {
   "github_app.not_visible": "githubApp.notVisible",
   "github_app.other_workspace": "githubApp.otherWorkspace",
   "github_app.installed_outside": "githubApp.installedOutside",
+  "github_app.owner_required": "githubApp.requested",
+  "github_app.owner_unknown": "githubApp.ownerUnknown",
   "github_app.misconfigured": "githubApp.misconfigured",
   github_app_env: "githubApp.server.line.env",
 } as const;
@@ -874,6 +876,10 @@ const OAUTH_RETURNS = {
   "github_app.other_workspace": "githubApp.otherWorkspace",
   installed_outside: "githubApp.installedOutside",
   "github_app.installed_outside": "githubApp.installedOutside",
+  owner_required: "githubApp.requested",
+  "github_app.owner_required": "githubApp.requested",
+  owner_unknown: "githubApp.ownerUnknown",
+  "github_app.owner_unknown": "githubApp.ownerUnknown",
   "github_app.misconfigured": "githubApp.misconfigured",
   requested: "githubApp.requested",
 } as const;

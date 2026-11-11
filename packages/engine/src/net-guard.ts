@@ -274,8 +274,9 @@ function bodyBytes(body: RequestInit["body"]): Uint8Array | null {
  * and every address the host resolves to public (not private, loopback, link-local, metadata, CGNAT or reserved). The
  * socket connects to one of those addresses (IPv4 first, `pinnedLookup`), never to the name resolved again, so a
  * name that changes after the check (DNS rebinding) can't move it. A redirect is never followed: it fails as with
- * `redirect: "error"`. A refused address throws `OutboundAddressError`, which callers tell from a network failure (a
- * `TypeError`, as `fetch` throws); `signal` aborts the request. Bodies: strings, bytes and form parameters.
+ * `redirect: "error"`, or comes back as the 3xx answer itself with `redirect: "manual"`. A refused address throws
+ * `OutboundAddressError`, which callers tell from a network failure (a `TypeError`, as `fetch` throws); `signal`
+ * aborts the request. Bodies: strings, bytes and form parameters.
  */
 export function publicHttpsFetch(
   options: { resolve?: ResolveAddresses; request?: typeof httpsRequest } = {},
@@ -328,7 +329,7 @@ export function publicHttpsFetch(
         },
         (res) => {
           const status = res.statusCode ?? 0;
-          if (status >= 300 && status < 400) {
+          if (status >= 300 && status < 400 && init.redirect !== "manual") {
             res.resume();
             req.destroy();
             reject(new TypeError("A redirect isn't followed for this address"));
@@ -370,4 +371,51 @@ export function publicHttpsFetch(
     });
   };
   return guarded as typeof fetch;
+}
+
+let privateOutbound = false;
+
+/**
+ * Lets addresses a workspace names be fetched with plain `fetch`. Off unless the server turns it on at boot, where
+ * its operator lets workspaces reach its own network (`allowsPrivateEndpoints`: self-hosted and closed to sign-up, or
+ * `MODEL_ENDPOINTS_PRIVATE=true`).
+ */
+export function allowPrivateOutbound(on = true) {
+  privateOutbound = on;
+}
+
+const MAX_OWN_REDIRECTS = 3;
+
+/**
+ * The `fetch` for an address a workspace's people, agents or connected servers named (a custom MCP server and its
+ * token endpoint, the workspace's own bucket, a page an agent reads), never for one the operator set by env:
+ * `publicHttpsFetch`, so the address is checked and pinned at every request, not only when it was saved, unless
+ * `allowPrivateOutbound` is on. `ownRedirects` follows a 307 or 308 that stays on the same origin (a trailing slash,
+ * a moved path), each hop checked and pinned again: what the request carries never leaves the host it was meant for.
+ */
+export function outboundFetch(
+  options: { resolveHost?: ResolveHost; ownRedirects?: boolean; request?: typeof httpsRequest } = {},
+): typeof fetch {
+  if (privateOutbound) return fetch;
+  const { resolveHost } = options;
+  const pinned = publicHttpsFetch({
+    request: options.request,
+    ...(resolveHost
+      ? { resolve: async (host) => (await resolveHost(host)).map((address) => ({ address, family: isIP(address) })) }
+      : {}),
+  });
+  if (!options.ownRedirects) return pinned;
+  const following = async (input: string | URL | Request, init: RequestInit = {}): Promise<Response> => {
+    let at = new URL(typeof input === "string" || input instanceof URL ? input : input.url);
+    for (let hop = 0; ; hop++) {
+      const res = await pinned(at, { ...init, redirect: "manual" });
+      const location = res.headers.get("location");
+      if ((res.status !== 307 && res.status !== 308) || !location || hop >= MAX_OWN_REDIRECTS) return res;
+      const next = new URL(location, at);
+      if (next.origin !== at.origin) return res;
+      await res.body?.cancel();
+      at = next;
+    }
+  };
+  return following as typeof fetch;
 }

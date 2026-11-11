@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { DatabaseError } from "@agenteschat/adapters";
+import { createFakeDatabaseDriver, DatabaseError } from "@agenteschat/adapters";
 import { eq, schema } from "@agenteschat/db";
 import {
   createDatabaseConnection,
@@ -184,6 +184,55 @@ test("the agent's rules: tables, hidden columns and the daily cap", async () => 
   expect(await call("query", { sql: "select 1" })).toMatchObject({
     output: { isError: true, content: expect.stringContaining("already ran its 3 queries") },
   });
+});
+
+test("the stored password only goes to the server and user it was saved for", async () => {
+  d = await databaseSetup();
+  const c = await connectDatabase(d);
+  const update = (input: Parameters<typeof updateDatabaseConnection>[4]) =>
+    updateDatabaseConnection(d.deps, d.f.owner.id, d.f.org.id, c.id, input);
+  d.opened.length = 0;
+  // Another server, port or user needs the password again: nothing is opened without it.
+  for (const input of [
+    { host: "other.example.com" },
+    { host: "other.example.com", sslmode: "disable" as const },
+    { port: 6543 },
+    { username: "someone" },
+  ]) {
+    await expect(update(input)).rejects.toMatchObject({ code: "database.password_required" });
+  }
+  await expect(update({ url: "postgres://reader@other.example.com/app" })).rejects.toThrow("password");
+  expect(d.opened).toEqual([]);
+  // What stays on the same server and user keeps using it: another database, the same address written again.
+  expect((await update({ database: "reports" })).ok).toBe(true);
+  expect((await update({ host: "DB.example.com", port: 5432, username: "reader" })).ok).toBe(true);
+  expect(d.opened.every((t) => t.host === "db.example.com" && t.password === "s3cret")).toBe(true);
+  // With its password, the address changes.
+  const moved = await update({ host: "other.example.com", password: "n3w" });
+  expect(moved.ok && moved.connection.host).toBe("other.example.com");
+  expect(d.opened.at(-1)).toMatchObject({ host: "other.example.com", password: "n3w" });
+  const byUrl = await update({ url: "postgres://writer:0ther@third.example.com:6543/app" });
+  expect(byUrl.ok && byUrl.connection).toMatchObject({ host: "third.example.com", port: 6543, username: "writer" });
+});
+
+test("string literals are read as the checked query's parser read them, whatever the server's setting", async () => {
+  d = await databaseSetup();
+  await d.pg.exec("set standard_conforming_strings = off");
+  const client = await createFakeDatabaseDriver({ db: d.pg }).open({
+    host: "db.example.com",
+    address: "93.184.216.34",
+    port: 5432,
+    database: "app",
+    username: "reader",
+    password: "x",
+    sslmode: "require",
+  });
+  // One literal with a backslash in it, not a literal followed by more SQL.
+  const r = await client.readOnly({ statementTimeoutMs: 1000, searchPath: "public" }, (run) =>
+    run("select 'a\\'' as x, 2 as y --'"),
+  );
+  expect(r.columns).toHaveLength(1);
+  expect(String(r.rows[0]?.[0])).toContain("as x, 2 as y");
 });
 
 test("a refused password marks the database for reconnecting; a new password brings it back", async () => {

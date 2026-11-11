@@ -271,7 +271,7 @@ function listMarkdown(list: HTMLElement, depth = 0): string {
   let n = 1;
   for (const li of Array.from(list.children)) {
     if (li.tagName !== "LI") continue;
-    const own = document.createElement("div");
+    const own = list.ownerDocument.createElement("div");
     const nested: HTMLElement[] = [];
     for (const c of Array.from(li.childNodes)) {
       if (c.nodeType === 1 && ((c as HTMLElement).tagName === "UL" || (c as HTMLElement).tagName === "OL"))
@@ -354,7 +354,9 @@ function childrenMarkdown(root: Node, keep?: (el: HTMLElement) => string | undef
   let loose: Node[] = [];
   const flush = () => {
     if (!loose.length) return;
-    const holder = document.createElement("p");
+    // In the nodes' own document: a paste is read in one that loads nothing, and a copy appended to an element of the
+    // page's would be adopted by it, images' requests and handlers included.
+    const holder = (root.ownerDocument ?? document).createElement("p");
     for (const n of loose) holder.append(n.cloneNode(true));
     const text = inlineMarkdown(holder).trim();
     if (text) parts.push(text);
@@ -411,8 +413,9 @@ export function retitled(body: string, from: string, to: string): string {
 
 /** What the editor shows of a pasted HTML (another site, a document): through Markdown, so only what the page draws. */
 export function pastedHtml(html: string): string {
-  const holder = document.createElement("div");
-  holder.innerHTML = html;
+  // Parsed in a document of its own, which loads nothing and runs nothing: the page's own would start an image's
+  // request, and run its handlers, before anything here is removed.
+  const holder = new DOMParser().parseFromString(html, "text/html").body;
   for (const el of Array.from(holder.querySelectorAll("script,style,meta,link,title,noscript,iframe,object")))
     el.remove();
   const md = childrenMarkdown(holder);

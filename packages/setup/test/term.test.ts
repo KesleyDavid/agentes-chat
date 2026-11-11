@@ -447,7 +447,7 @@ describe("questions", () => {
     expect(screen()).toBe("◇  Usage statistics\n│  Send them? Yes\n");
   });
 
-  test("typed and secret: ▪ while typing, a problem until it's fixed, its first 12 characters once answered", async () => {
+  test("typed and secret: ▪ while typing, a problem until it's fixed, a fixed row of ▪ once answered", async () => {
     const { term, keys, screen } = capture({ depth: 24 });
     const answer = term.ask("Paste the auth key", {
       secret: true,
@@ -462,7 +462,18 @@ describe("questions", () => {
     keys.type("tskey-auth-kQ7xYp2CNTRL");
     keys.press("return");
     expect(await answer).toBe("tskey-auth-kQ7xYp2CNTRL");
-    expect(screen()).toBe("◇  Paste the auth key\n│  tskey-auth-k…\n");
+    expect(screen()).toBe("◇  Paste the auth key\n│  ▪▪▪▪▪▪▪▪\n");
+  });
+
+  test("a secret answer read from a pipe leaves the same row of marks in the log, whatever it was", () => {
+    const logged = ["smtps://ab:pw@smtp.example.com:465", "key_live_0000000000000000", "x"].map((secret) => {
+      const { term, text } = capture({ tty: false });
+      term.answered("API key", secret, "API key: ", true);
+      expect(text()).not.toContain(secret.slice(0, 4));
+      return text();
+    });
+    expect(logged[0]).toContain("API key: ▪▪▪▪▪▪▪▪");
+    expect(new Set(logged).size).toBe(1);
   });
 
   test("a typed answer with a label, its default taken on an empty Enter", async () => {
@@ -507,7 +518,7 @@ describe("questions", () => {
     keys.type("tskey-auth-kQ7xYp2CNTRL");
     keys.press("return");
     expect(await answer).toBe("tskey-auth-kQ7xYp2CNTRL");
-    expect(screen()).toBe("◇  Paste the auth key\n│  tskey-auth-k…\n");
+    expect(screen()).toBe("◇  Paste the auth key\n│  ▪▪▪▪▪▪▪▪\n");
   });
 
   test("a word wider than the terminal folds, and the question still redraws over itself", async () => {

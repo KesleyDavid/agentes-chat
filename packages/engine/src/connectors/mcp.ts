@@ -11,7 +11,7 @@ import { type GitHubAppAccess, githubCallAuth, githubListingHeaders } from "../g
 import { githubItemOfCall, recordGitHubItem } from "../git/github-events";
 import { creditedMessage, runCoAuthor, signatureLine, signedBody } from "../git/signature";
 import type { Judge } from "../judge";
-import { assertPublicHttpsUrl, type ResolveHost } from "../net-guard";
+import { assertPublicHttpsUrl, outboundFetch, type ResolveHost } from "../net-guard";
 import { replyThreadOf } from "../runs";
 import { alwaysAsks, customAlwaysAsks, MAX_RESULT_CHARS } from "../tools/gateway";
 import type { ToolContext, ToolDefinition, ToolSource } from "../tools/types";
@@ -137,7 +137,7 @@ export const connectOverHttp: McpConnect = (connection, headers) =>
   mcpSessionOver(
     new StreamableHTTPClientTransport(new URL(connection.serverUrl), {
       requestInit: { headers },
-      fetch: tolerantMcpFetch(),
+      fetch: tolerantMcpFetch(outboundFetch({ ownRedirects: true })),
     }),
   );
 

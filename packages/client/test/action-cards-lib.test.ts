@@ -216,6 +216,10 @@ test("connect-an-app and invite cards: read from the message, a plain http addre
   const server = (serverUrl: string) => ({ def: null, server: { serverUrl } as never });
   expect(connectAppDone(app, [server("https://other.dev/mcp")])).toBe(false);
   expect(connectAppDone(app, [server("https://MCP.acme.dev/mcp/")])).toBe(true);
+  // Who can't manage connectors is told a server's origin only: it still settles the card, another host's doesn't.
+  expect(connectAppDone(app, [server("https://mcp.acme.dev")])).toBe(true);
+  expect(connectAppDone(app, [server("https://mcp.acme.dev.example.com")])).toBe(false);
+  expect(connectAppDone(app, [server("https://mcp.acme.dev/other")])).toBe(false);
   const linear = { kind: "connect_app" as const, forUserId: null, connector: "linear", why: "" };
   expect(connectAppDone(linear, [{ def: { id: "linear" } as never, server: null }])).toBe(true);
   // Its sign-in stopped working: the card asks again.

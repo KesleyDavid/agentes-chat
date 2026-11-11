@@ -65,6 +65,114 @@ test("hidden columns: never named, never through * or a whole-row value", async 
   expect(await reason("select to_jsonb(users) from users", rules)).toContain("name the columns");
 });
 
+test("a CTE's name stands for its query only where Postgres sees it", async () => {
+  const rules = { tables: ["public.orders"], hiddenColumns: [] };
+  // Ordinary use: one CTE, several where a later one reads an earlier one, one inside a subquery, a set operation.
+  expect(await reason("with x as (select id from orders) select count(*) from x", rules)).toBeNull();
+  expect(
+    await reason("with a as (select id from orders), b as (select id from a) select * from b join a using (id)", rules),
+  ).toBeNull();
+  expect(
+    await reason(
+      "select id from orders where id in (with firsts as (select id from orders limit 3) select id from firsts)",
+      rules,
+    ),
+  ).toBeNull();
+  expect(
+    await reason("with a as (select id from orders) select id from a union all select id from a", rules),
+  ).toBeNull();
+  // Nested: the inner query still sees the outer CTE, and its own.
+  expect(
+    await reason(
+      "with a as (select id from orders) select * from (with b as (select id from a) select b.id from b, a) s",
+      rules,
+    ),
+  ).toBeNull();
+  expect(
+    await reason("with a as (with b as (select id from orders) select id from b) select id from a", rules),
+  ).toBeNull();
+  // Recursive: a query reads itself, and one written after it.
+  expect(
+    await reason(
+      "with recursive n as (select 1 as i union all select i + 1 from n where i < 5) select i from n",
+      rules,
+    ),
+  ).toBeNull();
+  expect(
+    await reason("with recursive a as (select id from b), b as (select id from orders) select id from a", rules),
+  ).toBeNull();
+  // A CTE named like a table the agent may not read hides nothing real.
+  expect(await reason("with users as (select id from orders) select * from users", rules)).toBeNull();
+
+  // Outside the WITH's own statement the name is the real table again.
+  expect(
+    await reason("select email from users where exists (with users as (select 1) select 1 from users)", rules),
+  ).toContain("may only read");
+  expect(await reason("select * from (with users as (select 1) select * from users) s, users", rules)).toContain(
+    "may only read",
+  );
+  // Without RECURSIVE a CTE's own query doesn't see its name, nor the ones after it.
+  expect(await reason("with users as (select email from users) select * from users", rules)).toContain("may only read");
+  expect(await reason("with a as (select * from users), users as (select 1) select * from a", rules)).toContain(
+    "may only read",
+  );
+  // A schema-qualified name is never a CTE.
+  expect(await reason("with users as (select 1) select * from public.users", rules)).toContain("may only read");
+});
+
+test("a CTE's name never covers a hidden column or a blocked catalog outside its scope", async () => {
+  const rules = { tables: [], hiddenColumns: ["users.password_hash"] };
+  expect(await reason("with users as (select password_hash from users) select count(*) from users", rules)).toContain(
+    "password_hash is hidden",
+  );
+  expect(
+    await reason("select password_hash from users where exists (with users as (select 1) select 1 from users)", rules),
+  ).toContain("password_hash is hidden");
+  expect(await reason("with pg_stats as (select * from pg_stats) select * from pg_stats")).toContain(
+    "pg_catalog.pg_stats",
+  );
+  const whole = await guardSql(
+    "with pg_database as (select datname from pg_database) select * from pg_database",
+    open,
+    { wholeServer: true },
+  );
+  expect(whole.ok).toBe(false);
+});
+
+test("hidden columns: no whole row through any alias, alias.column still fine", async () => {
+  const rules = { tables: [], hiddenColumns: ["users.password_hash"] };
+  expect(await reason("select row_to_json(j) from (users join orders o on true) as j", rules)).toContain("whole row");
+  expect(await reason("select j from (users u join users u2 on true) as j", rules)).toContain("whole row");
+  // A subquery's row is only its select list, so its alias is fine as a value; what it selects is still checked.
+  expect(await reason("select to_jsonb(s) from (select id, email from users) s", rules)).toBeNull();
+  expect(await reason("select to_jsonb(s) from (select u from users u) s", rules)).toContain("whole row");
+  expect(await reason("select s from (select * from users) s", rules)).toContain("instead of *");
+  expect(await reason("select s from (table users) s", rules)).not.toBeNull();
+  expect(await reason("select s from (select j from (users u join orders o on true) as j) s", rules)).toContain(
+    "whole row",
+  );
+  expect(await reason("select x from users a join users b using (password_hash) as x", rules)).toContain("whole row");
+  // The refusal says what to write instead.
+  expect(await reason("select j from (users u join orders o on true) as j", rules)).toContain("alias.column");
+  // Naming columns through an alias, of a table, a join or a subquery.
+  expect(await reason("select u.id, u.email from users u", rules)).toBeNull();
+  expect(
+    await reason("select j.email, j.total from (users u join orders o on o.customer_id = u.id) as j", rules),
+  ).toBeNull();
+  expect(
+    await reason(
+      "select s.email, o.total from (select id, email from users) s join orders o on o.customer_id = s.id",
+      rules,
+    ),
+  ).toBeNull();
+  // A function's alias is its column.
+  expect(await reason("select u.email, d from users u, generate_series(1, 3) as d", rules)).toBeNull();
+  // Without hidden columns in the query, a whole row through an alias is fine.
+  expect(
+    await reason("select row_to_json(j) from (orders o join customers c on c.id = o.customer_id) as j", rules),
+  ).toBeNull();
+});
+
 test("hidden columns: never read under new names through an alias column list", async () => {
   const rules = { tables: [], hiddenColumns: ["public.users.password_hash"] };
   expect(await reason("select c from users as x(a, b, c)", rules)).toContain("alias list");

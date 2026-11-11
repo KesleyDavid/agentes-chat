@@ -11370,6 +11370,13 @@ export const ptBR = {
     installedOutside:
       "O app foi instalado nessa conta do GitHub fora do agentes.chat. Remova o app no GitHub e instale de novo em Conectores › GitHub.",
     /**
+     * O GitHub se recusou a dizer se a pessoa é dona da organização (`github_app_error=owner_unknown`, um 403): o mais
+     * provável é que o app do GitHub deste servidor tenha sido criado sem a permissão de organização Members, que só
+     * quem cuida dele adiciona.
+     */
+    ownerUnknown:
+      "O GitHub não disse quem é dono dessa organização. Quem cuida do servidor precisa adicionar a permissão de organização Members (somente leitura) ao app do GitHub, e depois você instala de novo.",
+    /**
      * O GitHub recusou o app do GitHub deste servidor, com a chave secreta (ou o ID) errada
      * (`github_app_error=misconfigured`): tentar de novo não resolve, só quem cuida do servidor conserta.
      */

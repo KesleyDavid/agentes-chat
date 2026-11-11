@@ -2,7 +2,7 @@ import { and, type Database, eq, isNull, schema } from "@agenteschat/db";
 import { openSecret, sealSecret } from "../crypto";
 import { ValidationError } from "../errors";
 import { oneLine } from "../mail/text";
-import { assertPublicHttpsUrl, type ResolveHost } from "../net-guard";
+import { assertPublicHttpsUrl, outboundFetch, type ResolveHost } from "../net-guard";
 import type { ConnectorDeps } from "./connections";
 
 const { oauthClients, connectorConnections } = schema;
@@ -39,12 +39,19 @@ export interface AuthServerMetadata {
 
 const AUTH_METHODS: readonly string[] = ["none", "client_secret_post", "client_secret_basic"];
 
-const http = (deps: McpOAuthDeps) => deps.http ?? fetch;
+/** Every address here is one a server's own answers named: checked and pinned as each request connects. */
+const http = (deps: McpOAuthDeps) => deps.http ?? outboundFetch({ resolveHost: deps.resolveHost });
+/** The pinned fetch has no time limit of its own: a server that never answers ends the discovery here. */
+const waitMs = () => AbortSignal.timeout(15_000);
 
 async function getJson(deps: McpOAuthDeps, url: string): Promise<Record<string, unknown> | null> {
   await assertPublicHttpsUrl(url, deps.resolveHost);
   try {
-    const res = await http(deps)(url, { headers: { accept: "application/json" }, redirect: "error" });
+    const res = await http(deps)(url, {
+      headers: { accept: "application/json" },
+      redirect: "error",
+      signal: waitMs(),
+    });
     if (!res.ok) return null;
     return (await res.json()) as Record<string, unknown>;
   } catch {
@@ -76,6 +83,7 @@ export async function probeMcpServer(deps: McpOAuthDeps, serverUrl: string): Pro
     res = await http(deps)(serverUrl, {
       method: "POST",
       redirect: "error",
+      signal: waitMs(),
       headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
       body: JSON.stringify({
         jsonrpc: "2.0",
@@ -230,6 +238,7 @@ export async function ensureOAuthClient(
     const res = await http(deps)(endpoint, {
       method: "POST",
       redirect: "error",
+      signal: waitMs(),
       headers: { "content-type": "application/json", accept: "application/json" },
       body: JSON.stringify({
         client_name: clientName,

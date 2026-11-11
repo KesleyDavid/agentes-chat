@@ -103,7 +103,7 @@ export function requestOriginAllowed(origins: Set<string>, headers: Headers): bo
  * POSTs to these paths may also be `multipart/form-data` (file uploads); the origin check still applies.
  * One list for every app router: each router's middleware runs for every `/api/app/*` request.
  */
-const MULTIPART_PATHS = [
+export const MULTIPART_PATHS = [
   /\/organizations\/[^/]+\/artifacts(\/[^/]+)?\/files$/,
   /\/organizations\/[^/]+\/imports\/files$/,
   /\/organizations\/[^/]+\/channels\/[^/]+\/voice$/,
@@ -226,6 +226,8 @@ export function oauthFailure(error: unknown, refusals: readonly string[] = []): 
   if (code === "github_app.not_visible") return "not_visible";
   if (code === "github_app.other_workspace") return "other_workspace";
   if (code === "github_app.installed_outside") return "installed_outside";
+  if (code === "github_app.owner_required") return "owner_required";
+  if (code === "github_app.owner_unknown") return "owner_unknown";
   return error instanceof ForbiddenError ? "not_allowed" : "failed";
 }
 

@@ -303,8 +303,8 @@ test("the launcher: the agent's slice, its own temporary folders, its user, abso
     USER: "ag-a1b2c3d4",
     LOGNAME: "ag-a1b2c3d4",
     SHELL: "/bin/bash",
-    // The shared folder's bin/ (ADR 0115) last: a tool an agent put there never stands in for the computer's own.
-    PATH: "/usr/local/bin:/usr/bin:/bin:/home/ag-a1b2c3d4/shared/bin",
+    // The shared folder's bin/ (ADR 0115) is named, never on the PATH: every agent can write there.
+    PATH: "/usr/local/bin:/usr/bin:/bin",
     AGENTES_SHARED_BIN: "/home/ag-a1b2c3d4/shared/bin",
     LANG: "C.UTF-8",
     ANDROID_ADB_SERVER_PORT: "31627",
@@ -313,6 +313,8 @@ test("the launcher: the agent's slice, its own temporary folders, its user, abso
   };
   const launcher = systemLauncher(user, true, false, false);
   const p = launcher.prefix;
+  for (const systemd of [true, false])
+    expect(systemLauncher(user, systemd, false).env.PATH.split(":")).not.toContain(env.AGENTES_SHARED_BIN);
   expect(p.slice(0, 8)).toEqual([
     "/usr/bin/systemd-run",
     "--quiet",

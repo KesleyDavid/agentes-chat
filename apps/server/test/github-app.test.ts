@@ -42,6 +42,9 @@ const http = (async (input: string | URL | Request, init?: RequestInit) => {
   asked.push(`${init?.method ?? "GET"} ${url}`);
   if (url === "https://github.com/login/oauth/access_token") return Response.json({ access_token: "ghu_person" });
   if (url.startsWith("https://api.github.com/user/installations")) return Response.json({ installations: SEEN });
+  if (url.startsWith("https://api.github.com/user/memberships/orgs/")) {
+    return Response.json({ state: "active", role: "admin" });
+  }
   if (url === "https://api.github.com/app-manifests/made-code/conversions" && init?.method === "POST") {
     return Response.json(
       {

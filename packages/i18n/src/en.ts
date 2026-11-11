@@ -11315,6 +11315,13 @@ export const en = {
     installedOutside:
       "The app was installed on that GitHub account outside agentes.chat. Remove it on GitHub and install it again from Connectors › GitHub.",
     /**
+     * GitHub refused to say whether the person owns the organization (`github_app_error=owner_unknown`, a 403): most
+     * likely this server's own GitHub App was made without the organization permission Members, which only whoever
+     * runs it can add.
+     */
+    ownerUnknown:
+      "GitHub didn't say who owns that organization. Whoever runs the server needs to add the organization permission Members (read-only) to the GitHub app, then you install it again.",
+    /**
      * GitHub refused this server's own GitHub App, whose client secret (or id) is wrong
      * (`github_app_error=misconfigured`): trying again can't help, only whoever runs the server can fix it.
      */

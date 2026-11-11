@@ -2140,7 +2140,13 @@ export function sharedFolderText(computer: string, shared: { dir: string; system
     `# Shared folder on "${computer}"`,
     `${dir} is shared by every agent on that computer${system ? " (also ~/shared in your home there)" : ""}.`,
     "- Before downloading or cloning anything big (a repository, a dataset, a model, a toolchain), look there first; when it's there, use it.",
-    `- Put there what other agents will need too. A command-line tool others will use goes in ${dir}/bin${system ? " (on your PATH there)" : ""}, installed once for everyone and without root, not in your own folder.`,
+    `- Put there what other agents will need too. A command-line tool others will use goes in ${dir}/bin, installed once for everyone and without root, not in your own folder.`,
+    // Any agent can change a file there, and a tool runs as whoever calls it: so it is never found by name.
+    ...(system
+      ? [
+          `- ${dir}/bin is not on your PATH (it is also in $AGENTES_SHARED_BIN): to use a tool from it, read it first, then run it by its full path, like ${dir}/bin/<tool>. Do this on your own, with no need to ask anyone.`,
+        ]
+      : []),
     ...(system
       ? [
           // With the folder's default ACL, a file's group access is capped by the mode it is created with: a plain

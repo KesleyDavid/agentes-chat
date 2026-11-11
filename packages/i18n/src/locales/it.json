@@ -11593,6 +11593,7 @@
     "notVisible": "Il tuo account GitHub non vede quell'installazione. Installala con un account che vi abbia accesso.",
     "otherWorkspace": "Questo account GitHub è già collegato a un altro spazio di lavoro. Rimuovi l'app da lì prima di installarla qui.",
     "installedOutside": "L'app è stata installata su questo account GitHub fuori da agentes.chat. Rimuovila su GitHub e installala di nuovo da Connettori › GitHub.",
+    "ownerUnknown": "GitHub non ha detto chi è proprietario di questa organizzazione. Chi gestisce il server deve aggiungere il permesso dell'organizzazione Members (sola lettura) all'app GitHub, poi la installi di nuovo.",
     "misconfigured": "L'app GitHub ha la chiave segreta sbagliata sul server, quindi l'installazione non può finire. Chi gestisce il server deve sostituire la chiave nelle impostazioni dell'app.",
     "connectAccount": "Collega un account GitHub",
     "ownerHint": "Il proprietario di questo server può creare l'app GitHub qui in Connettori.",

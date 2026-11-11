@@ -2,6 +2,7 @@ import { and, type Database, desc, type Executor, eq, inArray, lt, ne, or, schem
 import { recordAudit } from "./audit";
 import type { RunAuthority } from "./authority";
 import { readableChannelIds } from "./channels";
+import { serverUrlShown } from "./connectors/presets";
 import { cutText } from "./format";
 import { can, requirePermission } from "./organizations";
 import { MAKE_KEY_TOOL, REQUEST_SECRET_TOOL } from "./secrets";
@@ -274,6 +275,9 @@ async function hiddenFrom(db: Database, orgId: string, userId: string, rows: Aud
   return hidden;
 }
 
+/** Rows that carry a custom server's address: `view_audit` is not `manage_connectors`, so it leaves as its origin. */
+const CUSTOM_SERVER_ACTIONS: readonly string[] = ["connector.custom_connected", "connector.custom_reconnected"];
+
 /**
  * The org's audit log, newest first, for admins (`configure`): what people
  * changed and what agents did, with names (an agent or person since removed
@@ -400,7 +404,11 @@ export async function listAudit(
           : {}
         : r.action === TOOL_CALL
           ? r.details
-          : auditInput(r.details),
+          : auditInput(
+              CUSTOM_SERVER_ACTIONS.includes(r.action) && typeof r.details.serverUrl === "string"
+                ? { ...r.details, serverUrl: serverUrlShown(r.details.serverUrl) }
+                : r.details,
+            ),
       runId: r.runId,
       channelId: r.channelId,
       channel: (r.channelId && (channelById.get(r.channelId) as AuditRow["channel"])) || null,

@@ -28,7 +28,7 @@ import { recordAudit } from "./audit";
 import { openSecret, randomToken, sealSecret, sha256 } from "./crypto";
 import { NotFoundError, ValidationError } from "./errors";
 import { assertStorageRoom } from "./limits";
-import { assertPublicHttpsUrl, type ResolveHost } from "./net-guard";
+import { assertPublicHttpsUrl, outboundFetch, type ResolveHost } from "./net-guard";
 import { requirePermission } from "./organizations";
 import { enqueue } from "./outbox";
 
@@ -124,8 +124,9 @@ async function secretOf(deps: StorageDeps, row: StorageConfigRow) {
   return openSecret(deps.keyWrappers, sealed, aadFor(row.orgId, row.id));
 }
 
+/** A workspace's own bucket: every request's host is checked as it connects, the bucket's own name included. */
 function s3Store(deps: StorageDeps, settings: S3Settings) {
-  return createS3BlobStore(settings, { fetch: deps.fetch });
+  return createS3BlobStore(settings, { fetch: deps.fetch ?? outboundFetch({ resolveHost: deps.resolveHost }) });
 }
 
 async function storeOf(deps: StorageDeps, row: StorageConfigRow): Promise<BlobStore> {

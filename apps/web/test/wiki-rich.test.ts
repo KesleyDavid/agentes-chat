@@ -90,6 +90,22 @@ describe("the wiki's visual editor", () => {
     expect(pastedHtml(html)).toBe("<p><strong>Negrito</strong> e <em>itálico</em></p><ul><li>item</li></ul>");
   });
 
+  test("a paste is read outside the page: no element of it is ever made in the live document", () => {
+    const made: string[] = [];
+    const create = document.createElement;
+    document.createElement = ((tag: string) => {
+      made.push(tag.toLowerCase());
+      return create.call(document, tag);
+    }) as typeof document.createElement;
+    try {
+      const out = pastedHtml('<p>Oi <img src="https://example.com/x.png" alt="foto" onerror="window.ran = 1"></p>');
+      expect(out).toBe("<p>Oi foto</p>");
+    } finally {
+      document.createElement = create;
+    }
+    expect(made).toEqual([]);
+  });
+
   test("a first heading equal to the title stays out of the editor and goes back on save, renamed with the page", () => {
     const { root, save } = open("# Deploy\n\nSó de segunda a quinta.", "Deploy");
     expect(root.textContent).toBe("Só de segunda a quinta.");

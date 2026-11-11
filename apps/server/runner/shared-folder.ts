@@ -20,11 +20,11 @@ import { type RunCommand, runSync } from "./service";
 export const SHARED_ROOT = "/srv/agentes";
 export const SHARED_DIR = `${SHARED_ROOT}/shared`;
 export const SHARED_GROUP = "agentes-shared";
-/** Each agent's link to it, in its home (system mode): the shell, the desktop and its PATH (`bin/`) go through it. */
+/** Each agent's link to it, in its home (system mode): the shell, the desktop and its `bin/` go through it. */
 export const SHARED_LINK = "shared";
 /**
- * System mode: the env var holding the agent's shared `bin/` (also last on its PATH). The runner's own launches
- * (`resolveCommand`) never look there: a `claude` another agent put there would run with this agent's sign-in.
+ * System mode: the env var holding the agent's shared `bin/`, which is never on its PATH. The runner's own launches
+ * (`resolveCommand`) never look there either: a `claude` another agent put there would run with this agent's sign-in.
  */
 export const SHARED_BIN_ENV = "AGENTES_SHARED_BIN";
 

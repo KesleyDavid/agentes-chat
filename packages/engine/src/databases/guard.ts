@@ -179,16 +179,44 @@ const svalsOf = (list: unknown): string[] =>
     ? list.map((n) => (isObject(n) && isObject(n.String) ? String(n.String.sval ?? "") : "")).filter(Boolean)
     : [];
 
-/** Every node of the tree with its key (`SelectStmt`, `FuncCall`…). */
-function walk(value: unknown, visit: (key: string, node: Node) => void) {
+const NO_CTES: ReadonlySet<string> = new Set();
+const cteNameOf = (item: unknown) =>
+  isObject(item) && isObject(item.CommonTableExpr) && typeof item.CommonTableExpr.ctename === "string"
+    ? item.CommonTableExpr.ctename
+    : null;
+
+/**
+ * Every node of the tree with its key (`SelectStmt`, `FuncCall`…) and the CTE names visible there, scoped as
+ * Postgres does: a `WITH` names its queries for its own statement and everything nested in it, never outside;
+ * a query of the list sees the ones before it, and itself and the ones after it only under `RECURSIVE`.
+ */
+function walk(
+  value: unknown,
+  visit: (key: string, node: Node, ctes: ReadonlySet<string>) => void,
+  ctes: ReadonlySet<string> = NO_CTES,
+) {
   if (Array.isArray(value)) {
-    for (const v of value) walk(v, visit);
+    for (const v of value) walk(v, visit, ctes);
     return;
   }
   if (!isObject(value)) return;
+  const withClause = isObject(value.withClause) ? value.withClause : null;
+  const items = withClause && Array.isArray(withClause.ctes) ? withClause.ctes : [];
+  const names = items.map(cteNameOf).filter((n): n is string => n !== null);
+  const inner = names.length > 0 ? new Set([...ctes, ...names]) : ctes;
   for (const [key, child] of Object.entries(value)) {
-    if (isObject(child)) visit(key, child);
-    walk(child, visit);
+    if (child === withClause && withClause) {
+      visit(key, withClause, ctes);
+      let seen = withClause.recursive === true ? inner : ctes;
+      for (const item of items) {
+        walk(item, visit, seen);
+        const name = cteNameOf(item);
+        if (name !== null && withClause.recursive !== true) seen = new Set([...seen, name]);
+      }
+      continue;
+    }
+    if (isObject(child)) visit(key, child, inner);
+    walk(child, visit, inner);
   }
 }
 
@@ -234,14 +262,14 @@ export async function guardSql(
   }
 
   const problems: string[] = [];
-  const ctes = new Set<string>();
-  const relations: { schema: string | null; table: string; alias: string | null }[] = [];
+  const relations: { schema: string | null; table: string; alias: string | null; cte: boolean }[] = [];
+  const aliases: string[] = [];
   let crossDatabase = false;
   const functions: string[] = [];
   const columnRefs: string[][] = [];
   let star = false;
   let aliasColumns = false;
-  walk(top, (key, node) => {
+  walk(top, (key, node, ctes) => {
     if (key.endsWith("Stmt") && key !== "SelectStmt" && key !== "ExplainStmt")
       problems.push(`${key.replace(/Stmt$/, "").toUpperCase()} is not allowed: this database is read-only.`);
     if (key === "SelectStmt") {
@@ -249,13 +277,18 @@ export async function guardSql(
       if (node.lockingClause) problems.push("FOR UPDATE / FOR SHARE is not allowed.");
     }
     // The parser already folds unquoted names to lowercase and keeps quoted ones exact, as Postgres resolves them.
-    if (key === "CommonTableExpr" && typeof node.ctename === "string") ctes.add(node.ctename);
     if (key === "RangeVar" && typeof node.catalogname === "string") crossDatabase = true;
     if (key === "RangeVar" && typeof node.relname === "string") {
       const schema = typeof node.schemaname === "string" ? node.schemaname : null;
       const alias = isObject(node.alias) && typeof node.alias.aliasname === "string" ? node.alias.aliasname : null;
-      relations.push({ schema, table: node.relname, alias });
+      relations.push({ schema, table: node.relname, alias, cte: schema === null && ctes.has(node.relname) });
     }
+    // The name given to a join (`AS j`, `JOIN … USING (id) AS j`): a row of every column of the tables under it.
+    // A subquery's alias is left out: its row is only its own select list, which is checked like any other.
+    // A function's alias too: it is also the name of its one column (`generate_series(…) AS d`).
+    if (key === "JoinExpr")
+      for (const a of [node.alias, node.join_using_alias])
+        if (isObject(a) && typeof a.aliasname === "string") aliases.push(a.aliasname);
     // `t(a, b)` after a table, join, subquery or function renames its columns by position.
     if (key === "alias" && Array.isArray(node.colnames) && node.colnames.length > 0) aliasColumns = true;
     if (key === "FuncCall") functions.push(lower(svalsOf(node.funcname).at(-1) ?? ""));
@@ -284,10 +317,10 @@ export async function guardSql(
       return { ok: false, reason: `The function ${fn}() is not allowed here.` };
   }
 
-  // Unqualified names that aren't CTEs are catalogs (pg_catalog is searched first) or tables in `public`
-  // (the search path we set).
+  // Unqualified names that aren't a CTE visible where they are written are catalogs (pg_catalog is searched
+  // first) or tables in `public` (the search path we set).
   const resolved = relations
-    .filter((r) => r.schema !== null || !ctes.has(r.table))
+    .filter((r) => !r.cte)
     .map((r) => {
       const schema = r.schema ?? (CATALOG_RELATIONS.has(r.table) ? "pg_catalog" : "public");
       return { ...r, schema, name: identPath([schema, r.table]) };
@@ -310,11 +343,9 @@ export async function guardSql(
   const touched = resolved.filter((r) => hiddenOf(r).length > 0);
   if (touched.length > 0) {
     const hidden = new Set(touched.flatMap((r) => hiddenOf(r).map(lower)));
+    // A join's alias stands for a whole row too, with every column of the tables under it.
     const rowNames = new Set(
-      touched
-        .flatMap((r) => [r.alias, r.table])
-        .filter((x): x is string => !!x)
-        .map(lower),
+      [...touched.flatMap((r) => [r.alias, r.table]), ...aliases].filter((x): x is string => !!x).map(lower),
     );
     const list = touched.map((r) => `${r.name}: ${hiddenOf(r).map(quoteIdent).join(", ")}`).join("; ");
     if (aliasColumns)
@@ -331,9 +362,12 @@ export async function guardSql(
       const last = ref.at(-1);
       if (last && hidden.has(lower(last)))
         return { ok: false, reason: `The column ${quoteIdent(last)} is hidden from this agent (${list}).` };
-      // `t`, `dbo.t` or `(dbo.t).col`: the whole row of a table (a column named like its table is refused too).
+      // `t`, `dbo.t` or `(dbo.t).col`: the whole row of a table or alias (a column named like one is refused too).
       if (last && rowNames.has(lower(last)))
-        return { ok: false, reason: `Some columns are hidden from this agent (${list}); name the columns you need.` };
+        return {
+          ok: false,
+          reason: `Some columns are hidden from this agent (${list}); ${quoteIdent(last)} would read a whole row: name the columns you need, like alias.column.`,
+        };
     }
   }
 

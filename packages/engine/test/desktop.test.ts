@@ -846,7 +846,10 @@ describe("folders and tools on the machine (protocol 10)", () => {
     expect(system).toStartWith('# Shared folder on "Build box"\n/srv/agentes/shared is shared by every agent');
     expect(system).toContain("~/shared");
     expect(system).toContain("look there first");
-    expect(system).toContain("/srv/agentes/shared/bin (on your PATH there)");
+    // Every agent can write the shared bin/: a tool there is read first and run by its full path, never by name.
+    expect(system).toContain("/srv/agentes/shared/bin is not on your PATH");
+    expect(system).toContain("read it first, then run it by its full path, like /srv/agentes/shared/bin/<tool>");
+    expect(system).not.toContain("on your PATH there");
     // A plain cp keeps the source's mode, which the default ACL then caps the group to: the others couldn't write.
     expect(system).toContain("cp -r --no-preserve=mode");
     expect(system).toContain("mv or a plain cp keeps it private or read-only to the others");

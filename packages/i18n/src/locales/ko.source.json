@@ -27297,6 +27297,9 @@
   "githubApp.installedOutside": {
     "value": "The app was installed on that GitHub account outside agentes.chat. Remove it on GitHub and install it again from Connectors › GitHub."
   },
+  "githubApp.ownerUnknown": {
+    "value": "GitHub didn't say who owns that organization. Whoever runs the server needs to add the organization permission Members (read-only) to the GitHub app, then you install it again."
+  },
   "githubApp.misconfigured": {
     "value": "The GitHub app has the wrong secret key on the server, so the install can't finish. Whoever runs the server needs to replace the key in the app's settings."
   },

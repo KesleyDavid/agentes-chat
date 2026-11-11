@@ -144,19 +144,39 @@ async function userInstallations(h: ReturnType<typeof http>, token: string): Pro
   return found;
 }
 
+/**
+ * Whether the person behind `token` owns that GitHub organization (`GET /user/memberships/orgs/{org}`). Null when
+ * GitHub refuses the app the answer (403): most likely it lacks the organization permission Members: read, or the
+ * organization blocked it.
+ */
+async function ownsOrganization(h: ReturnType<typeof http>, token: string, login: string): Promise<boolean | null> {
+  const res = await h.fetch(`${h.apiUrl}/user/memberships/orgs/${encodeURIComponent(login)}`, {
+    headers: userHeaders(token),
+  });
+  // Not affiliated with it: an outside collaborator on its repositories.
+  if (res.status === 404) return false;
+  if (res.status === 403) return null;
+  if (!res.ok) throw new ValidationError(`GitHub didn't say who owns ${login} (${res.status})`);
+  const { state, role } = (await res.json().catch(() => ({}))) as { state?: unknown; role?: unknown };
+  return state === "active" && role === "admin";
+}
+
 /** GitHub's clock and ours may disagree by this much (and its `created_at` drops the milliseconds). */
 const CLOCK_SKEW_MS = 2 * 60_000;
 
 /**
  * GitHub's redirect after installing (user authorization during installation on): checks the state (exists, unused,
  * not expired, same person, still an admin), exchanges the code for the person's token and requires the installation
- * to be one they can see, and a personal account's to be theirs — so nobody can claim another account's installation
- * by its id. Then binds it to the organization, whose GitHub it becomes when it has no connection yet (ADR 0156); an
- * installation bound to another organization is refused (`github_app.other_workspace`). A new binding needs an
- * installation GitHub made after this state was issued: one made on GitHub itself, or kept there when its uninstall
- * was refused, shows to every member of its account who reads one of its repositories, so seeing it gives no right to
- * link it (`github_app.installed_outside`). `setupAction` is GitHub's `setup_action`: an `update` (an existing
- * installation whose repositories changed) only refreshes one already bound here.
+ * to be one they can see, a personal account's to be theirs and an organization's to be one they own — so nobody can
+ * claim another account's installation by its id, or one they only read (`github_app.owner_required`;
+ * `github_app.owner_unknown` when GitHub wouldn't say who owns it). Refreshing one already bound to this organization
+ * links nothing new and asks no owner. Then binds it to the organization, whose GitHub it becomes when it has no
+ * connection yet (ADR 0156); an installation bound to another organization is refused
+ * (`github_app.other_workspace`). A new binding needs an installation GitHub made after this state was issued: one
+ * made on GitHub itself, or kept there when its uninstall was refused, shows to every member of its account who reads
+ * one of its repositories, so seeing it gives no right to link it (`github_app.installed_outside`). `setupAction` is
+ * GitHub's `setup_action`: an `update` (an existing installation whose repositories changed) only refreshes one
+ * already bound here.
  */
 export async function completeGitHubAppInstall(
   deps: GitHubAppInstallDeps,
@@ -203,6 +223,11 @@ export async function completeGitHubAppInstall(
   if (!res.ok || !token.access_token) {
     throw new ValidationError(`GitHub refused the authorization: ${token.error ?? res.status}`);
   }
+  const [bound] = await deps.db
+    .select({ orgId: githubAppInstallations.orgId })
+    .from(githubAppInstallations)
+    .where(eq(githubAppInstallations.installationId, input.installationId));
+  const boundHere = bound?.orgId === row.orgId;
   const seen = (await userInstallations(h, token.access_token)).find((i) => i.id === input.installationId);
   const notVisible = () =>
     new ForbiddenError("This installation isn't visible to your GitHub account", "github_app.not_visible");
@@ -213,6 +238,23 @@ export async function completeGitHubAppInstall(
     if (!me.ok) throw new ValidationError(`GitHub didn't say who authorized (${me.status})`);
     const { id } = (await me.json()) as { id?: unknown };
     if (typeof id !== "number" || id !== seen.account.id) throw notVisible();
+  } else if (!boundHere) {
+    // An organization's installation shows to everyone who reads one of its repositories: only its owners link it.
+    const account = seen.account?.login;
+    if (!account) throw notVisible();
+    const owns = await ownsOrganization(h, token.access_token, account);
+    if (owns === null) {
+      throw new ForbiddenError(
+        "GitHub didn't say who owns that organization: this server's GitHub App needs the organization permission Members (read)",
+        "github_app.owner_unknown",
+        { account },
+      );
+    }
+    if (!owns) {
+      throw new ForbiddenError(`Only an owner of ${account} on GitHub can connect it`, "github_app.owner_required", {
+        account,
+      });
+    }
   }
   const origin = await installationOrigin(app, h, input.installationId);
   if (origin === "gone") throw notVisible();
@@ -239,6 +281,8 @@ export async function completeGitHubAppInstall(
         "github_app.other_workspace",
       );
     }
+    // Unbound since it was read above: its owner was never asked.
+    if (!existing && boundHere) throw new ValidationError("This installation changed meanwhile: install it again");
     const madeHere = origin.createdAt.getTime() >= row.createdAt.getTime() - CLOCK_SKEW_MS;
     if (!existing && (input.setupAction === "update" || !madeHere)) {
       throw new ForbiddenError("This installation was made outside agentes.chat", "github_app.installed_outside");

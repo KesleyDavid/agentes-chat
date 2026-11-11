@@ -7,7 +7,7 @@ import { caches } from "../cache";
 import { openSecret, randomToken, sealSecret, sha256 } from "../crypto";
 import { ConflictError, ForbiddenError, MisconfiguredError, NotFoundError, ValidationError } from "../errors";
 import { forgetInstallationTokens } from "../git/github-app";
-import type { ResolveHost } from "../net-guard";
+import { outboundFetch, type ResolveHost } from "../net-guard";
 import { requirePermission } from "../organizations";
 import { CONNECTOR_ALL } from "../tools/scopes";
 import { CONNECTOR_CATALOG, type ConnectorDefinition } from "./catalog";
@@ -671,6 +671,13 @@ interface TokenResponse {
  */
 export const clientRefused = (error: unknown) => error === "invalid_client" || error === "incorrect_client_credentials";
 
+/**
+ * The fetch for a token endpoint an authorization server's metadata named (MCP OAuth), where a built-in connector's
+ * fixed one goes straight: checked and pinned at every exchange and refresh, and a redirect is never followed, so
+ * the form (the code, the refresh token, the client's secret) only goes to a public address.
+ */
+const namedTokenFetch = (deps: ConnectorDeps) => deps.http ?? outboundFetch({ resolveHost: deps.resolveHost });
+
 /** `ownApp`: the connector, when the client is this server's own OAuth app for it (`oauthApps`). */
 async function tokenRequest(
   deps: ConnectorDeps,
@@ -678,10 +685,12 @@ async function tokenRequest(
   form: Record<string, string | undefined>,
   headers: Record<string, string> = {},
   ownApp?: ConnectorDefinition,
+  http: typeof fetch = deps.http ?? fetch,
 ): Promise<TokenResponse> {
-  const http = deps.http ?? fetch;
   const res = await http(url, {
     method: "POST",
+    // The form carries the code, the refresh token and the client's secret: they go to the address asked, never on.
+    redirect: "error",
     // Well inside a refresh's 30 s lease (`refreshOnce`), which the other calls for that connection wait on.
     signal: AbortSignal.timeout(15_000),
     headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json", ...headers },
@@ -922,6 +931,8 @@ async function refreshTokens(
       client.tokenEndpoint,
       { ...refresh, resource: c.resource ?? undefined, ...auth.form },
       auth.headers,
+      undefined,
+      namedTokenFetch(deps),
     );
   } else {
     const def = c.connector.startsWith("custom:") ? null : connectorDefinition(c.connector);
@@ -1042,6 +1053,8 @@ async function completeMcpOAuth(
       ...auth.form,
     },
     auth.headers,
+    undefined,
+    namedTokenFetch(deps),
   );
   const secret = { accessToken: token.access_token, refreshToken: token.refresh_token };
   const tokenExpiresAt = token.expires_in ? new Date(at.getTime() + token.expires_in * 1000) : null;

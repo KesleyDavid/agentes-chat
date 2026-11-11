@@ -297,7 +297,7 @@ export interface AskOptions {
   initial?: string;
   /** Dim in the empty field. */
   placeholder?: string;
-  /** Typed as ▪, answered as its first 12 characters. */
+  /** Typed as ▪, answered as a row of ▪ of one fixed length. */
   secret?: boolean;
   /** A problem with the answer (shown under it), or null. */
   validate?: (value: string) => string | null;
@@ -636,11 +636,15 @@ export function createTerm(o: TermOptions = {}) {
 
     // ── Questions (a terminal on both ends; otherwise the caller reads lines and calls `answered`) ──
 
-    /** The block a question leaves once answered: ◇ its title, then the answer (dim, or dim `prefix` and the answer). */
-    answered(title: string, answer: string, prefix?: string) {
+    /**
+     * The block a question leaves once answered: ◇ its title, then the answer (dim, or dim `prefix` and the answer).
+     * A secret answer leaves the same row of marks whatever it was: this output is kept in logs, so none of its
+     * characters and not its length may show.
+     */
+    answered(title: string, answer: string, prefix?: string, secret = false) {
       const quiet = [...(prefix ?? "")].length;
       let at = 0;
-      const lines = wrap(`${prefix ?? ""}${answer}`, width - 3).map((l) => {
+      const lines = wrap(`${prefix ?? ""}${secret ? S.mask.repeat(8) : answer}`, width - 3).map((l) => {
         const chars = [...l];
         // How much of this line is still the prefix (wrap drops one space at each break).
         const k = prefix === undefined ? chars.length : Math.max(0, Math.min(chars.length, quiet - at));
@@ -740,7 +744,7 @@ export function createTerm(o: TermOptions = {}) {
         else if (key.ctrl && key.name === "u") value = "";
         else if (text && !key.ctrl && text >= " ") value += text;
       });
-      term.answered(title, a.secret ? `${[...answer].slice(0, 12).join("")}${S.more}` : answer, label);
+      term.answered(title, answer, label, a.secret);
       return answer;
     },
   };

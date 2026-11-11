@@ -11233,6 +11233,7 @@
     "notVisible": "Je GitHub-account kan die installatie niet zien. Installeer hem met een account dat er toegang toe heeft.",
     "otherWorkspace": "Dat GitHub-account is al gekoppeld aan een andere werkruimte. Verwijder de app daar voordat je hem hier installeert.",
     "installedOutside": "De app is buiten agentes.chat op dat GitHub-account geïnstalleerd. Verwijder hem op GitHub en installeer hem opnieuw via Connectors › GitHub.",
+    "ownerUnknown": "GitHub zei niet wie eigenaar is van die organisatie. Wie de server beheert, moet de organisatiemachtiging Members (alleen lezen) aan de GitHub-app toevoegen, daarna installeer je hem opnieuw.",
     "misconfigured": "De GitHub-app heeft op de server de verkeerde geheime sleutel, dus de installatie kan niet worden afgerond. Wie de server beheert, moet de sleutel vervangen in de instellingen van de app.",
     "connectAccount": "Een GitHub-account koppelen",
     "ownerHint": "De eigenaar van deze server kan de GitHub-app hier bij Connectors maken.",

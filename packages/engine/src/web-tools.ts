@@ -1,6 +1,6 @@
 import { decodeEntities, htmlToText } from "@agenteschat/adapters";
 import { cutText } from "./format";
-import { assertPublicHttpsUrl, type ResolveHost } from "./net-guard";
+import { assertPublicHttpsUrl, outboundFetch, type ResolveHost } from "./net-guard";
 import { outboundRefusal } from "./outbound";
 import type { ToolContext, ToolDefinition, ToolSource } from "./tools/types";
 
@@ -255,6 +255,8 @@ export function createWebToolSource(deps: WebToolDeps = {}): ToolSource {
   ): Promise<{ ok: true; text: string; url: string; status: number } | { ok: false; text: string }> {
     let next = raw;
     const wait = timeout(ctx.signal);
+    // Not `http`: that one also reaches the search service the operator set, which may be on this server's network.
+    const openPage = deps.fetch ?? outboundFetch({ resolveHost: deps.resolveHost });
     for (let hop = 0; ; hop++) {
       let at: URL;
       try {
@@ -264,7 +266,7 @@ export function createWebToolSource(deps: WebToolDeps = {}): ToolSource {
       }
       let res: Response;
       try {
-        res = await http(at.toString(), {
+        res = await openPage(at.toString(), {
           method: "GET",
           redirect: "manual",
           headers: { "user-agent": USER_AGENT, accept: "text/html,text/plain,application/json;q=0.9,*/*;q=0.5" },

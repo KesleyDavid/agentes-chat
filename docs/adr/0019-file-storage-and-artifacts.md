@@ -31,3 +31,9 @@
 - Old files keep working after a switch without a migration; the migration is optional and safe to re-run.
 - The Postgres fallback keeps development free of external services, but is meant for small files only.
 - Self-host can also keep files on local disk (`FILES_DIR`).
+
+## Addendum (2026-11-11): the address is checked again as every request connects
+
+The check when an address is saved doesn't hold for later requests: a name can answer with another address afterwards, and a workspace's own bucket with virtual-hosted addressing is reached at `bucket.endpoint`, a name the saved check never saw. So every request to an address a workspace's people, agents or connected servers named goes through one fetch, `outboundFetch` (`net-guard.ts`), which is `publicHttpsFetch` (ADR 0146): the host is resolved and checked at that request, the socket goes to the checked address, and a redirect isn't followed. It covers the workspace's own bucket, a custom MCP server's sessions (a 307 or 308 that stays on the same origin is followed, each hop checked again), MCP OAuth's discovery, registration, token exchange and refresh, the icon a server lists, and `web_fetch` (its own redirects, each hop checked). The saved check stays, for its plain errors.
+
+Addresses the operator sets by env (the platform bucket, a search or speech server) are trusted and never checked. Where the operator lets workspaces reach the server's network (`allowsPrivateEndpoints`, ADR 0146: self-hosted and closed to sign-up, or `MODEL_ENDPOINTS_PRIVATE`), `outboundFetch` is the plain `fetch`, as before, so a proxy set for the server keeps working (`allowPrivateOutbound` at boot).

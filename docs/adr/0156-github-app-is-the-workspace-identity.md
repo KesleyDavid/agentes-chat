@@ -229,3 +229,32 @@ its page on GitHub (`missingGitHubAppEvents`, from `GET /app`). `git/github-even
   alone under the agent's name, and a push never quotes it.
 - **Not done.** `pull_request_review_thread` (resolved threads) is subscribed but wakes nobody. Who wrote a review the
   bot left isn't known from a reply to it: the item's agent hears it. An edit to a comment wakes nobody.
+
+## Addendum (2026-11-11): an organization's installation links only for one of its owners
+
+Decision 10 ties a new link to an install started here, by time: GitHub made the installation after the state was
+issued. Time alone doesn't say who made it. A member whose own install can't go through (GitHub turns it into a request
+to the owners) still holds a fresh state while an owner makes the installation on GitHub, and
+`GET /user/installations` shows it to them the moment it exists.
+
+- **The rule.** Linking an installation on anything but a personal account also needs GitHub to say the authorizing
+  person owns that organization: `GET /user/memberships/orgs/{org}` with their token from the callback, `state`
+  `active` and `role` `admin`. Anyone else (a member, a billing manager, an invitation not yet accepted, an outside
+  collaborator, whom GitHub answers 404) is refused as `github_app.owner_required`
+  (`github_app_error=owner_required`), told what the request flow already says: the account's owner installs it from
+  Conectores › GitHub in this workspace. The personal account rule and the time rule stay as they are. A return for
+  an installation already linked to this workspace (a refresh) links nothing new and asks no owner. Nothing changes
+  for agents: tokens are minted as before once it is linked.
+- **The permission.** The call is made with the organization permission Members (read), which agentes.chat's app and
+  `githubAppManifest` already ask (first addendum of 2026-11-08): no installation accepts anything new. Whether
+  GitHub answers it to an app without that permission isn't in its documentation and wasn't probed. This revisits
+  "Why not Members: read" in decision 10: the role is asked besides the state, not instead of it, and of the person,
+  not of the installation.
+- **When GitHub won't say.** A 403 links nothing (`github_app.owner_unknown`, `github_app_error=owner_unknown`):
+  GitHub refused the app the answer. The likely cause is a server's own app made before it asked for Members, so the
+  words tell whoever runs the server to add the permission on the app's page on GitHub and install again; an
+  organization that blocked the app answers the same. Any other failure (GitHub down, a rate limit) links nothing
+  either and reads as the plain "try again".
+- **Not done.** Who made an installation isn't in what GitHub says of it (`GET /app/installations/{id}`), and the
+  `installation.created` delivery that names its sender needs the webhook, which a server may run without (decision 8):
+  the owner's role is what can always be asked.

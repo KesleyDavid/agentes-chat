@@ -859,6 +859,9 @@ export function createRealtime(deps: RealtimeDeps) {
           return send(ws, { type: "unsubscribed", channelId });
         }
         if (ws.data.subscriptions.has(channelId)) return send(ws, { type: "subscribed", channelId });
+        // One check per channel at a time: a second would take the first's place in `pending`, and a removal that
+        // lands meanwhile would mark only one of them. The check in flight answers for both.
+        if (ws.data.pending.has(channelId)) return;
         if (ws.data.subscriptions.size >= MAX_SUBSCRIPTIONS)
           return send(ws, { type: "error", code: "too_many_subscriptions", channelId });
         const check = { revoked: false };
@@ -874,7 +877,7 @@ export function createRealtime(deps: RealtimeDeps) {
           ws.close(1011, "try again");
           return;
         } finally {
-          ws.data.pending.delete(channelId);
+          if (ws.data.pending.get(channelId) === check) ws.data.pending.delete(channelId);
         }
         // A revocation that arrived while we were checking wins over a stale "allowed".
         if (!denied && check.revoked) denied = "forbidden";

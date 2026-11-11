@@ -10714,6 +10714,7 @@
     "notVisible": "내 GitHub 계정으로는 그 설치를 볼 수 없어요. 접근 권한이 있는 계정으로 설치하세요.",
     "otherWorkspace": "이 GitHub 계정은 이미 다른 워크스페이스에 연결돼 있어요. 거기서 앱을 제거한 뒤 여기서 설치하세요.",
     "installedOutside": "그 GitHub 계정의 앱은 agentes.chat 밖에서 설치됐어요. GitHub에서 제거한 뒤 커넥터 › GitHub에서 다시 설치하세요.",
+    "ownerUnknown": "GitHub가 그 조직의 소유자가 누구인지 알려 주지 않았어요. 서버를 운영하는 사람이 GitHub 앱에 조직 권한 Members(읽기 전용)를 추가해야 해요. 그런 다음 다시 설치하세요.",
     "misconfigured": "서버에 있는 GitHub 앱의 시크릿 키가 잘못돼서 설치를 끝낼 수 없어요. 서버를 운영하는 사람이 앱 설정에서 키를 바꿔야 해요.",
     "connectAccount": "GitHub 계정 연결",
     "ownerHint": "이 서버의 소유자가 여기 커넥터에서 GitHub 앱을 만들 수 있어요.",

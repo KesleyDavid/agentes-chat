@@ -12000,6 +12000,7 @@
     "notVisible": "Twoje konto GitHub nie widzi tej instalacji. Zainstaluj ją z konta, które ma do niej dostęp.",
     "otherWorkspace": "To konto GitHub jest już połączone z inną przestrzenią roboczą. Usuń tam aplikację, zanim zainstalujesz ją tutaj.",
     "installedOutside": "Aplikacja została zainstalowana na tym koncie GitHub poza agentes.chat. Usuń ją w GitHub i zainstaluj ponownie w Konektory › GitHub.",
+    "ownerUnknown": "GitHub nie podał, kto jest właścicielem tej organizacji. Osoba zarządzająca serwerem musi dodać do aplikacji GitHub uprawnienie organizacji Members (tylko odczyt), a potem instalujesz ją ponownie.",
     "misconfigured": "Aplikacja GitHub ma na serwerze zły klucz tajny, więc instalacja nie może się zakończyć. Osoba zarządzająca serwerem musi zmienić klucz w ustawieniach aplikacji.",
     "connectAccount": "Połącz konto GitHub",
     "ownerHint": "Właściciel tego serwera może utworzyć aplikację GitHub tutaj, w Konektorach.",

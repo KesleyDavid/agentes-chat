@@ -11106,6 +11106,7 @@
     "notVisible": "GitHub hesabınız o kurulumu göremiyor. Ona erişimi olan bir hesapla yükleyin.",
     "otherWorkspace": "Bu GitHub hesabı zaten başka bir çalışma alanına bağlı. Buraya yüklemeden önce uygulamayı oradan kaldırın.",
     "installedOutside": "Uygulama bu GitHub hesabına agentes.chat dışında yüklendi. GitHub'da kaldırın ve Bağlayıcılar › GitHub bölümünden yeniden yükleyin.",
+    "ownerUnknown": "GitHub bu kuruluşun sahibinin kim olduğunu söylemedi. Sunucuyu yöneten kişinin GitHub uygulamasına Members (salt okunur) kuruluş iznini eklemesi gerekiyor, ardından uygulamayı yeniden yükleyin.",
     "misconfigured": "Sunucudaki GitHub uygulamasının gizli anahtarı yanlış, bu yüzden yükleme tamamlanamıyor. Sunucuyu yöneten kişinin anahtarı uygulamanın ayarlarında değiştirmesi gerekiyor.",
     "connectAccount": "GitHub hesabı bağla",
     "ownerHint": "Bu sunucunun sahibi GitHub uygulamasını burada, Bağlayıcılar bölümünde oluşturabilir.",

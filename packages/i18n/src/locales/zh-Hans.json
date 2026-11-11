@@ -10786,6 +10786,7 @@
     "notVisible": "你的 GitHub 账号看不到那个安装。请用有权访问它的账号安装。",
     "otherWorkspace": "这个 GitHub 账号已关联到另一个工作区。请先在那里移除应用，再在这里安装。",
     "installedOutside": "这个 GitHub 账号上的应用是在 agentes.chat 之外安装的。请在 GitHub 上移除它，再从 连接器 › GitHub 重新安装。",
+    "ownerUnknown": "GitHub 没有说明谁是这个组织的所有者。运行服务器的人需要给 GitHub 应用添加组织权限 Members（只读），然后你再重新安装。",
     "misconfigured": "服务器上的 GitHub 应用密钥不对，所以无法完成安装。运行服务器的人需要在应用的设置中更换密钥。",
     "connectAccount": "连接 GitHub 账号",
     "ownerHint": "这台服务器的所有者可以在这里的连接器中创建 GitHub 应用。",

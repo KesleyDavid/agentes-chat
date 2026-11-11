@@ -39,6 +39,10 @@ describe("back from a provider's sign-in that didn't connect", () => {
           "Essa conta do GitHub já está ligada a outro workspace. Remova o app de lá antes de instalar aqui.",
         installed_outside:
           "O app foi instalado nessa conta do GitHub fora do agentes.chat. Remova o app no GitHub e instale de novo em Conectores › GitHub.",
+        owner_required:
+          "Só o dono da conta do GitHub pode instalar o app. Peça para essa pessoa instalar em Conectores › GitHub neste workspace.",
+        owner_unknown:
+          "O GitHub não disse quem é dono dessa organização. Quem cuida do servidor precisa adicionar a permissão de organização Members (somente leitura) ao app do GitHub, e depois você instala de novo.",
         failed: "Não deu para conectar. Tente de novo em instantes.",
         "Some words from the server": "Não deu para conectar. Tente de novo em instantes.",
       },
@@ -54,6 +58,10 @@ describe("back from a provider's sign-in that didn't connect", () => {
           "That GitHub account is already linked to another workspace. Remove the app there before installing it here.",
         installed_outside:
           "The app was installed on that GitHub account outside agentes.chat. Remove it on GitHub and install it again from Connectors › GitHub.",
+        owner_required:
+          "Only the GitHub account's owner can install the app. Ask them to install it from Connectors › GitHub in this workspace.",
+        owner_unknown:
+          "GitHub didn't say who owns that organization. Whoever runs the server needs to add the organization permission Members (read-only) to the GitHub app, then you install it again.",
         failed: "Couldn't connect. Try again in a moment.",
         "Some words from the server": "Couldn't connect. Try again in a moment.",
       },

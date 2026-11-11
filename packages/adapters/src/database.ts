@@ -73,6 +73,8 @@ export function readOnlySettings(limits: DatabaseLimits): string[] {
     `set local statement_timeout = ${ms}`,
     `set local lock_timeout = ${LOCK_TIMEOUT_MS}`,
     `set local idle_in_transaction_session_timeout = ${IDLE_IN_TX_MS}`,
+    // The server must read string literals as the parser that checked the query did (backslashes are plain text).
+    "set local standard_conforming_strings = on",
     ...(limits.searchPath ? [`set local search_path = ${quoteLiteral(limits.searchPath)}`] : []),
   ];
 }
@@ -101,11 +103,23 @@ export function databaseErrorOf(error: unknown): DatabaseError {
 
 const ROLLBACK = Symbol("rollback");
 
-/** postgres.js: a small pool per connection (2 sockets, closed after 5 minutes idle), `application_name = agentes.chat`. */
-export function createPostgresDatabaseDriver(options: { connectTimeoutSeconds?: number } = {}): DatabaseDriver {
+/**
+ * The extended protocol takes one statement per message; postgres.js would otherwise send a query without
+ * parameters over the simple protocol, where the server runs every statement it finds in the text.
+ */
+const ONE_STATEMENT: postgres.UnsafeQueryOptions & { simple: boolean } = { simple: false };
+
+/**
+ * postgres.js: a small pool per connection (2 sockets, closed after 5 minutes idle), `application_name = agentes.chat`.
+ * `connect` stands in for postgres.js in tests.
+ */
+export function createPostgresDatabaseDriver(
+  options: { connectTimeoutSeconds?: number; connect?: typeof postgres } = {},
+): DatabaseDriver {
+  const connect = options.connect ?? postgres;
   return {
     async open(target) {
-      const sql = postgres({
+      const sql = connect({
         host: target.address,
         port: target.port,
         database: target.database,
@@ -130,7 +144,9 @@ export function createPostgresDatabaseDriver(options: { connectTimeoutSeconds?: 
             await sql.begin("read only", async (tx) => {
               for (const s of readOnlySettings(limits)) await tx.unsafe(s);
               out = await fn(async (text, params) => {
-                const result = await tx.unsafe(text, (params ?? []) as postgres.ParameterOrJSON<never>[]).values();
+                const result = await tx
+                  .unsafe(text, (params ?? []) as postgres.ParameterOrJSON<never>[], ONE_STATEMENT)
+                  .values();
                 return {
                   columns: (result.columns ?? []).map((c) => ({ name: c.name, type: c.type })),
                   rows: [...result] as unknown[][],

@@ -53,6 +53,7 @@ import {
 import {
   APP_JOB_KINDS,
   adoptRestoredOperatorEvents,
+  allowPrivateOutbound,
   allowsPrivateEndpoints,
   backfillMemoryTrust,
   composioUsageHook,
@@ -340,6 +341,9 @@ async function boot(
   }
   const ctx: ModuleContext = { ...base, adapters };
 
+  // Addresses a workspace names (custom MCP servers, its own bucket, pages agents read) are pinned to public ones at
+  // every request, except where the operator lets workspaces reach this server's network.
+  allowPrivateOutbound(allowsPrivateEndpoints(config));
   // Per-process caches for agent/org/channel config, scopes, connections, credential rows (30 s TTL).
   enableCaches();
   // A write in any process (the app, a worker) clears what every process cached of it.
@@ -611,6 +615,8 @@ async function boot(
     log.info("shutting down", { signal });
     // No new jobs, from now on: one started during the delay below would be cut by the drain.
     workers.stop();
+    // The switch is the process's: a server started after this one sets its own.
+    allowPrivateOutbound(false);
     // `/api/health` answers 503 from now on: the proxy's health check takes this instance out before it stops
     // listening, and holds new requests for the next one instead of failing them.
     if (config.SHUTDOWN_DELAY_MS > 0) await Bun.sleep(config.SHUTDOWN_DELAY_MS);

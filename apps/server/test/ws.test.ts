@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { listenResumedTopic, orgTopic } from "@agenteschat/adapters";
+import { schema } from "@agenteschat/db";
 import { createLogger } from "../src/logger";
 import {
   authorizeSubscription,
@@ -260,6 +261,109 @@ test("a channel subscribed while the periodic membership check runs stays subscr
     c.ws.close();
   } finally {
     await Promise.race([fast.stop(true), Bun.sleep(500)]);
+  }
+}, 30_000);
+
+test("a removal that lands while two subscribes to the channel are being checked refuses it: nothing is streamed", async () => {
+  const owner = browser(t);
+  await signUp(owner, "owner@example.com");
+  const { orgId, channelId } = await seedOrg(owner);
+  const ana = await joinByInvitation(t, owner, orgId, "ana@example.com");
+  const { user } = (await (await ana("/api/app/me")).json()) as { user: { id: string } };
+  // The channel's membership check answers only when the test lets it: both subscribes are in flight at the removal.
+  const held: (() => void)[] = [];
+  const holds = <T extends object>(query: T): T =>
+    new Proxy(query, {
+      get(target, key) {
+        const value = Reflect.get(target, key) as unknown;
+        if (typeof value !== "function") return value;
+        if (key === "then")
+          return (ok: (v: unknown) => void, fail: (e: unknown) => void) =>
+            value.call(target, (rows: unknown) => held.push(() => ok(rows)), fail);
+        return (...args: unknown[]) => {
+          const out = value.apply(target, args) as unknown;
+          return out !== null && typeof out === "object" ? holds(out) : out;
+        };
+      },
+    });
+  const db = new Proxy(t.db, {
+    get(target, key) {
+      const value = Reflect.get(target, key) as unknown;
+      if (key === "select")
+        return (fields?: Record<string, unknown>) => {
+          const query = (value as (f?: unknown) => object).call(target, fields);
+          return fields?.channel === schema.channels ? holds(query) : query;
+        };
+      return typeof value === "function" ? value.bind(target) : value;
+    },
+  });
+  // The periodic recheck far away: only the removal's own event may refuse the channel here.
+  const realtime = createRealtime({
+    db,
+    auth: t.auth,
+    config: t.config,
+    log: createLogger("error"),
+    ...t.adapters,
+    sessionRecheckMs: 60_000,
+  });
+  let data: SocketData | undefined;
+  const refused = await realtime.upgrade(
+    new Request(`${ORIGIN}/api/ws?orgId=${orgId}`, { headers: { origin: ORIGIN, cookie: ana.cookie() } }),
+    {
+      upgrade(_request: Request, options: { data: SocketData }) {
+        data = options.data;
+        return true;
+      },
+    } as unknown as Parameters<typeof realtime.upgrade>[1],
+  );
+  expect(refused).toBeUndefined();
+  const frames: Record<string, unknown>[] = [];
+  const socket = {
+    data,
+    readyState: 1,
+    send(text: string) {
+      frames.push(JSON.parse(text) as Record<string, unknown>);
+      return 1;
+    },
+    close() {
+      this.readyState = 3;
+    },
+  } as unknown as Parameters<typeof realtime.websocket.open>[0];
+  const until = async (done: () => boolean) => {
+    const deadline = Date.now() + 3000;
+    while (!done() && Date.now() < deadline) await Bun.sleep(1);
+    expect(done()).toBe(true);
+  };
+  const pending: Promise<unknown>[] = [];
+  try {
+    await realtime.websocket.open(socket);
+    const subscribe = JSON.stringify({ type: "subscribe", channelId });
+    pending.push(Promise.resolve(realtime.websocket.message(socket, subscribe)));
+    await until(() => held.length === 1);
+    let answered = false;
+    pending.push(Promise.resolve(realtime.websocket.message(socket, subscribe)).then(() => (answered = true)));
+    await until(() => answered || held.length === 2);
+
+    const removed = await owner(`/api/app/organizations/${orgId}/channels/${channelId}/members/people/${user.id}`, {
+      method: "DELETE",
+    });
+    expect(removed.status).toBe(204);
+    for (const release of held.splice(0).reverse()) release();
+    await Promise.all(pending);
+
+    expect(frames.filter((f) => f.channelId === channelId)).toEqual([{ type: "error", code: "forbidden", channelId }]);
+    expect(data?.subscriptions.has(channelId)).toBe(false);
+    expect(data?.pending.has(channelId)).toBe(false);
+    const posted = await owner(`/api/app/organizations/${orgId}/channels/${channelId}/messages`, {
+      json: { body: "after the removal" },
+    });
+    expect(posted.status).toBe(201);
+    expect(frames.filter((f) => f.type === "event" && f.channelId === channelId)).toEqual([]);
+  } finally {
+    for (const release of held.splice(0)) release();
+    await Promise.allSettled(pending);
+    (socket as unknown as { readyState: number }).readyState = 3;
+    await realtime.websocket.close(socket, 1000);
   }
 }, 30_000);
 

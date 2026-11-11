@@ -24,3 +24,13 @@ Agents on one computer each work in their own folder, and in system mode (ADR 00
 - The runner changed: an older runner has no shared folder, and the prompt says nothing of one.
 - agentes.chat Cloud's computers need the `acl` package in their image; without it the folder works, but files stay read-only to the group until an agent runs `chmod g+w`.
 - A big shared folder costs one `du` walk an hour, at the lowest priority.
+
+## Addendum (2026-11-11): the shared `bin/` is reached by full path in system mode
+
+Replaces the `PATH` part of decision 3. In system mode every agent's user can write the shared `bin/`, and a tool runs as whichever agent calls it, with that agent's files and sign-ins. A tool found there by name would let one agent's file run as another, so:
+
+- An agent launch's `PATH` is the computer's own folders only (`/usr/local/bin:/usr/bin:/bin`), for every process started through the agent's launcher: brains, commands, terminals, desktops and workers.
+- `AGENTES_SHARED_BIN` still names the folder, and `resolveCommand` still skips it.
+- The prompt tells agents the folder is not on their `PATH`: read a tool there first, then run it by its full path. They do so on their own, with no approval.
+
+Single-user mode is unchanged: every agent is the same user there, and its `PATH` was never extended.

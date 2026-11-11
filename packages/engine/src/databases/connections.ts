@@ -614,16 +614,20 @@ export async function updateDatabaseConnection(
     (input.databasePrefix !== undefined && (input.databasePrefix.trim() || null) !== row.databasePrefix);
   let tested: DatabaseTestResult | null = null;
   if (scopeChanged || reconnect.some((v) => v !== undefined)) {
+    const given = input.password !== undefined || !!input.url;
     const s = databaseSettings(input, {
       host: row.host,
       port: row.port,
       database: row.database,
       username: row.username,
-      password: input.password ?? (input.url ? undefined : await passwordOf(deps, row)),
+      password: given ? input.password : await passwordOf(deps, row),
       sslmode: row.sslmode === "disable" ? "disable" : "require",
       wholeServer: row.wholeServer,
       databasePrefix: row.databasePrefix,
     });
+    // A stored password only goes to the server and user it was saved for.
+    if (!given && (s.host !== row.host || s.port !== row.port || s.username !== row.username))
+      throw new ValidationError("Give the database password", "database.password_required");
     const test = await testSettings(deps, s);
     if (!test.ok) return test;
     tested = test.result;

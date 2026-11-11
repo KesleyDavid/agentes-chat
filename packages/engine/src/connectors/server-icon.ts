@@ -4,7 +4,7 @@ import { and, type Database, eq, isNull, schema } from "@agenteschat/db";
 import { sniffImage, stripImageMetadata } from "../avatars";
 import { caches } from "../cache";
 import { NotFoundError } from "../errors";
-import { assertPublicHttpsUrl, type ResolveHost } from "../net-guard";
+import { assertPublicHttpsUrl, outboundFetch, type ResolveHost } from "../net-guard";
 import { requirePermission } from "../organizations";
 import type { ConnectorConnection } from "./connections";
 
@@ -110,7 +110,7 @@ async function iconBytes(deps: ServerIconDeps, icon: McpIcon): Promise<Uint8Arra
   }
   try {
     const url = await assertPublicHttpsUrl(icon.src, deps.resolveHost);
-    const res = await (deps.http ?? fetch)(url.toString(), {
+    const res = await (deps.http ?? outboundFetch({ resolveHost: deps.resolveHost }))(url.toString(), {
       headers: { accept: "image/png, image/jpeg, image/webp" },
       credentials: "omit",
       redirect: "error",

@@ -116,6 +116,7 @@ describe("the server's GitHub App (ADR 0156)", () => {
         if (url.endsWith("/user/installations?per_page=100&page=1")) {
           return Response.json({ installations: [{ id: 5, account: acme }] });
         }
+        if (url.endsWith("/user/memberships/orgs/acme")) return Response.json({ state: "active", role: "admin" });
         if (url.endsWith("/app/installations/5")) {
           return Response.json({ id: 5, account: acme, created_at: new Date().toISOString() });
         }

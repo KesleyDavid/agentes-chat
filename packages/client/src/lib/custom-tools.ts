@@ -59,3 +59,15 @@ export const isHttpsUrl = (v: string) => /^https:\/\/[^\s/]+/.test(v.trim());
 /** Same MCP address, ignoring a trailing slash and case. */
 export const sameServer = (a: string | null | undefined, b: string | null | undefined) =>
   Boolean(a && b) && (a ?? "").replace(/\/+$/, "").toLowerCase() === (b ?? "").replace(/\/+$/, "").toLowerCase();
+
+/**
+ * Whether a listed server is the one at `url`. Who can't manage connectors is told only a server's origin, so a
+ * listed address with no path or query also stands for any address on that host.
+ */
+export const serverCovers = (listed: string | null | undefined, url: string | null | undefined) => {
+  if (sameServer(listed, url)) return true;
+  const origin = (listed ?? "").replace(/\/+$/, "").toLowerCase();
+  if (!/^https:\/\/[^\s/?#]+$/.test(origin)) return false;
+  const rest = (url ?? "").trim().toLowerCase();
+  return rest.startsWith(origin) && /^[/?#]/.test(rest.slice(origin.length));
+};

@@ -10774,6 +10774,7 @@
     "notVisible": "Akun GitHub-mu tidak bisa melihat pemasangan itu. Pasang dengan akun yang punya akses ke sana.",
     "otherWorkspace": "Akun GitHub itu sudah terhubung ke ruang kerja lain. Hapus aplikasinya di sana sebelum memasangnya di sini.",
     "installedOutside": "Aplikasinya dipasang di akun GitHub itu di luar agentes.chat. Hapus di GitHub, lalu pasang lagi dari Konektor › GitHub.",
+    "ownerUnknown": "GitHub tidak memberi tahu siapa pemilik organisasi itu. Pengelola server perlu menambahkan izin organisasi Members (hanya baca) ke aplikasi GitHub, lalu kamu pasang lagi.",
     "misconfigured": "Aplikasi GitHub di server memakai kunci rahasia yang salah, jadi pemasangan tidak bisa selesai. Pengelola server perlu mengganti kunci itu di pengaturan aplikasi.",
     "connectAccount": "Hubungkan akun GitHub",
     "ownerHint": "Pemilik server ini bisa membuat aplikasi GitHub di sini, di Konektor.",

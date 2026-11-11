@@ -42,7 +42,8 @@ const WEB = "https://github.test";
  * `gone` installations answer 404; `uninstall` is the status `DELETE /app/installations/{id}` answers. `personal` maps
  * an installation on a personal account → that account's GitHub id; `ids` maps a user token → its GitHub id. `made`
  * is when GitHub made an installation (else the moment it's asked); `moved` the account id the app sees it on, when
- * not the one people see.
+ * not the one people see. `roles` maps a user token → what GitHub says of it in any organization: a role (an owner's
+ * `admin` when unset), `pending` (an owner who hasn't accepted yet), `none` (not a member: 404) or `refused` (the app lacks Members: read: 403).
  */
 function fakeGitHub(state: {
   repos: Record<string, number>;
@@ -56,6 +57,7 @@ function fakeGitHub(state: {
   accounts?: Record<number, { login: string; selection: string; suspended?: string }>;
   made?: Record<number, string>;
   moved?: Record<number, number>;
+  roles?: Record<string, string>;
 }) {
   const calls: string[] = [];
   const bodies: { url: string; body: Record<string, unknown> }[] = [];
@@ -123,6 +125,16 @@ function fakeGitHub(state: {
         })),
       });
     }
+    if (url.startsWith(`${API}/user/memberships/orgs/`)) {
+      const role = state.roles?.[auth] ?? "admin";
+      if (role === "none") return new Response("not found", { status: 404 });
+      if (role === "refused") return new Response("Resource not accessible by integration", { status: 403 });
+      if (role === "down") return new Response("down", { status: 502 });
+      // An owner invited but not yet in: `pending`.
+      return role === "pending"
+        ? Response.json({ state: "pending", role: "admin" })
+        : Response.json({ state: "active", role });
+    }
     if (url === `${API}/user`) {
       const id = state.ids?.[auth];
       return id ? Response.json({ id, login: `u${id}` }) : new Response("bad credentials", { status: 401 });
@@ -158,6 +170,7 @@ async function world() {
     accounts: {} as Record<number, { login: string; selection: string; suspended?: string }>,
     made: {} as Record<number, string>,
     moved: {} as Record<number, number>,
+    roles: {} as Record<string, string>,
   };
   const fake = fakeGitHub(gh);
   let clock = Date.now();
@@ -338,6 +351,70 @@ describe("GitHub App installations are bound to one organization", () => {
     expect(refused).toBeInstanceOf(ValidationError);
     expect(refused).not.toBeInstanceOf(MisconfiguredError);
     expect(await listGitHubAppInstallations(w.db, w.ana.id, w.orgA.id)).toEqual([]);
+  });
+});
+
+describe("an organization's installation links only for one of its owners on GitHub", () => {
+  test("a member or an outside collaborator who sees a fresh installation can't link it, nor get its tokens", async () => {
+    const w = await world();
+    const bia = `user-${w.bia.id}`;
+    // Installation 1 was just made on GitHub and shows to everyone who reads one of its repositories.
+    for (const role of ["member", "none", "billing_manager", "pending"]) {
+      w.gh.roles[bia] = role;
+      await expect(w.install(w.bia, w.orgB.id, 1)).rejects.toMatchObject({
+        code: "github_app.owner_required",
+        params: { account: "acct1" },
+      });
+    }
+    expect(w.fake.calls).toContain(`GET ${API}/user/memberships/orgs/acct1`);
+    expect(await listGitHubAppInstallations(w.db, w.bia.id, w.orgB.id)).toEqual([]);
+    expect((await w.github(w.orgB.id)).all).toEqual([]);
+    const write = { contents: "write" } as const;
+    expect(await appTokenForRepo(APP, http(w), { db: w.db, orgId: w.orgB.id }, "a", "app", write)).toBeNull();
+    // Its owner still links it to their own workspace.
+    expect((await w.install(w.ana, w.orgA.id, 1)).installation).toMatchObject({ orgId: w.orgA.id, installationId: 1 });
+  });
+
+  test("GitHub not saying who owns it links nothing", async () => {
+    const w = await world();
+    w.gh.roles[`user-${w.ana.id}`] = "refused";
+    await expect(w.install(w.ana, w.orgA.id, 1)).rejects.toMatchObject({ code: "github_app.owner_unknown" });
+    expect(await listGitHubAppInstallations(w.db, w.ana.id, w.orgA.id)).toEqual([]);
+  });
+
+  test("GitHub failing to answer is a failure to try again, not a missing permission", async () => {
+    const w = await world();
+    w.gh.roles[`user-${w.ana.id}`] = "down";
+    const failed = await w.install(w.ana, w.orgA.id, 1).catch((e: unknown) => e);
+    expect(failed).toBeInstanceOf(ValidationError);
+    expect(failed).not.toMatchObject({ code: "github_app.owner_unknown" });
+    expect(await listGitHubAppInstallations(w.db, w.ana.id, w.orgA.id)).toEqual([]);
+  });
+
+  test("refreshing an installation already linked here asks no owner", async () => {
+    const w = await world();
+    await w.install(w.ana, w.orgA.id, 1);
+    for (const role of ["refused", "member"]) {
+      w.gh.roles[`user-${w.ana.id}`] = role;
+      expect((await w.install(w.ana, w.orgA.id, 1, [1], "update")).installation).toMatchObject({
+        orgId: w.orgA.id,
+        installationId: 1,
+      });
+    }
+    // Linked to one workspace gives no way into another.
+    w.gh.roles[`user-${w.bia.id}`] = "member";
+    await expect(w.install(w.bia, w.orgB.id, 1, [1], "update")).rejects.toMatchObject({
+      code: "github_app.owner_required",
+    });
+  });
+
+  test("a personal account's installation asks nothing about organizations", async () => {
+    const w = await world();
+    w.gh.personal[5] = 900;
+    w.gh.ids[`user-${w.ana.id}`] = 900;
+    w.gh.roles[`user-${w.ana.id}`] = "none";
+    await w.install(w.ana, w.orgA.id, 5);
+    expect(w.fake.calls.some((c) => c.includes("/user/memberships/"))).toBe(false);
   });
 });
 
