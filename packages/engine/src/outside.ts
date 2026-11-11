@@ -130,6 +130,18 @@ export async function runItselfReadOutside(db: Executor, orgId: string, runId: s
   return run ? readOutsideItself(db, run) : false;
 }
 
+/**
+ * What this turn brought in: its own calls (`readOutsideItself`) or a routine's reading that feeds it, without what
+ * the conversation relayed before it. A rule a person writes in the message the run answers weighs only this (ADR
+ * 0120, addendum 2026-11-11): one relayed message among the newest would refuse every rule they give, however often
+ * they repeat it.
+ */
+export async function turnReadOutsideById(db: Executor, orgId: string, runId: string): Promise<boolean> {
+  const run = await outsideRun(db, orgId, runId);
+  if (!run) return false;
+  return (await readOutsideItself(db, run)) || fedByRoutine(await runAuthority(db, run));
+}
+
 /** `runReadOutside` by the tool context's run id (false when the run is gone). */
 export async function runReadOutsideById(db: Executor, orgId: string, runId: string): Promise<boolean> {
   const run = await outsideRun(db, orgId, runId);

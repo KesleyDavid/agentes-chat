@@ -20,7 +20,7 @@ import { callLine, type LearnSignal, type RunCall, runCalls } from "../continuat
 import { cutText, cutTextEnd } from "../format";
 import { agentBudgetState } from "../gateway";
 import { enqueue } from "../outbox";
-import { runReadOutsideById } from "../outside";
+import { runReadOutsideById, turnReadOutsideById } from "../outside";
 import { personBehindCall } from "../requester";
 import { isRightHand } from "../right-hand";
 import { addRunStep } from "../runs";
@@ -146,6 +146,16 @@ export async function learnTrust(ctx: Pick<ToolContext, "orgId" | "runId" | "tri
   ]);
   const outside = relayed || calls.some(readsOutside);
   return { trust: person && !outside ? ("high" as const) : ("low" as const), person, outside };
+}
+
+/** Whether this turn itself read outside content (`turnReadOutsideById`, or one of its calls): its conversation aside. */
+export async function turnReadOutside(ctx: Pick<ToolContext, "orgId" | "runId"> & { db: Database }) {
+  if (!ctx.runId) return false;
+  const [read, calls] = await Promise.all([
+    turnReadOutsideById(ctx.db, ctx.orgId, ctx.runId),
+    runCalls(ctx.db, { id: ctx.runId, orgId: ctx.orgId }),
+  ]);
+  return read || calls.some(readsOutside);
 }
 
 /**

@@ -159,3 +159,9 @@ Skipped: writing access facts from code when a connector, a Vault login or a mai
 ## Addendum: no memory mark
 
 The mark under a person's message is gone on web and phone. The agent's reply and its receipt already say what was saved, and the receipt opens the item, where it can be corrected or forgotten. The message list still carries `memories` and the `message.memories` event still fires, for phone builds that draw the mark.
+
+## Addendum (2026-11-11): a rule after the conversation read outside
+
+A person gave an agent a rule in its DM and got "I couldn't save this rule, tell me again" every time they repeated it. A rule (`remember` kind `rule`, `update_memory` on one) was refused whenever the run counted as having read outside (`runReadOutside`), and that counts the conversation too: one relayed message among the channel's 30 newest top-level ones (an earlier answer that read a page) refused every rule, and repeating it changed nothing while that message stayed among them.
+
+Now a rule from the person's own message is refused only when this turn read outside itself (`turnReadOutsideById`: its own calls, a computer brain's fetches, or a routine's reading that feeds it). What the conversation relayed before still weighs where it did: the addresses check (ADR 0117 §5) refuses a rule naming an address no person wrote, in `remember` and now in `update_memory` on a rule too, and a rule only comes from the message the run answers (`triggerAuthor`). Such a rule is kept at high trust: a person's own words on a turn that brought nothing in. The refusal no longer tells the agent to have the person say it again in the same turn; it says why, once.
