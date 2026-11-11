@@ -10,7 +10,7 @@ afterEach(async () => {
   await current?.close();
 });
 
-const RULE = "Answer Fábio in Brazilian Portuguese, never in European Portuguese.";
+const RULE = "Answer Ana in Brazilian Portuguese, never in European Portuguese.";
 
 const rules = () =>
   f.db
@@ -126,9 +126,9 @@ describe("a rule a person gives after the conversation read outside", () => {
     expect(moved).toMatchObject({ isError: true, data: { code: "memory.unasked_destination" } });
     const changed = await call(change, "update_memory", {
       item_id: rule.id,
-      content: "Answer Fábio in Brazilian Portuguese, informal.",
+      content: "Answer Ana in Brazilian Portuguese, informal.",
     });
     expect(changed.isError).toBeFalsy();
-    expect((await rules()).map((r) => r.content)).toEqual(["Answer Fábio in Brazilian Portuguese, informal."]);
+    expect((await rules()).map((r) => r.content)).toEqual(["Answer Ana in Brazilian Portuguese, informal."]);
   });
 });
