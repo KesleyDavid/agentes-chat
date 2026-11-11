@@ -1,0 +1,1442 @@
+/*
+ * Installing the desktop app the first time (ADR 0036 §10): the systems' drawings (isc-), the frames under a
+ * download (ifr-), the steps on the /download page (ist-) and the page itself (dlp-).
+ */
+
+/* ---------- The drawings: a 400×250 desktop, scaled by its box ---------- */
+.isc-box {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+.isc-fit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+.isc {
+  --w: #ffffffec;
+  --w2: #f4f4f6;
+  --wt: #1d1d1f;
+  --wm: #6e6e73;
+  --wl: #0000001a;
+  --blue: #0a6cff;
+  --hi: #f59e0b;
+  position: relative;
+  width: 400px;
+  height: 250px;
+  overflow: hidden;
+  color: var(--wt);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-sans), system-ui, sans-serif;
+  line-height: 1.25;
+  text-align: left;
+  user-select: none;
+}
+[data-theme="dark"] .isc {
+  --w: #2c2c2eec;
+  --w2: #232325;
+  --wt: #f2f2f7;
+  --wm: #a1a1a6;
+  --wl: #ffffff1f;
+}
+.isc b {
+  font-weight: 700;
+}
+.isc p {
+  margin: 0;
+}
+.isc-stage {
+  position: absolute;
+  inset: 16px 0 34px;
+  display: grid;
+  place-items: center;
+}
+.isc-stage--full {
+  inset: 16px 0 4px;
+}
+.isc-stage--win {
+  inset: 0 0 22px;
+}
+.isc-stage--linux {
+  inset: 16px 0 0;
+}
+.isc-off {
+  opacity: 0.6;
+}
+.isc-icon {
+  display: block;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px -2px #0005;
+}
+.isc-battery {
+  display: inline-block;
+  width: 13px;
+  height: 6px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px currentColor;
+  background: linear-gradient(90deg, currentColor 70%, transparent 70%) 1.5px 1.5px / 9px 3px no-repeat;
+}
+
+/* macOS: wallpaper, menu bar, Dock, windows, alerts */
+.isc--mac {
+  background:
+    radial-gradient(120% 90% at 12% 18%, #9fc4ff 0, transparent 55%),
+    radial-gradient(90% 90% at 92% 88%, #d6b4ff 0, transparent 60%),
+    radial-gradient(80% 70% at 70% 10%, #ffd3e6 0, transparent 55%), linear-gradient(160deg, #cfe0ff, #e8dcff);
+}
+[data-theme="dark"] .isc--mac {
+  background:
+    radial-gradient(120% 90% at 12% 18%, #23407a 0, transparent 55%),
+    radial-gradient(90% 90% at 92% 88%, #4a2a73 0, transparent 60%),
+    radial-gradient(80% 70% at 70% 10%, #5a2341 0, transparent 55%), linear-gradient(160deg, #101a33, #1c1530);
+}
+.isc-menubar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 16px;
+  padding: 0 10px;
+  background: #ffffff73;
+  color: #1d1d1f;
+  font-size: 8.5px;
+}
+[data-theme="dark"] .isc-menubar {
+  background: #0000004d;
+  color: #f2f2f7;
+}
+.isc-menubar__mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+.isc-menubar__end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.isc-dock {
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  z-index: 1;
+  display: flex;
+  gap: 5px;
+  padding: 4px 5px;
+  border-radius: 11px;
+  background: #ffffff66;
+  box-shadow:
+    inset 0 0 0 0.5px #ffffff99,
+    0 4px 14px -6px #0004;
+  translate: -50% 0;
+}
+[data-theme="dark"] .isc-dock {
+  background: #ffffff1f;
+  box-shadow: inset 0 0 0 0.5px #ffffff33;
+}
+.isc-dock > i,
+.isc-dock__app {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--c);
+}
+.isc-lights {
+  display: flex;
+  gap: 5px;
+}
+.isc-lights i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff5f57;
+  box-shadow: inset 0 0 0 0.5px #0002;
+}
+.isc-lights i:nth-child(2) {
+  background: #febc2e;
+}
+.isc-lights i:nth-child(3) {
+  background: #28c840;
+}
+.isc-win {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--w);
+  box-shadow:
+    0 0 0 0.5px #0000004d,
+    0 18px 40px -12px #0006;
+}
+[data-theme="dark"] .isc-win {
+  box-shadow:
+    0 0 0 0.5px #ffffff26,
+    0 18px 40px -12px #000a;
+}
+.isc-win__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  padding: 0 10px;
+  color: var(--wm);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.isc-win__bar > span:last-child {
+  flex: 1;
+  margin-right: 40px;
+  text-align: center;
+}
+/* The disk image: the app, an arrow, Applications. */
+.isc-dmg {
+  width: 300px;
+}
+.isc-dmg__in {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 124px;
+  padding: 0 40px;
+  background: linear-gradient(#ffffff, #f2f4f8);
+}
+[data-theme="dark"] .isc-dmg__in {
+  background: linear-gradient(#2a2a2d, #222225);
+}
+.isc-dmg__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 500;
+}
+.isc-dmg__item .isc-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+}
+.isc-dmg__arrow {
+  flex: 1;
+  height: 12px;
+  margin: 0 10px 18px;
+  color: var(--wm);
+}
+.isc-folder {
+  position: relative;
+  width: 56px;
+  height: 44px;
+  filter: drop-shadow(0 2px 3px #0003);
+}
+.isc-folder::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 2px;
+  width: 22px;
+  height: 9px;
+  border-radius: 4px 6px 0 0;
+  background: #56a8f5;
+}
+.isc-folder::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 38px;
+  border-radius: 3px 7px 7px;
+  background: linear-gradient(#8cc8ff, #4ea1f3);
+}
+.isc-folder b {
+  position: absolute;
+  inset: auto 0 8px;
+  z-index: 1;
+  color: #ffffffd9;
+  font-size: 15px;
+  line-height: 1;
+  text-align: center;
+}
+/* The app's icon flying to Applications behind the pointer. */
+.isc-ghost {
+  position: absolute;
+  top: 31px;
+  left: 50px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  animation: isc-ghost 2.8s cubic-bezier(0.4, 0.1, 0.3, 1) infinite;
+}
+@keyframes isc-ghost {
+  0%,
+  20% {
+    opacity: 0;
+    transform: none;
+  }
+  24% {
+    opacity: 0.75;
+  }
+  70% {
+    opacity: 0.75;
+    transform: translateX(160px);
+  }
+  78%,
+  100% {
+    opacity: 0;
+    transform: translateX(160px);
+  }
+}
+/* Alerts: rounded, capsule buttons, the app's icon with a warning. */
+.isc-alert {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 232px;
+  padding: 16px 14px 12px;
+  border-radius: 18px;
+  background: var(--w);
+  box-shadow:
+    0 0 0 0.5px #0000004d,
+    0 22px 50px -14px #0007;
+  text-align: center;
+}
+[data-theme="dark"] .isc-alert {
+  box-shadow:
+    0 0 0 0.5px #ffffff2e,
+    0 22px 50px -14px #000c;
+}
+.isc-alert--narrow {
+  width: 206px;
+}
+.isc-alert .isc-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  margin-bottom: 3px;
+}
+.isc-alert > b {
+  font-size: 12px;
+  line-height: 15px;
+}
+.isc-alert > p {
+  margin-bottom: 5px;
+  font-size: 9.5px;
+  line-height: 13px;
+}
+.isc-alert__btns {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-self: stretch;
+}
+.isc-badge {
+  position: relative;
+}
+.isc-badge::after {
+  content: "!";
+  position: absolute;
+  right: -5px;
+  bottom: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffcc00;
+  box-shadow: 0 0 0 2px var(--w2);
+  color: #1d1d1f;
+  font:
+    800 11px / 18px system-ui,
+    sans-serif;
+  text-align: center;
+}
+.isc-capsule {
+  display: block;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--wt) 9%, transparent);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+.isc-capsule--default {
+  background: var(--blue);
+  color: #fff;
+}
+.isc-capsule--small {
+  flex: none;
+  padding: 3.5px 9px;
+  background: color-mix(in srgb, var(--wt) 11%, transparent);
+  font-size: 9.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.isc-pair {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.isc-touchid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 150px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--w);
+  box-shadow:
+    0 0 0 0.5px #0000004d,
+    0 22px 50px -14px #0007;
+  font-size: 9.5px;
+  line-height: 12.5px;
+  text-align: center;
+}
+.isc-touchid svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: #ff375f;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.isc-touchid b {
+  font-size: 10.5px;
+}
+.isc-touchid > span {
+  color: var(--wm);
+}
+.isc-touchid__field {
+  box-sizing: border-box;
+  width: 100%;
+  height: 16px;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--wt) 4%, transparent);
+  box-shadow: inset 0 0 0 0.5px var(--wl);
+  font-size: 8.5px;
+  line-height: 16px;
+  text-align: left;
+}
+/* System Settings › Privacy & Security, at Security. */
+.isc-settings {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  width: 376px;
+  height: 196px;
+}
+.isc-settings__side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 7px;
+  border-right: 0.5px solid var(--wl);
+  background: color-mix(in srgb, var(--w2) 80%, transparent);
+  font-size: 9.5px;
+}
+.isc-settings__side .isc-lights {
+  margin: 0 0 8px 2px;
+}
+.isc-settings__search {
+  height: 15px;
+  margin-bottom: 5px;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--wt) 7%, transparent);
+  color: var(--wm);
+  font-size: 8.5px;
+  line-height: 15px;
+}
+.isc-settings__me {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
+  padding: 2px 4px 6px;
+  border-bottom: 0.5px solid var(--wl);
+  font-weight: 600;
+}
+.isc-settings__me i {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffb36b, #f05f8a);
+}
+.isc-side {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 2.5px 4px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.isc-side > i {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 3.5px;
+  background: var(--c);
+}
+.isc-side > i::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 1.5px;
+  background: #fff;
+  opacity: 0.9;
+}
+.isc-side > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.isc-side--on {
+  background: var(--blue);
+  color: #fff;
+}
+.isc-settings__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.isc-settings__top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.isc-settings__top em {
+  color: var(--wm);
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 4px;
+}
+.isc-settings__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 10px 10px;
+  overflow: hidden;
+  font-size: 9.5px;
+  line-height: 12.5px;
+}
+.isc-settings__label {
+  margin: 2px 0 0 2px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.isc-group {
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--wt) 4.5%, transparent);
+  box-shadow: inset 0 0 0 0.5px var(--wl);
+}
+.isc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+}
+.isc-row + .isc-row {
+  border-top: 0.5px solid var(--wl);
+}
+.isc-row__value {
+  color: var(--wm);
+  white-space: nowrap;
+}
+.isc-toggle {
+  position: relative;
+  flex: none;
+  width: 20px;
+  height: 12px;
+  border-radius: 6px;
+  background: #34c759;
+}
+.isc-toggle::after {
+  content: "";
+  position: absolute;
+  top: 1.5px;
+  right: 1.5px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* Windows: wallpaper, taskbar, the browser's downloads, SmartScreen */
+.isc--win {
+  background:
+    radial-gradient(70% 90% at 50% 105%, #7cc4ff 0, #2d7be0 35%, transparent 70%),
+    radial-gradient(60% 60% at 20% 20%, #b9dcff 0, transparent 70%), linear-gradient(170deg, #dceeff, #9cc6f5);
+  font-family: "Segoe UI Variable", "Segoe UI", var(--font-sans), system-ui, sans-serif;
+}
+[data-theme="dark"] .isc--win {
+  background:
+    radial-gradient(70% 90% at 50% 105%, #1f5fbf 0, #123d84 35%, transparent 70%),
+    linear-gradient(170deg, #0c1a33, #0a2350);
+}
+.isc-taskbar {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 22px;
+  border-top: 1px solid #0000000f;
+  background: #f3f3f3d9;
+}
+[data-theme="dark"] .isc-taskbar {
+  border-color: #ffffff14;
+  background: #202020d9;
+}
+.isc-taskbar > i {
+  display: block;
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  background: var(--c);
+}
+.isc-taskbar__start {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5px;
+  width: 13px;
+  height: 13px;
+}
+.isc-taskbar__start s {
+  border-radius: 1px;
+  background: #1f8fff;
+}
+.isc-taskbar__clock {
+  position: absolute;
+  right: 10px;
+  font-size: 8.5px;
+}
+.isc-browser {
+  position: relative;
+  overflow: hidden;
+  width: 330px;
+  height: 178px;
+  border-radius: 8px;
+  background: var(--w);
+  box-shadow:
+    0 0 0 0.5px #0000004d,
+    0 18px 40px -12px #0006;
+}
+.isc-browser__tabs {
+  display: flex;
+  align-items: flex-end;
+  height: 20px;
+  padding: 0 8px;
+  background: var(--w2);
+}
+.isc-browser__tabs span {
+  width: 96px;
+  height: 15px;
+  padding: 0 8px;
+  border-radius: 6px 6px 0 0;
+  background: var(--w);
+  font-size: 8.5px;
+  line-height: 15px;
+}
+.isc-browser__url {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  padding: 0 8px;
+  border-bottom: 0.5px solid var(--wl);
+}
+.isc-browser__url span {
+  flex: 1;
+  height: 13px;
+  overflow: hidden;
+  padding: 0 8px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--wt) 6%, transparent);
+  color: var(--wm);
+  font-size: 8px;
+  line-height: 13px;
+  white-space: nowrap;
+}
+.isc-browser__url svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+}
+.isc-browser__page {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+}
+.isc-browser__page i {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--wt) 7%, transparent);
+}
+.isc-flyout {
+  position: absolute;
+  top: 44px;
+  right: 6px;
+  width: 210px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: var(--w2);
+  box-shadow:
+    0 0 0 0.5px #0000004d,
+    0 12px 28px -8px #0006;
+  font-size: 9.5px;
+  line-height: 12.5px;
+}
+.isc-flyout > b {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.isc-flyout__file {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 7px;
+}
+.isc-flyout__file > span {
+  width: 18px;
+  height: 22px;
+  border-radius: 3px;
+  background: linear-gradient(#eef3fb, #d3def2);
+  box-shadow: inset 0 0 0 0.5px #8aa3cf;
+}
+.isc-flyout__file b {
+  display: block;
+  font-weight: 600;
+  word-break: break-all;
+}
+.isc-flyout__file small {
+  display: block;
+  margin-top: 2px;
+  color: #b45309;
+  font-size: 9px;
+}
+[data-theme="dark"] .isc-flyout__file small {
+  color: #fbbf24;
+}
+.isc-flyout__acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-top: 8px;
+}
+.isc-winbtn {
+  padding: 3px 11px;
+  border-radius: 4px;
+  background: var(--w);
+  box-shadow: inset 0 0 0 0.5px var(--wl);
+  font-weight: 600;
+}
+.isc-smartscreen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 300px;
+  height: 186px;
+  padding: 14px 16px 0;
+  background: #0b5cad;
+  box-shadow:
+    0 0 0 0.5px #ffffff26,
+    0 22px 50px -14px #000a;
+  color: #fff;
+  --w2: #0b5cad;
+}
+.isc-smartscreen__x {
+  position: absolute;
+  top: 6px;
+  right: 9px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+.isc-smartscreen h4 {
+  margin: 0 0 7px;
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 21px;
+}
+.isc-smartscreen p {
+  margin-bottom: 7px;
+  font-size: 9.5px;
+  line-height: 13px;
+  opacity: 0.95;
+}
+.isc-smartscreen__more {
+  align-self: flex-start;
+  margin-left: -3px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-size: 9.5px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.isc-smartscreen__facts {
+  font-size: 9.5px;
+  line-height: 14px;
+}
+.isc-smartscreen__facts span {
+  display: inline-block;
+  width: 64px;
+  opacity: 0.8;
+}
+.isc-smartscreen__acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: auto -16px 0;
+  padding: 8px 12px;
+  background: #00000026;
+}
+.isc-ssbtn {
+  padding: 4px 12px;
+  border-radius: 2px;
+  background: #ffffff1a;
+  box-shadow: inset 0 0 0 1px #ffffffa0;
+  font-size: 9.5px;
+}
+
+/* Linux: wallpaper, top bar, terminal, the apps */
+.isc--linux {
+  background:
+    radial-gradient(80% 80% at 85% 90%, #f08a4b 0, transparent 60%),
+    radial-gradient(80% 80% at 15% 10%, #8b5cc4 0, transparent 60%), linear-gradient(160deg, #5b2a7a, #b2475b);
+  font-family: Ubuntu, Cantarell, var(--font-sans), system-ui, sans-serif;
+}
+.isc-topbar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 16px;
+  padding: 0 10px;
+  background: #111;
+  color: #eee;
+  font-size: 8.5px;
+}
+.isc-term {
+  width: 320px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #241f31;
+  box-shadow:
+    0 0 0 0.5px #ffffff26,
+    0 18px 40px -12px #000a;
+  color: #e8e3ef;
+  font:
+    10px / 15px var(--font-mono),
+    ui-monospace,
+    monospace;
+}
+.isc-term__bar {
+  height: 22px;
+  background: #2f2a3d;
+  color: #c9c2d6;
+  font:
+    600 9.5px / 22px Ubuntu,
+    Cantarell,
+    var(--font-sans),
+    system-ui,
+    sans-serif;
+  text-align: center;
+}
+.isc-term__in {
+  padding: 9px 11px 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.isc-term__in em {
+  color: #8ae28a;
+  font-style: normal;
+}
+.isc-apps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.isc-apps__search {
+  box-sizing: border-box;
+  width: 150px;
+  height: 18px;
+  padding: 0 10px;
+  border-radius: 9px;
+  background: #ffffffe6;
+  color: #333;
+  font-size: 9.5px;
+  line-height: 18px;
+}
+.isc-apps__app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 9px;
+  text-shadow: 0 1px 2px #0006;
+  --w2: #7a3a6e;
+}
+.isc-apps__app .isc-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+/* The thing to click: a warm ring that pulses as the pointer clicks it. */
+.isc-hl {
+  position: relative;
+  box-shadow:
+    0 0 0 2px var(--w2),
+    0 0 0 4px var(--hi);
+}
+.isc-hl::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--hi);
+  opacity: 0;
+  animation: isc-ring 2.6s ease-out infinite;
+}
+@keyframes isc-ring {
+  0%,
+  45% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  52% {
+    opacity: 0.85;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+.isc-ptr {
+  position: absolute;
+  top: 45%;
+  left: 60%;
+  z-index: 3;
+  width: 16px;
+  height: 20px;
+  filter: drop-shadow(0 1px 1.5px #0007);
+  pointer-events: none;
+  animation: isc-tap 2.6s cubic-bezier(0.3, 0.7, 0.2, 1) infinite;
+}
+@keyframes isc-tap {
+  0% {
+    opacity: 0;
+    transform: translate(26px, 30px);
+  }
+  15% {
+    opacity: 1;
+  }
+  42% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(0, 0) scale(0.82);
+  }
+  58%,
+  88% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+}
+.isc-ptr--drag {
+  top: 50%;
+  left: 55%;
+  animation: isc-drag 2.8s cubic-bezier(0.4, 0.1, 0.3, 1) infinite;
+}
+@keyframes isc-drag {
+  0% {
+    opacity: 0;
+    transform: none;
+  }
+  12% {
+    opacity: 1;
+    transform: none;
+  }
+  22% {
+    transform: scale(0.85);
+  }
+  70%,
+  86% {
+    opacity: 1;
+    transform: translateX(160px) scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(160px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .isc-hl::after,
+  .isc-ptr,
+  .isc-ptr--drag,
+  .isc-ghost {
+    animation: none;
+  }
+}
+
+/* ---------- The frames under a download ---------- */
+.ifr {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: stretch;
+  min-width: 0;
+  margin-top: 4px;
+}
+/* The icon sits on the first line by .ac-iconline. */
+.ifr__lead {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 19px;
+}
+.ifr__lead > .ac-icon {
+  color: var(--faint);
+}
+.ifr__lead strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.ifr__pic {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 196px;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.ifr__frame {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.45s var(--out);
+}
+.ifr__frame[data-on] {
+  opacity: 1;
+}
+.ifr__bars {
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 6px;
+}
+.ifr__bar {
+  display: flex;
+  align-items: center;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.ifr__bar i {
+  display: block;
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.ifr__bar i::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ink2);
+}
+.ifr__bar[data-done] i::after {
+  width: 100%;
+}
+/* The fill's end (an animationend on the bar, from its ::after) moves the frames on. */
+.ifr__bar[data-on] i::after {
+  animation: ifr-fill 4.2s linear forwards;
+}
+.ifr:hover .ifr__bar[data-on] i::after,
+.ifr:focus-within .ifr__bar[data-on] i::after {
+  animation-play-state: paused;
+}
+@keyframes ifr-fill {
+  to {
+    width: 100%;
+  }
+}
+.ifr__cap {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  min-height: 42px;
+}
+.ifr__n {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 700;
+}
+.ifr__text {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  text-wrap: pretty;
+}
+.ifr__text small {
+  display: block;
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 17px;
+}
+.ifr__nav {
+  display: flex;
+  gap: 2px;
+  margin-top: -4px;
+}
+.ifr__more {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 4px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ifr__bar[data-on] i::after {
+    width: 100%;
+    animation: none;
+  }
+  .ifr__frame {
+    transition: none;
+  }
+}
+
+/* ---------- Every step with its drawing (the /download page) ---------- */
+.ist {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ist__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+  gap: 32px;
+  align-items: center;
+  padding: 14px 0;
+}
+/* The line joining the numbers, from one step to the next. */
+.ist__step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: calc(50% + 22px);
+  bottom: calc(-50% + 22px);
+  left: 15px;
+  width: 2px;
+  background: var(--line);
+}
+.ist__text {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.ist__text > div,
+.ist__stuck > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+.ist__text .machine-command,
+.ist__stuck .machine-command {
+  align-self: stretch;
+}
+.ist__n {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 700;
+}
+.ist__line {
+  margin: 3px 0 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+  text-wrap: pretty;
+}
+.ist__sub {
+  margin: -6px 0 0;
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 21px;
+  text-wrap: pretty;
+}
+.ist__shot {
+  aspect-ratio: 400 / 250;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 14px 34px -18px #0005;
+}
+/* The icon on the title's first line (.ac-iconline); its gap puts the words on the steps' edge (32px + 14px). */
+.ist__stuck.ac-iconline {
+  gap: 26px;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.ist__stuck > .ac-icon {
+  color: var(--faint);
+}
+.ist__stuck > div {
+  flex: 1;
+}
+.ist__stuck .ist__line {
+  font-size: 15px;
+}
+@media (max-width: 760px) {
+  .ist__step {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .ist__step::before {
+    display: none;
+  }
+}
+
+/* ---------- The /download page ---------- */
+.dlp {
+  position: relative;
+  min-height: 100vh;
+  /* biome-ignore lint/suspicious/noDuplicateProperties: dvh with a vh fallback for older browsers */
+  min-height: 100dvh;
+  isolation: isolate;
+}
+.dlp__sky {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 240px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.dlp__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px 0;
+}
+.dlp__bar > a {
+  display: inline-flex;
+  border-radius: 6px;
+}
+.dlp__bar-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dlp__main {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 56px 28px 72px;
+}
+.dlp__hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+}
+.dlp__icon {
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px -10px #0007;
+}
+.dlp__hero h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: -0.015em;
+}
+.dlp__beta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+.dlp__hero p {
+  max-width: 560px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 24px;
+}
+.dlp__get {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.dlp__arch {
+  font-size: 13px;
+}
+.dlp__get small {
+  color: var(--muted);
+  font-size: 13px;
+}
+.dlp__get-note {
+  max-width: 260px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: right;
+}
+.dlp__why {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 16px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.dlp__why > .ac-icon {
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  border-radius: 12px 12px 12px 4px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink2);
+}
+.dlp__why h2 {
+  margin: 2px 0 6px;
+  font-size: 16px;
+  line-height: 22px;
+}
+.dlp__why p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 22px;
+}
+.dlp__marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink2);
+  font-size: 14px;
+}
+.dlp__marks li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dlp__marks .ac-icon {
+  color: var(--faint);
+}
+.dlp__guide-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.dlp__guide-head h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+@media (max-width: 760px) {
+  .dlp__main {
+    padding: 32px 16px 56px;
+  }
+  .dlp__hero {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .dlp__get {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+  }
+  .dlp__get-note {
+    text-align: left;
+  }
+}

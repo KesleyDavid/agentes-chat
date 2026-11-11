@@ -727,18 +727,19 @@ export const desktopEn = {
     lead: "This {{device}} does the setup. You only tap on the iPhone when a step asks.",
     account: "Apple Account in Xcode",
     checking: "Looking at this {{device}}…",
+    /** The app's own helper on this computer didn't answer for a while. */
+    checkingStall: "This {{device}} isn't answering yet. Quit agentes.chat from its menu bar icon and open it again.",
     xcodeText: "Install Xcode from the App Store. This step goes on by itself when it's there.",
-    xcodeOld: "This iPhone needs a newer Xcode. Update it in the App Store.",
     updateXcode: "Update Xcode",
     toolsStarting: "Starting the download…",
     toolsProgress: "{{done}} of {{total}}",
     toolsPercent: "{{percent}}% downloaded",
     toolsFailed: "The download stopped: {{message}}",
-    accountText: "Add it in Xcode\u00a0›\u00a0Settings\u00a0›\u00a0Accounts. A free Apple Account is enough.",
+    /** Xcode's pane names stay in English in every language. */
+    accountText: "Add it in Xcode\u00a0›\u00a0Settings\u00a0›\u00a0Apple Accounts. A free Apple Account is enough.",
     openXcode: "Open Xcode",
     personalTeam: "{{name}} · Personal Team",
     unlockText: "Unlock the iPhone and keep it unlocked for a moment.",
-    oldText: "This iPhone's iOS is too old for Xcode's tools.",
     devModeHint: "It shows in Settings only after a Mac pairs with the iPhone. This {{device}} did that.",
     helperText: "This {{device}} builds it and renews it every 7 days. The first time, trust it on the iPhone.",
     helperHint:

@@ -6,6 +6,7 @@ import {
   type RunnerAccess,
   type RunnerFrame,
   type RunnerInfo,
+  type RunnerToolchains,
   type RunnerTools,
 } from "@agenteschat/adapters";
 import { and, type Database, eq, isNull, schema, sql } from "@agenteschat/db";
@@ -97,6 +98,19 @@ export async function storeMachineExecutors(
     .where(eq(machines.id, machineId))
     .returning({ orgId: machines.orgId });
   if (row) await publishMachineUpdated(deps.pubsub, row.orgId, machineId, { executors: true });
+}
+
+/** `toolchains.changed`: what `hello.toolchains` said, replaced whole; the rest of `executors` stays. */
+export async function storeMachineToolchains(deps: AccessDeps, machineId: string, toolchains: RunnerToolchains) {
+  const [row] = await deps.db
+    .update(machines)
+    .set({
+      executors: sql`coalesce(${machines.executors}, '{}'::jsonb) || jsonb_build_object('toolchains', ${JSON.stringify(toolchains)}::jsonb)`,
+      updatedAt: new Date(),
+    })
+    .where(eq(machines.id, machineId))
+    .returning({ orgId: machines.orgId });
+  if (row) await publishMachineUpdated(deps.pubsub, row.orgId, machineId, { toolchains: true });
 }
 
 export interface ReduceAccessInput {

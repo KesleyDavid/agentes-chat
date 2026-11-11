@@ -1801,6 +1801,8 @@
       "helper_missing": "De testhelper is nog niet ingesteld",
       "helper_expired": "De testhelper moet worden vernieuwd",
       "apple_account_missing": "Xcode op de Mac heeft een Apple Account nodig",
+      "apple_team_missing": "Xcode op de Mac toont nog geen team",
+      "ui_not_authorized": "Deze iPhone weigerde de tikken van de testhelper",
       "team_limit": "Verwijder een zelfgemaakte app van deze iPhone",
       "helper_untrusted": "Vertrouw de testhelper op deze iPhone",
       "booting": "Wordt opgestart",
@@ -1959,7 +1961,16 @@
       "step5Hint": "De app die {{host}} installeert zodat agents op deze iPhone kunnen tikken en typen. Hij verschijnt in deze lijst zodra hij is geïnstalleerd.",
       "step5Text": "Instellingen › Algemeen › VPN en apparaatbeheer. Tik op de naam van de ontwikkelaar en dan op Vertrouw.",
       "waiting": "Wachten tot {{host}} hem ziet",
-      "footer": "Je Mac doet de rest en vernieuwt de testhelper elke 7 dagen zolang hij aan staat."
+      "footer": "Je Mac doet de rest en vernieuwt de testhelper elke 7 dagen zolang hij aan staat.",
+      "tooOld": "Deze iPhone draait iOS {{version}}, en agents hebben iOS 17 of nieuwer nodig. Werk hem bij als dat kan, of gebruik een nieuwere iPhone.",
+      "xcodeOld": "Deze iPhone draait iOS {{version}}, nieuwer dan Xcode op {{host}} kent. Installeer daar Xcode {{major}} en voer daarna xcrun devicectl manage ddis update uit in Terminal.",
+      "teamMissing": "Xcode is ingelogd maar toont nog geen team. Maak in Xcode een willekeurige iOS-app, kies je team bij Signing & Capabilities en voer hem één keer uit op deze iPhone.",
+      "uiRefused": "Deze iPhone weigerde de tikken van de testhelper. Ontgrendel hem en voer je toegangscode in als hij erom vraagt. Blijft het gebeuren, zet dan Instellingen › Ontwikkelaar › Schakel UI-automatisering in uit en weer aan.",
+      "pluggedIn": "Hij is aangesloten",
+      "stall": {
+        "plug": "{{host}} ziet deze iPhone nog niet. Gebruik een kabel die data doorgeeft, niet alleen stroom, houd deze iPhone ontgrendeld en tik op Vertrouw als hij erom vraagt.",
+        "devmode": "Ontwikkelaarsmodus gaat pas aan nadat deze iPhone herstart. Tik op Herstart en daarna op Zet aan als hij terug is. Geen schakelaar? Koppel deze iPhone los en sluit hem weer aan."
+      }
     },
     "notice": {
       "kind": "Apparaten",

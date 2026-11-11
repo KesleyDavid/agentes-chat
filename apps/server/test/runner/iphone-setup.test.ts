@@ -2,13 +2,14 @@ import { afterEach, expect, test } from "bun:test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import {
+  accountOf,
   IphoneSetup,
   parseDownloadLine,
   parseIosRuntime,
-  parseXcodeTeams,
   parseXcodeVersion,
   XCODE_APP_STORE,
 } from "../../runner/iphone-setup";
+import { parseXcodeTeams } from "../../runner/wda";
 import { removeDirs, tempDir, waitFor } from "./helpers";
 
 const dirs: string[] = [];
@@ -85,12 +86,15 @@ test("parsers read Xcode's own answers", () => {
     }),
   ).toBe("26.2");
   expect(parseIosRuntime({ runtimes: [] })).toBeNull();
-  expect(parseXcodeTeams(TEAMS)).toEqual({ name: "Sam Rivera", personal: true });
-  expect(parseXcodeTeams({ a: [{ teamName: "Acme Inc.", teamType: "Company" }] })).toEqual({
-    name: "Acme Inc.",
-    personal: false,
+  expect(accountOf({ teams: parseXcodeTeams(TEAMS), account: "team" })).toEqual({
+    account: { name: "Sam Rivera", personal: true },
   });
-  expect(parseXcodeTeams({})).toBeNull();
+  expect(
+    accountOf({ teams: parseXcodeTeams({ a: [{ teamID: "A1B2C3D4E5", teamName: "Acme Inc." }] }), account: "team" }),
+  ).toEqual({ account: { name: "Acme Inc.", personal: false } });
+  // Signed in with no team yet: an older desktop app reads `account: null` as missing, never as done.
+  expect(accountOf({ teams: [], account: "no_team" })).toEqual({ account: null, noTeam: true });
+  expect(accountOf({ teams: [], account: "none" })).toEqual({ account: null });
   expect(parseDownloadLine("Downloading iOS 26.1 Simulator (23B80): 12.3% (1.04 GB of 8.43 GB)")).toEqual({
     state: "downloading",
     percent: 12.3,

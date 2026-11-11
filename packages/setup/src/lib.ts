@@ -1105,11 +1105,11 @@ export function decideComputer(p: {
   if (on === undefined) return { ask: "computer", yes: p.offer.yes };
   if (!on) return off();
   const { mac, simple } = p.offer;
-  // On a Mac agents work as the person, so their commands could reach everything that person can: asked
-  // with the computer, off when it was on already and nothing installed says otherwise.
-  const unsaid = mac ? (now === "on" ? false : p.answers.commands) : true;
+  // Commands start on everywhere (product decision). On a Mac agents work as the person, so the question is still
+  // asked there, with yes as its answer by default.
+  const unsaid = mac ? (now === "on" ? true : p.answers.commands) : true;
   const commands = p.commands ? p.commands === "yes" : (p.installed ?? unsaid);
-  if (commands === undefined) return { ask: "commands", yes: false };
+  if (commands === undefined) return { ask: "commands", yes: true };
   return {
     plan: {
       state: "on",

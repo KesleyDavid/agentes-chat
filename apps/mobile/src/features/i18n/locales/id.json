@@ -1705,6 +1705,8 @@
       "helper_missing": "Helper pengujian belum disiapkan",
       "helper_expired": "Helper pengujian perlu diperbarui",
       "apple_account_missing": "Xcode di Mac perlu Apple Account",
+      "apple_team_missing": "Xcode di Mac belum menampilkan tim",
+      "ui_not_authorized": "iPhone ini menolak ketukan helper pengujian",
       "team_limit": "Hapus satu aplikasi buatan sendiri dari iPhone ini",
       "helper_untrusted": "Percayai helper pengujian di iPhone ini",
       "booting": "Sedang memulai",
@@ -1862,7 +1864,16 @@
       "step5Hint": "Aplikasi yang dipasang {{host}} agar agen bisa mengetuk dan mengetik di iPhone ini. Aplikasi ini muncul di daftar ini setelah terpasang.",
       "step5Text": "Pengaturan › Umum › VPN & Manajemen Perangkat. Ketuk nama developernya, lalu Percayai.",
       "waiting": "Menunggu {{host}} melihatnya",
-      "footer": "Mac-mu mengurus sisanya, dan memperbarui helper pengujian setiap 7 hari selama menyala."
+      "footer": "Mac-mu mengurus sisanya, dan memperbarui helper pengujian setiap 7 hari selama menyala.",
+      "tooOld": "iPhone ini memakai iOS {{version}}, dan agen butuh iOS 17 atau lebih baru. Perbarui jika bisa, atau pakai iPhone yang lebih baru.",
+      "xcodeOld": "iPhone ini memakai iOS {{version}}, lebih baru dari yang dikenal Xcode di {{host}}. Instal Xcode {{major}} di sana, lalu jalankan xcrun devicectl manage ddis update di Terminal.",
+      "teamMissing": "Xcode sudah masuk tapi belum menampilkan tim. Di Xcode, buat app iOS apa saja, pilih timmu di Signing & Capabilities, lalu jalankan di iPhone ini sekali.",
+      "uiRefused": "iPhone ini menolak ketukan helper pengujian. Buka kuncinya dan masukkan kode sandimu jika diminta. Jika terus terjadi, matikan lalu nyalakan lagi Pengaturan › Pengembang › Aktifkan Otomatisasi UI.",
+      "pluggedIn": "Sudah tercolok",
+      "stall": {
+        "plug": "{{host}} belum melihat iPhone ini. Pakai kabel yang membawa data, bukan hanya daya, biarkan iPhone ini tidak terkunci, lalu ketuk Percayai jika diminta.",
+        "devmode": "Mode Pengembang baru menyala setelah iPhone ini dimulai ulang. Ketuk Mulai Ulang, lalu Nyalakan setelah iPhone menyala lagi. Tidak ada tombolnya? Cabut iPhone ini dan colokkan lagi."
+      }
     },
     "notice": {
       "kind": "Perangkat",

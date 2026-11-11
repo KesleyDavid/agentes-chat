@@ -1361,6 +1361,112 @@
     "moveDown": "下移",
     "restoreOrder": "恢复默认顺序"
   },
+  "install": {
+    "frames": "如何在 {{system}} 上安装",
+    "step": "第 {{n}} 步",
+    "previous": "上一步",
+    "next": "下一步",
+    "fullGuide": "完整步骤",
+    "copied": "已复制。请粘贴到终端中。",
+    "mac": {
+      "why": "<b>应用还在测试阶段。</b>所以第一次打开时，Mac 会要求你确认：",
+      "drag": "把 agentes.chat 拖到“应用程序”。",
+      "dragLong": "打开下载的文件，把 agentes.chat 拖到“应用程序”。",
+      "blocked": "打开应用，然后点击“完成”。",
+      "blockedSub": "不要点击“移到废纸篓”。",
+      "settings": "在“设置 › 隐私与安全性”中点击“仍要打开”。",
+      "settingsLong": "紧接着打开“系统设置 › 隐私与安全性”，滚动到“安全性”，然后点击“仍要打开”。",
+      "settingsSub": "这个按钮只在你尝试打开应用（第 2 步）之后才会出现，大约一小时后消失。没看到？再打开一次应用，然后回到这里。",
+      "settingsShort": "只在第 2 步之后马上出现。",
+      "openSettings": "打开隐私与安全性",
+      "confirm": "用触控 ID 或密码确认。",
+      "confirmLong": "再次点击“仍要打开”，然后用触控 ID 或 Mac 的密码确认。",
+      "done": "完成：以后它会直接打开。",
+      "stuckTitle": "还是没有按钮，或者 Mac 提示应用已损坏？",
+      "stuckText": "把这段粘贴到“终端”中，然后再次打开应用："
+    },
+    "windows": {
+      "why": "<b>应用还在测试阶段。</b>所以第一次打开时，Windows 会要求你确认：",
+      "keep": "如果浏览器询问，请选择“保留”。",
+      "more": "打开安装程序，点击“更多信息”。",
+      "moreLong": "打开安装程序。如果出现“Windows 已保护你的电脑”，点击“更多信息”。",
+      "run": "点击“仍要运行”。",
+      "runLong": "点击“仍要运行”，然后按照安装程序的步骤操作。",
+      "done": "完成：以后它会直接打开。"
+    },
+    "linux": {
+      "why": "适用于 Ubuntu、Debian 及类似系统（x64）。Linux 不需要额外确认：",
+      "apt": "双击 .deb 文件安装，或在终端中安装。",
+      "aptLong": "双击下载的文件并点击“安装”，或把这段粘贴到终端中：",
+      "open": "从你的应用中打开 agentes.chat。"
+    },
+    "page": {
+      "docTitle": "下载应用 · agentes.chat",
+      "title": "下载 agentes.chat 应用",
+      "beta": "Beta",
+      "text": "你的工作区拥有独立的窗口，并使用系统通知。只需点击一下，智能体就能在这台电脑上各自的文件夹中工作。",
+      "open": "打开 agentes.chat",
+      "version": "版本 {{version}}",
+      "versionSize": "版本 {{version}} · {{size}}",
+      "soon": "还没有 {{system}} 版本。",
+      "useArm": "电脑使用 ARM 芯片？下载 ARM 版",
+      "useX64": "下载 x64 版",
+      "unavailable": "现在无法从这里下载应用。请稍后再试。",
+      "installOn": "在 {{system}} 上安装",
+      "system": "系统",
+      "whyTitle": "为什么我的电脑要求确认？",
+      "whyText": "agentes.chat 还在测试阶段：Mac 版本还没有经过 Apple 公证，Windows 安装程序也还没有 Microsoft 证书。没有这些，电脑在打开从网上下载的应用之前会询问一次。之后它会直接打开，并自动更新。测试阶段结束前，这一步会取消。",
+      "openSource": "开源",
+      "onlyHere": "只在这里和项目的发布页发布",
+      "signedUpdates": "签名更新"
+    },
+    "scene": {
+      "finder": "访达",
+      "file": "文件",
+      "edit": "编辑",
+      "view": "显示",
+      "window": "窗口",
+      "applications": "应用程序",
+      "notOpened": "未打开“{{app}}”",
+      "notOpenedText": "Apple 无法验证“{{app}}”是否包含可能危害 Mac 安全或泄漏隐私的恶意软件。",
+      "done": "完成",
+      "moveToTrash": "移到废纸篓",
+      "search": "搜索",
+      "account": "Apple 账户",
+      "general": "通用",
+      "appearance": "外观",
+      "accessibility": "辅助功能",
+      "privacy": "隐私与安全性",
+      "desktopDock": "桌面与程序坞",
+      "displays": "显示器",
+      "security": "安全性",
+      "allowFrom": "允许以下来源的应用程序",
+      "allowValue": "App Store 和已知开发者",
+      "blocked": "已阻止使用“{{app}}”，以保护 Mac。",
+      "openAnyway": "仍要打开",
+      "confirmTitle": "要打开“{{app}}”吗？",
+      "confirmText": "仅在你信任其来源时打开。",
+      "touchIdTitle": "系统设置",
+      "touchIdText": "使用触控 ID 或输入密码以允许此操作。",
+      "password": "密码",
+      "downloads": "下载",
+      "rare": "此文件不常被下载。打开前，请确保你信任它。",
+      "delete": "删除",
+      "keep": "保留",
+      "protectedTitle": "Windows 已保护你的电脑",
+      "protectedText": "Microsoft Defender SmartScreen 阻止了无法识别的应用启动。运行此应用可能会导致你的电脑面临风险。",
+      "protectedShort": "Microsoft Defender SmartScreen 阻止了无法识别的应用启动。",
+      "moreInfo": "更多信息",
+      "dontRun": "不运行",
+      "appLabel": "应用：",
+      "publisher": "发布者：",
+      "unknownPublisher": "未知发布者",
+      "runAnyway": "仍要运行",
+      "activities": "活动",
+      "readingLists": "正在读取软件包列表... 完成",
+      "settingUp": "正在设置 agentes-chat ({{version}}) ..."
+    }
+  },
   "legal": {
     "updated": "最后更新于 {{date}}",
     "contents": "本页内容",
@@ -12971,6 +13077,7 @@
     "downloadFor": "下载 {{system}} 版",
     "downloadApp": "下载应用",
     "otherSystems": "其他系统",
+    "armBuild": "{{system}} (ARM)",
     "onThePhone": "在手机上",
     "onTheIphone": "在 iPhone 上",
     "screen": {
@@ -13046,6 +13153,8 @@
       "helper_missing": "测试助手还没有设置好",
       "helper_expired": "测试助手需要续期",
       "apple_account_missing": "Xcode 还没有登录 Apple 账户",
+      "apple_team_missing": "Xcode 还没有显示团队",
+      "ui_not_authorized": "iPhone 拒绝了测试助手的点按",
       "team_limit": "免费 Apple 账户已达到 App 数量上限",
       "helper_untrusted": "iPhone 还没有信任测试助手",
       "booting": "正在启动",
@@ -13053,7 +13162,8 @@
       "no_driverLinux": "Linux 无法打开这台手机",
       "os_too_old": "这个系统太旧，无法使用这些工具",
       "adb_offline": "手机没有响应",
-      "other": "设备上需要处理一些事"
+      "other": "设备上需要处理一些事",
+      "iosTooOld": "它运行 iOS {{version}}，智能体需要 iOS 17 或更新版本"
     },
     "fix": {
       "locked": "解锁手机",
@@ -13067,6 +13177,8 @@
       "helper_missing": "在 Mac 上打开应用",
       "helper_expired": "在 Mac 上打开应用",
       "apple_account_missing": "登录 Xcode",
+      "apple_team_missing": "从 Xcode 在 iPhone 上运行一次 App",
+      "ui_not_authorized": "解锁 iPhone",
       "team_limit": "删除一个你自己构建的 App",
       "helper_untrusted": "在 iPhone 上信任它",
       "booting": "等它启动完成",
@@ -13318,7 +13430,8 @@
       "toolsDone": "已由 Mac 下载",
       "toolsText": "Mac 会下载这些工具，约 8 GB。",
       "accountDone": "已添加",
-      "accountText": "在 {{mac}} 的 Xcode 中添加一个（免费或付费均可）：Settings › Accounts。",
+      "accountText": "在 {{mac}} 的 Xcode 中添加一个（免费或付费均可）：Settings › Apple Accounts。",
+      "teamMissingText": "Xcode 已登录，但还没有显示团队。在 Xcode 中新建任意 iOS App，在 Signing & Capabilities 下选择你的团队，然后在 iPhone 上运行一次。",
       "connectedDone": "{{name}} · iOS {{version}}",
       "connectedText": "用数据线把 iPhone 连接到 {{mac}}。",
       "trustDone": "已信任",
@@ -13329,6 +13442,22 @@
       "helperText": "由 Mac 构建，并每 7 天续期一次。在 Xcode 中登录免费的 Apple 账户即可。",
       "helperUntrustedText": "点按开发者的名称，然后点按“信任”。",
       "teamLimitText": "从 iPhone 上删除一个你自己构建的 App：免费 Apple 账户最多允许 3 个。",
+      "xcodeOld": "{{name}} 运行 iOS {{version}}，而 {{mac}} 上的 Xcode 最高只支持 iOS {{sdk}}。安装 Xcode {{major}}，然后在终端中运行下面的命令。",
+      "xcodeOldAny": "{{name}} 运行 iOS {{version}}，比 {{mac}} 上的 Xcode 支持的版本更新。安装 Xcode {{major}}，然后在终端中运行下面的命令。",
+      "uiRefusedText": "iPhone 拒绝了测试助手的点按。请解锁它，如有要求就输入密码。如果反复出现，把 设置 › 开发者 › 启用 UI 自动化 关闭再打开。",
+      "tooOld": "{{name}} 运行 iOS {{version}}，而智能体需要 iOS 17 或更新版本。能更新就更新，或者连接一台更新的 iPhone。",
+      "tooOldVersion": "16 或更早版本",
+      "pluggedIn": "已经插好了",
+      "stall": {
+        "xcode": "已经装好了？打开一次 Xcode 并同意它的条款，{{mac}} 才能使用它。",
+        "tools": "下载约 8 GB，需要 {{mac}} 保持唤醒并联网。如果停了，请在 Xcode › Settings › Components 中获取 iOS。",
+        "account": "已经登录了？在 Xcode 中新建任意 iOS App，在 Signing & Capabilities 下选择你的团队，然后在 iPhone 上运行一次。",
+        "connected": "{{mac}} 还没有看到 iPhone。请使用能传输数据的线，而不是只能充电的线，解锁 iPhone，如有提示就点按“信任”。",
+        "trust": "没有出现“信任”？拔下 iPhone，解锁后重新插上，然后点按“信任”并输入密码。",
+        "developerMode": "开发者模式要在 iPhone 重启后才会打开。点按“重新启动”，开机后点按“打开”。没有这个开关？拔下 iPhone 再重新插上。",
+        "uiAutomation": "开发者模式打开且 iPhone 重启后，这个开关才会出现。查找时请保持解锁。",
+        "helper": "{{mac}} 会构建测试助手并在 iPhone 上启动它，第一次需要几分钟。请保持 iPhone 解锁并连接。"
+      },
       "ready": "{{name}} 已可供智能体使用。",
       "path": {
         "settings": "设置",
@@ -13968,6 +14097,9 @@
       "membersPersonal": "成员"
     },
     "advanced": "高级",
+    "tab": {
+      "account": "个人资料"
+    },
     "sectionText": {
       "account": "你的个人资料和应用外观。",
       "notifications": "在这里以通知形式推送给你的内容。收件箱会保留所有内容。",
@@ -14236,9 +14368,6 @@
         "jev": "只有使用 Jev 时，智能体才会主动发送贴纸。",
         "jevLink": "设置 Jev"
       }
-    },
-    "tab": {
-      "account": "个人资料"
     }
   },
   "personalMode": {

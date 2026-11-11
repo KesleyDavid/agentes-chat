@@ -1,5 +1,15 @@
 import { afterAll, beforeAll, expect, spyOn, test } from "bun:test";
-import fs, { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import fs, {
+  type Mode,
+  mkdirSync,
+  mkdtempSync,
+  type OpenMode,
+  type PathLike,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
@@ -17,6 +27,7 @@ import {
   pgliteFolder,
   pgliteUrl,
   restorePglite,
+  syncFolder,
 } from "../src/pglite";
 import { users } from "../src/schema";
 
@@ -159,6 +170,70 @@ test("commits reach the disk: Postgres syncs, and its syncs reach the system", a
     sync.mockRestore();
     await pg.close();
   }
+});
+
+test("a folder sync skips Windows and lets a refusing system through, but not a real failure", () => {
+  const calls: string[] = [];
+  const fail = (code: string) => Object.assign(new Error(code), { code });
+  const opens = () => 3;
+  const syncs = () => undefined;
+  const refuse = (code: string) => (): never => {
+    throw fail(code);
+  };
+  const io = (open: () => number, sync: () => void) => ({
+    openSync: ((path: string) => {
+      calls.push(`open ${path}`);
+      return open();
+    }) as unknown as typeof fs.openSync,
+    fsyncSync: (() => {
+      calls.push("fsync");
+      sync();
+    }) as typeof fs.fsyncSync,
+    closeSync: (() => {
+      calls.push("close");
+    }) as typeof fs.closeSync,
+  });
+  // Windows can't open a folder for reading: nothing is tried.
+  syncFolder("C:\\data", "win32", io(opens, syncs));
+  expect(calls).toEqual([]);
+  syncFolder("/data", "linux", io(opens, syncs));
+  expect(calls).toEqual(["open /data", "fsync", "close"]);
+  calls.length = 0;
+  syncFolder("/data", "linux", io(refuse("EISDIR"), syncs));
+  syncFolder("/data", "linux", io(opens, refuse("EINVAL")));
+  expect(calls).toEqual(["open /data", "open /data", "fsync", "close"]);
+  expect(() => syncFolder("/data", "linux", io(opens, refuse("EIO")))).toThrow("EIO");
+});
+
+test("a folder that can't be opened for reading (Windows) still reopens, writes and closes", async () => {
+  // As on Windows: `openSync(folder, "r")` fails. Postgres syncs folders as it starts, writes and stops; each one
+  // used to become an fsync error that aborted the database on reopening a folder.
+  const open = fs.openSync.bind(fs);
+  let refusals = 0;
+  const spy = spyOn(fs, "openSync").mockImplementation(((path: PathLike, flags?: OpenMode, mode?: Mode) => {
+    if (flags === "r" && fs.existsSync(path) && fs.statSync(path).isDirectory()) {
+      refusals++;
+      throw Object.assign(new Error(`EISDIR: illegal operation on a directory, open '${path}'`), { code: "EISDIR" });
+    }
+    return open(path, flags ?? "r", mode);
+  }) as typeof fs.openSync);
+  try {
+    const first = openPglite(db);
+    await first.ready;
+    await first.pg.query("create table if not exists windows_sync (id int)");
+    await first.pg.query("insert into windows_sync values (1)");
+    await first.pg.query("checkpoint");
+    await first.pg.close();
+    const again = openPglite(db);
+    await again.ready;
+    const { rows } = await again.pg.query<{ n: number }>("select count(*)::int as n from windows_sync");
+    expect(rows[0]?.n).toBeGreaterThan(0);
+    await again.pg.query("drop table windows_sync");
+    await again.pg.close();
+  } finally {
+    spy.mockRestore();
+  }
+  expect(refusals).toBeGreaterThan(0);
 });
 
 /**

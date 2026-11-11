@@ -1892,6 +1892,8 @@
       "helper_missing": "L'app de test n'est pas encore configurée",
       "helper_expired": "L'app de test doit être renouvelée",
       "apple_account_missing": "Xcode sur le Mac a besoin d'un Apple Account",
+      "apple_team_missing": "Xcode sur le Mac n'affiche pas encore d'équipe",
+      "ui_not_authorized": "Cet iPhone a refusé les touchers de l'app de test",
       "team_limit": "Supprimez de cet iPhone une app que vous avez créée",
       "helper_untrusted": "Faites confiance à l'app de test sur cet iPhone",
       "booting": "Démarrage en cours",
@@ -2051,7 +2053,16 @@
       "step5Hint": "L'app que {{host}} installe pour que les agents puissent toucher et écrire sur cet iPhone. Elle apparaît dans cette liste une fois installée.",
       "step5Text": "Réglages › Général › VPN et gestion de l'appareil. Touchez le nom du développeur, puis Se fier.",
       "waiting": "En attente que {{host}} le détecte",
-      "footer": "Votre Mac fait le reste, et renouvelle l'app de test tous les 7 jours tant qu'il est allumé."
+      "footer": "Votre Mac fait le reste, et renouvelle l'app de test tous les 7 jours tant qu'il est allumé.",
+      "tooOld": "Cet iPhone est sous iOS {{version}}, et les agents ont besoin d'iOS 17 ou plus récent. Mettez-le à jour s'il le peut, ou utilisez un iPhone plus récent.",
+      "xcodeOld": "Cet iPhone est sous iOS {{version}}, plus récent que ce que connaît Xcode sur {{host}}. Installez-y Xcode {{major}}, puis lancez xcrun devicectl manage ddis update dans Terminal.",
+      "teamMissing": "Xcode est connecté mais n'affiche pas encore d'équipe. Dans Xcode, créez n'importe quelle app iOS, choisissez votre équipe dans Signing & Capabilities et lancez-la une fois sur cet iPhone.",
+      "uiRefused": "Cet iPhone a refusé les touchers de l'app de test. Déverrouillez-le et saisissez votre code s'il le demande. Si cela continue, désactivez puis réactivez Réglages › Développeur › Activer l'automatisation de l'IU.",
+      "pluggedIn": "Il est branché",
+      "stall": {
+        "plug": "{{host}} ne voit pas encore cet iPhone. Utilisez un câble qui transmet les données, pas seulement la charge, gardez cet iPhone déverrouillé et touchez Se fier s'il le demande.",
+        "devmode": "Le Mode développeur ne s'active qu'après le redémarrage de cet iPhone. Touchez Redémarrer, puis Activer une fois qu'il a redémarré. Pas d'interrupteur ? Débranchez cet iPhone et rebranchez-le."
+      }
     },
     "notice": {
       "kind": "Appareils",

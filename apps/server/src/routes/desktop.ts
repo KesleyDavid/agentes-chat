@@ -51,38 +51,59 @@ interface GitHubRelease {
 export const dmgName = (version: string) => `agentes_${version}_universal.dmg`;
 export const updaterName = (version: string) => `agentes_${version}_universal.app.tar.gz`;
 
-/** The platforms the app is built for, as the Tauri updater names them (`{{target}}`). */
-export type DesktopTarget = "darwin" | "windows" | "linux";
+/**
+ * The builds the app comes in, as `/desktop/latest` and the updater ask for them (Tauri's `{{target}}` and
+ * `{{arch}}`): one universal Mac build, and Windows and Linux for x64 (`windows`, `linux`) and ARM64.
+ */
+export type DesktopTarget = "darwin" | "windows" | "windows-arm64" | "linux" | "linux-arm64";
 
 /**
- * A platform's files in a release: what a person downloads, and what the app's updater installs. Windows'
+ * A build's files in a release: what a person downloads, and what the app's updater installs. Windows'
  * installer is its own updater bundle; on Linux the deb is the download (a deb updates by downloading again)
- * and the AppImage updates itself.
+ * and the AppImage updates itself. The CI names them (.github/workflows/desktop.yml).
  */
 export function desktopAssets(target: DesktopTarget, version: string): { download: string; updater: string } {
-  if (target === "windows")
-    return { download: `agentes_${version}_x64-setup.exe`, updater: `agentes_${version}_x64-setup.exe` };
-  if (target === "linux")
-    return { download: `agentes_${version}_amd64.deb`, updater: `agentes_${version}_amd64.AppImage` };
+  if (target === "windows" || target === "windows-arm64") {
+    const installer = `agentes_${version}_${target === "windows" ? "x64" : "arm64"}-setup.exe`;
+    return { download: installer, updater: installer };
+  }
+  if (target === "linux" || target === "linux-arm64") {
+    const arch = target === "linux" ? "amd64" : "arm64";
+    return { download: `agentes_${version}_${arch}.deb`, updater: `agentes_${version}_${arch}.AppImage` };
+  }
   return { download: dmgName(version), updater: updaterName(version) };
 }
 
-/** Mac architectures, as Rust (`aarch64`, `x86_64`) and Node (`arm64`, `x64`) name them. */
-const MAC_ARCHES = new Set(["aarch64", "arm64", "x86_64", "x64"]);
-/** Windows and Linux builds are x64 only for now. */
+/** Architectures, as Rust (`aarch64`, `x86_64`) and Node (`arm64`, `x64`) name them. */
+const ARM64 = new Set(["aarch64", "arm64"]);
 const X64 = new Set(["x86_64", "x64"]);
 
-/** The query's platform when there is a build for it (one universal Mac build; x64 elsewhere). */
+/** The query's build when there is one for it: the universal one on any Mac; x64 when the arch isn't said. */
 export function desktopTarget(target: string | undefined, arch: string | undefined): DesktopTarget | null {
-  if (target === "darwin") return !arch || MAC_ARCHES.has(arch) ? "darwin" : null;
-  if (target === "windows" || target === "linux") return !arch || X64.has(arch) ? target : null;
+  if (target === "darwin") return !arch || ARM64.has(arch) || X64.has(arch) ? "darwin" : null;
+  if (target === "windows" || target === "linux") {
+    if (!arch || X64.has(arch)) return target;
+    if (!ARM64.has(arch)) return null;
+    return target === "windows" ? "windows-arm64" : "linux-arm64";
+  }
   return null;
 }
 
-/** `min-version: x.y.z` out of a release body, and the notes without that line. */
+/** A deb or an AppImage: Linux, either architecture. */
+const onLinux = (target: DesktopTarget) => target === "linux" || target === "linux-arm64";
+
+/**
+ * Where a release body's first-open steps start (`.github/desktop-install.md`, added by the desktop CI): they are for
+ * people downloading from the release page, not the app's update notes (ADR 0036 §10).
+ */
+export const INSTALL_NOTES_MARK = "<!-- install -->";
+
+/** `min-version: x.y.z` out of a release body, and the notes without that line or the first-open steps. */
 export function parseReleaseBody(body: string | null | undefined): { notes: string; minVersion?: string } {
   let minVersion: string | undefined;
-  const lines = (body ?? "").split(/\r?\n/).filter((line) => {
+  const text = body ?? "";
+  const cut = text.indexOf(INSTALL_NOTES_MARK);
+  const lines = (cut < 0 ? text : text.slice(0, cut)).split(/\r?\n/).filter((line) => {
     const m = line.match(/^\s*min-version:\s*v?(\S+)\s*$/i);
     if (!m) return true;
     if (m[1] && SEMVER.test(m[1])) minVersion = m[1];
@@ -330,7 +351,7 @@ export function registerDesktopRoutes(api: OpenAPIHono, deps: AppDeps, releases:
       const limit = await rateLimiter.consume(`desktop-latest:${ip}`, LATEST_LIMIT);
       if (!limit.allowed) return apiError(c, 429, "rate_limited", "Too many requests. Try again in a minute.");
       const { target, arch } = c.req.valid("query");
-      // One universal build for both Mac architectures (Rust and Node names alike); x64 on Windows and Linux.
+      // One universal build for both Mac architectures (Rust and Node names alike); x64 or ARM64 elsewhere.
       const platform = desktopTarget(target, arch);
       const release = platform ? await releases.latest(platform).catch(() => null) : null;
       if (!release) return apiError(c, 404, "desktop.no_release", "No desktop build for this computer yet");
@@ -348,7 +369,7 @@ export function registerDesktopRoutes(api: OpenAPIHono, deps: AppDeps, releases:
     const platform = desktopTarget(c.req.query("target"), c.req.query("arch"));
     // On Linux the updater bundle is the AppImage, which only an AppImage install takes in place: a deb (or an
     // app that doesn't say which it is, `bundle`) updates by downloading again, from `/desktop/latest`'s link.
-    if (platform === "linux" && c.req.query("bundle") !== "appimage") return c.body(null, 204);
+    if (platform && onLinux(platform) && c.req.query("bundle") !== "appimage") return c.body(null, 204);
     const release = platform ? await releases.latest(platform).catch(() => null) : null;
     if (!release?.updater) return c.body(null, 204);
     return c.json(

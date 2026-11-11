@@ -2,19 +2,19 @@ import { type ChildProcess, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import type { EventEmitter } from "node:events";
 import { existsSync } from "node:fs";
-import { chmod, mkdir, readdir, rename, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { gunzipSync } from "node:zlib";
-import type { PhoneKind, PhoneReason } from "@agenteschat/adapters/machine-protocol";
+import type { PhoneKind, PhoneReason, RunnerToolchains } from "@agenteschat/adapters/machine-protocol";
 import { jpegSize } from "./browser";
 import { RunnerError } from "./errors";
 import { killTree } from "./exec";
 import { readJson, writeJson } from "./json-file";
 import { acquireLock, pidAlive, readLock } from "./lock";
 import { type PhoneScreenDriver, REASON_WORDS, runTool, startTool } from "./phones";
-import { USBMUXD_SOCKET, usbmuxForward } from "./usbmux";
+import { parsePlist, USBMUXD_SOCKET, usbmuxForward } from "./usbmux";
 
 /**
  * The iPhone test helper: WebDriverAgent (appium/WebDriverAgent, a pinned release built from source), the small
@@ -51,6 +51,8 @@ const DEVICE_MJPEG_PORT = 9100;
 
 /** What a failed build or start of the helper needs, from xcodebuild's words; null when it's none of these. */
 export function helperReason(text: string): PhoneReason | null {
+  if (/Not authorized for performing UI testing actions|XCTDaemonErrorDomain Code=41/i.test(text))
+    return "ui_not_authorized";
   if (/maximum App ID limit|maximum number of apps|App ID limit|limit of \d+ apps/i.test(text)) return "team_limit";
   if (
     /No Account for Team|No accounts? (with|for)|requires a development team|session has expired|sign in (with|to) your Apple|Unable to log in|re-?enter (your )?password/i.test(
@@ -90,51 +92,255 @@ export interface AppleTeam {
   free: boolean;
 }
 
-/** Xcode's signing teams, from its settings (`IDEProvisioningTeamByIdentifier`, before Xcode 14 `IDEProvisioningTeams`). */
-export function parseXcodeTeams(json: unknown): AppleTeam[] {
-  const out: AppleTeam[] = [];
-  const accounts = typeof json === "object" && json !== null ? Object.values(json) : [];
-  for (const list of accounts) {
-    if (!Array.isArray(list)) continue;
-    for (const t of list as Record<string, unknown>[]) {
-      const id = typeof t.teamID === "string" && /^[A-Z0-9]{10}$/.test(t.teamID) ? t.teamID : null;
-      if (!id || out.some((o) => o.id === id)) continue;
-      const free =
-        t.isFreeProvisioningTeam === true || t.isFreeProvisioningTeam === 1 || t.teamType === "Personal Team";
-      out.push({ id, name: typeof t.teamName === "string" ? t.teamName : id, free });
-    }
+/** What Xcode's Apple Accounts give this Mac: the teams found (the Personal Team first), and the account's state. */
+export interface AppleLook {
+  teams: AppleTeam[];
+  account: NonNullable<RunnerToolchains["appleAccount"]>;
+}
+
+const TEAM_ID = /^[A-Z0-9]{10}$/;
+const PERSONAL = /\s*\(Personal Team\)\s*$/;
+const DAY_MS = 24 * 3600_000;
+
+/** Dedupe by id (a free flag from any copy counts); the Personal Team first, then Xcode's last pick, then the rest. */
+export function orderTeams(teams: AppleTeam[], lastSelected?: string | null): AppleTeam[] {
+  const byId = new Map<string, AppleTeam>();
+  for (const t of teams) {
+    const had = byId.get(t.id);
+    if (!had) byId.set(t.id, { ...t });
+    else if (t.free) had.free = true;
   }
   // The person's own Personal Team first: a company's team isn't theirs to fill with test apps.
-  return out.sort((a, b) => Number(b.free) - Number(a.free));
+  const rank = (t: AppleTeam) => (t.free ? 0 : t.id === lastSelected ? 1 : 2);
+  return [...byId.values()].sort((a, b) => rank(a) - rank(b));
+}
+
+/** The look's answer: teams, else an account listed with none (`no_team`), else nothing (`none`). */
+export const appleLookOf = (teams: AppleTeam[], accounts: number, lastSelected?: string | null): AppleLook => ({
+  teams: orderTeams(teams, lastSelected),
+  account: teams.length > 0 ? "team" : accounts > 0 ? "no_team" : "none",
+});
+
+/**
+ * Xcode's signing teams (`IDEProvisioningTeamByIdentifier`, before Xcode 14 `IDEProvisioningTeams`): account → its
+ * teams. A team cache: from Xcode 26.5 it can be empty while Settings › Apple Accounts shows the account.
+ */
+export function parseXcodeTeams(json: unknown): AppleTeam[] {
+  const out: AppleTeam[] = [];
+  for (const list of typeof json === "object" && json !== null ? Object.values(json) : []) {
+    if (!Array.isArray(list)) continue;
+    for (const t of list as Record<string, unknown>[]) {
+      const id = typeof t?.teamID === "string" && TEAM_ID.test(t.teamID) ? t.teamID : null;
+      if (!id) continue;
+      const raw = typeof t.teamName === "string" ? t.teamName.trim() : "";
+      const free =
+        t.isFreeProvisioningTeam === true ||
+        t.isFreeProvisioningTeam === 1 ||
+        t.teamType === "Personal Team" ||
+        PERSONAL.test(raw);
+      out.push({ id, name: raw.replace(PERSONAL, "").slice(0, 80) || id, free });
+    }
+  }
+  return orderTeams(out);
+}
+
+/** How many Apple Accounts Xcode lists (`DVTDeveloperAccountManagerAppleIDLists`, lists of accounts). */
+export function appleIdCount(json: unknown): number {
+  let n = 0;
+  for (const list of typeof json === "object" && json !== null ? Object.values(json) : []) {
+    if (!Array.isArray(list)) continue;
+    for (const e of list as Record<string, unknown>[]) {
+      if (e && (typeof e.identifier === "string" || typeof e.username === "string")) n++;
+    }
+  }
+  return n;
+}
+
+/** A development profile for iPhones (`security cms -D -i`), not expired: its team, free when it lasts 8 days or less. */
+export function profileTeam(xml: string, now: number): AppleTeam | null {
+  let p: Record<string, unknown>;
+  try {
+    p = parsePlist(xml) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  const ids = Array.isArray(p?.TeamIdentifier) ? p.TeamIdentifier : [];
+  const id = ids.find((x): x is string => typeof x === "string" && TEAM_ID.test(x));
+  const ios = Array.isArray(p.Platform) && p.Platform.includes("iOS");
+  const entitlements = (p.Entitlements ?? {}) as Record<string, unknown>;
+  const created = p.CreationDate instanceof Date ? p.CreationDate.getTime() : Number.NaN;
+  const ends = p.ExpirationDate instanceof Date ? p.ExpirationDate.getTime() : Number.NaN;
+  if (!id || !ios || entitlements["get-task-allow"] !== true || !(ends > now)) return null;
+  const name = typeof p.TeamName === "string" ? p.TeamName.trim().replace(PERSONAL, "").slice(0, 80) : "";
+  return { id, name: name || id, free: ends - created <= 8 * DAY_MS };
+}
+
+/** `security find-identity -v -p codesigning`: the SHA-1s of the valid signing identities. */
+export const validIdentities = (out: string) =>
+  new Set([...out.matchAll(/^\s*\d+\)\s+([0-9A-F]{40})\s/gm)].map((m) => m[1] as string));
+
+/** `security find-certificate -a -Z -p`: each certificate's SHA-1 and PEM. */
+export function certificatesOf(out: string): { sha1: string; pem: string }[] {
+  const certs: { sha1: string; pem: string }[] = [];
+  let sha1: string | null = null;
+  for (const m of out.matchAll(
+    /SHA-1 hash:\s*([0-9A-F]{40})|(-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----)/g,
+  )) {
+    if (m[1]) sha1 = m[1];
+    else if (m[2] && sha1) {
+      certs.push({ sha1, pem: m[2] });
+      sha1 = null;
+    }
+  }
+  return certs;
+}
+
+/**
+ * `openssl x509 -noout -subject` of an Apple Development certificate (LibreSSL's `/K=V` or OpenSSL's `K = V, `): the
+ * team is its OU and its name the O. The id in the CN's parentheses is the person's, never the team's.
+ */
+export function subjectTeam(line: string): AppleTeam | null {
+  const body = line.replace(/^\s*subject\s*=\s*/i, "").trim();
+  const parts = body.startsWith("/") ? body.slice(1).split("/") : body.split(/\s*(?<!\\),\s*/);
+  const field = (key: string) =>
+    parts
+      .find((p) => new RegExp(`^${key}\\s*=`).test(p))
+      ?.replace(/^\w+\s*=\s*/, "")
+      .replace(/\\(.)/g, "$1")
+      .trim();
+  const id = field("OU");
+  if (!id || !TEAM_ID.test(id)) return null;
+  return { id, name: field("O")?.slice(0, 80) || id, free: false };
+}
+
+export interface AppleLookOptions {
+  env?: NodeJS.ProcessEnv;
+  /** Says once what each look that found nothing tried (counts only, never names). */
+  log?: (line: string) => void;
+  /** Where a macOS tool is (default `/usr/bin/<name>`); null: not here. */
+  bin?: (name: "defaults" | "plutil" | "security" | "openssl") => string | null;
+  now?: () => number;
+}
+
+const PROFILE_DIRS = [
+  ["Library", "Developer", "Xcode", "UserData", "Provisioning Profiles"],
+  ["Library", "MobileDevice", "Provisioning Profiles"],
+];
+/** Decoded profiles by file, kept while the file is unchanged: a look runs every minute. */
+const profileCache = new Map<string, { mtime: number; xml: string }>();
+let lastLookLine = "";
+
+/**
+ * The teams of the Apple Accounts in Xcode on this Mac, all read-only, each source tried when the one before found
+ * none: Xcode's settings (`defaults export`, one `plutil -extract` per key, never `-convert`, which fails on this
+ * domain), xcodebuild's copy of them, Xcode's development profiles, then the keychain's Apple Development identities.
+ */
+export async function appleLook(o: AppleLookOptions = {}): Promise<AppleLook> {
+  const env = o.env ?? process.env;
+  const bin = o.bin ?? ((name: string) => `/usr/bin/${name}`);
+  const now = (o.now ?? Date.now)();
+  const notes: string[] = [];
+  const run = async (name: Parameters<NonNullable<AppleLookOptions["bin"]>>[0], args: string[]) => {
+    const b = bin(name);
+    if (!b) return null;
+    const r = await runTool(b, args, { timeoutMs: 15_000, env });
+    return r.code === 0 && !r.timedOut ? r.stdout.toString("utf8") : null;
+  };
+  const dir = await mkdtemp(path.join(os.tmpdir(), "agentes-xcode-"));
+  let accounts = 0;
+  let last: string | null = null;
+  const done = (teams: AppleTeam[]) => {
+    if (teams.length > 0) lastLookLine = "";
+    return appleLookOf(teams, accounts, last);
+  };
+  try {
+    for (const domain of ["com.apple.dt.Xcode", "com.apple.dt.xcodebuild"]) {
+      // `defaults` reads what Xcode has in memory too; the file on disk can lag.
+      const file = path.join(dir, `${domain}.plist`);
+      if ((await run("defaults", ["export", domain, file])) === null) {
+        notes.push(`no ${domain} settings`);
+        continue;
+      }
+      const key = (k: string, as: string) => run("plutil", ["-extract", k, as, "-o", "-", file]);
+      // JSON can't hold a date or data value: such a key is read as XML.
+      const value = async (k: string): Promise<unknown> => {
+        const json = await key(k, "json");
+        try {
+          if (json !== null) return JSON.parse(json);
+        } catch {
+          // read as XML below
+        }
+        const xml = await key(k, "xml1");
+        try {
+          return xml ? parsePlist(xml) : null;
+        } catch {
+          return null;
+        }
+      };
+      if (domain === "com.apple.dt.Xcode") {
+        const picked = (await key("IDEProvisioningTeamManagerLastSelectedTeamID", "raw"))?.trim() ?? "";
+        if (TEAM_ID.test(picked)) last = picked;
+        accounts = appleIdCount(await value("DVTDeveloperAccountManagerAppleIDLists"));
+      }
+      for (const k of ["IDEProvisioningTeamByIdentifier", "IDEProvisioningTeams"]) {
+        const teams = parseXcodeTeams(await value(k));
+        if (teams.length > 0) return done(teams);
+      }
+      notes.push(`no team in ${domain}`);
+    }
+    const home = env.HOME || os.homedir();
+    const profiles: AppleTeam[] = [];
+    let read = 0;
+    for (const parts of PROFILE_DIRS) {
+      const folder = path.join(home, ...parts);
+      for (const name of await readdir(folder).catch(() => [] as string[])) {
+        if (!/\.(mobileprovision|provisionprofile)$/.test(name)) continue;
+        const file = path.join(folder, name);
+        const mtime = (await stat(file).catch(() => null))?.mtimeMs ?? 0;
+        const cached = profileCache.get(file);
+        let xml = cached?.mtime === mtime ? cached.xml : null;
+        if (xml === null) {
+          xml = await run("security", ["cms", "-D", "-i", file]);
+          if (xml !== null) profileCache.set(file, { mtime, xml });
+        }
+        read++;
+        const team = xml ? profileTeam(xml, now) : null;
+        if (team) profiles.push(team);
+      }
+    }
+    if (profiles.length > 0) return done(profiles);
+    notes.push(`no team in ${read} profiles`);
+    const valid = validIdentities((await run("security", ["find-identity", "-v", "-p", "codesigning"])) ?? "");
+    const certs = valid.size
+      ? certificatesOf(
+          (await run("security", ["find-certificate", "-a", "-Z", "-c", "Apple Development", "-p"])) ?? "",
+        ).filter((c) => valid.has(c.sha1))
+      : [];
+    const identities: AppleTeam[] = [];
+    for (const [i, cert] of certs.entries()) {
+      const pem = path.join(dir, `cert-${i}.pem`);
+      await writeFile(pem, cert.pem);
+      const team = subjectTeam((await run("openssl", ["x509", "-noout", "-subject", "-in", pem])) ?? "");
+      if (team) identities.push(team);
+    }
+    if (identities.length > 0) return done(identities);
+    notes.push(`no team in ${valid.size} signing identities (${certs.length} Apple Development)`);
+    const line = `Apple teams: ${notes.join(", ")}; ${accounts} Apple Accounts listed`;
+    if (line !== lastLookLine) o.log?.(line);
+    lastLookLine = line;
+    return done([]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 }
 
 /** The teams of the Apple Accounts signed in to Xcode on this Mac (none: no account, or no Xcode). */
-export async function xcodeTeams(env: NodeJS.ProcessEnv = process.env): Promise<AppleTeam[]> {
-  const file = path.join(os.tmpdir(), `agentes-xcode-${process.pid}-${Date.now()}.plist`);
-  try {
-    // `defaults` reads what Xcode has in memory too; the file on disk can lag.
-    const exported = await runTool("/usr/bin/defaults", ["export", "com.apple.dt.Xcode", file], {
-      timeoutMs: 10_000,
-      env,
-    });
-    if (exported.code !== 0) return [];
-    for (const key of ["IDEProvisioningTeamByIdentifier", "IDEProvisioningTeams"]) {
-      const r = await runTool("/usr/bin/plutil", ["-extract", key, "json", "-o", "-", file], {
-        timeoutMs: 10_000,
-        env,
-      });
-      if (r.code !== 0) continue;
-      try {
-        const teams = parseXcodeTeams(JSON.parse(r.stdout.toString("utf8")));
-        if (teams.length > 0) return teams;
-      } catch {
-        // not JSON
-      }
-    }
-    return [];
-  } finally {
-    await rm(file, { force: true });
-  }
+export const xcodeTeams = async (env: NodeJS.ProcessEnv = process.env) => (await appleLook({ env })).teams;
+
+/** The Mac's screen is locked (`ioreg -n Root -d1`): Xcode can lose the account if it signs while the keychain is. */
+export async function macScreenLocked(env: NodeJS.ProcessEnv = process.env) {
+  const r = await runTool("/usr/sbin/ioreg", ["-n", "Root", "-d1"], { timeoutMs: 10_000, env });
+  return r.code === 0 && /"CGSSessionScreenIsLocked"\s*=\s*Yes/.test(r.stdout.toString("utf8"));
 }
 
 /** How a team reads in Xcode's own signing menu: "Sam Rivera (Personal Team)". */
@@ -248,14 +454,50 @@ export interface IosScreen {
   terminate(bundleId: string): Promise<void>;
 }
 
+/** The helper stopped answering (gone, or stuck): it was dropped, and the next call starts a fresh one. */
+export class HelperGone extends RunnerError {
+  constructor(message: string) {
+    super("internal", message);
+  }
+}
+
+/** The helper answers, but not in time (a busy screen): asking again may work. */
+export class HelperSlow extends RunnerError {
+  constructor(message: string) {
+    super("internal", message);
+  }
+}
+
+export interface WdaClientOptions {
+  /** The helper is gone or refused UI actions (`reason`): its run is dropped. */
+  onGone?: (reason: PhoneReason | null) => void;
+  /** Stops this client's calls too (a flow's): `scoped`. */
+  signal?: AbortSignal;
+}
+
+/** WDA's tree without what our lookups never read: each attribute costs it a query per element. */
+const SOURCE_ROUTE =
+  "/source?format=json&excluded_attributes=accessible,focused,nativeAccessibilityElement,traits,nativeFrame";
+/** One look at the screen: a lookup polls again until its own deadline when one takes longer. */
+export const SOURCE_TIMEOUT_MS = 20_000;
+
 export class WdaClient implements IosScreen {
-  /** Shared by concurrent calls: WDA keeps one session, and a second one opened ends the first. */
-  private sid: Promise<string> | null = null;
+  /** Shared by concurrent calls and scoped copies: WDA keeps one session, and a second one opened ends the first. */
+  private readonly shared: { sid: Promise<string> | null };
 
   constructor(
     readonly base: string,
     private readonly fetchImpl: typeof fetch = fetch,
-  ) {}
+    private readonly opts: WdaClientOptions = {},
+    shared?: { sid: Promise<string> | null },
+  ) {
+    this.shared = shared ?? { sid: null };
+  }
+
+  /** The same helper and session, its calls stopped when `signal` aborts. */
+  scoped(signal: AbortSignal) {
+    return new WdaClient(this.base, this.fetchImpl, { ...this.opts, signal }, this.shared);
+  }
 
   /** One call; WDA's own error in words. `session`: under `/session/<id>` (one is made, again if it ended). */
   async call<T = unknown>(
@@ -264,40 +506,46 @@ export class WdaClient implements IosScreen {
     body?: unknown,
     opts: { session?: boolean; timeoutMs?: number } = {},
   ) {
+    const stop = this.opts.signal;
     for (let attempt = 0; ; attempt++) {
       const prefix = opts.session ? `/session/${await this.session()}` : "";
+      const timeout = AbortSignal.timeout(opts.timeoutMs ?? 60_000);
       const res = await this.fetchImpl(`${this.base}${prefix}${route}`, {
         method,
         ...(body === undefined ? {} : { body: JSON.stringify(body), headers: { "content-type": "application/json" } }),
-        signal: AbortSignal.timeout(opts.timeoutMs ?? 60_000),
-      }).catch((err: unknown) => {
-        throw new RunnerError(
-          "internal",
-          `The test helper didn't answer: ${err instanceof Error ? err.message : String(err)}`,
-        );
+        signal: stop ? AbortSignal.any([timeout, stop]) : timeout,
+      }).catch(async (err: unknown) => {
+        if (stop?.aborted) throw new RunnerError("internal", "Stopped");
+        const words = `The test helper didn't answer: ${err instanceof Error ? err.message : String(err)}`;
+        // Slow on a busy screen, yet up: the caller may ask again. Down, or stuck: it's started again. WDA answers
+        // `/status` on a queue of its own, beside the call that timed out.
+        if (timeout.aborted && (await this.ready())) throw new HelperSlow(words);
+        this.opts.onGone?.(null);
+        throw new HelperGone(words);
       });
       const json = (await res.json().catch(() => ({}))) as { value?: unknown; sessionId?: string };
       const value = json.value as { error?: string; message?: string } | undefined;
       if (res.ok && !(value && typeof value === "object" && "error" in value)) return json.value as T;
       if (opts.session && attempt === 0 && /invalid session/i.test(String(value?.error ?? value?.message))) {
-        this.sid = null;
+        this.shared.sid = null;
         continue;
       }
-      throw new RunnerError(
-        "internal",
-        `The test helper said: ${String(value?.message ?? value?.error ?? res.status)
-          .split("\n")[0]
-          ?.slice(0, 300)}`,
-      );
+      const said = String(value?.message ?? value?.error ?? res.status);
+      if (helperReason(said) === "ui_not_authorized") {
+        // Its test session can't act any more: the next op starts a fresh one.
+        this.opts.onGone?.("ui_not_authorized");
+        throw new RunnerError("phone_not_ready", REASON_WORDS.ui_not_authorized as string);
+      }
+      throw new RunnerError("internal", `The test helper said: ${said.split("\n")[0]?.slice(0, 300)}`);
     }
   }
 
   session() {
-    this.sid ??= this.openSession().catch((err: unknown) => {
-      this.sid = null;
+    this.shared.sid ??= this.openSession().catch((err: unknown) => {
+      this.shared.sid = null;
       throw err;
     });
-    return this.sid;
+    return this.shared.sid;
   }
 
   private async openSession() {
@@ -306,10 +554,21 @@ export class WdaClient implements IosScreen {
       body: JSON.stringify({ capabilities: { alwaysMatch: { shouldWaitForQuiescence: false } } }),
       headers: { "content-type": "application/json" },
       signal: AbortSignal.timeout(60_000),
+    }).catch((err: unknown) => {
+      this.opts.onGone?.(null);
+      throw new HelperGone(`The test helper didn't answer: ${err instanceof Error ? err.message : String(err)}`);
     });
     const json = (await res.json().catch(() => ({}))) as { sessionId?: string; value?: { sessionId?: string } };
     const sid = json.sessionId ?? json.value?.sessionId;
     if (!sid) throw new RunnerError("internal", "The test helper didn't open a session.");
+    // Without a bundle id `shouldWaitForQuiescence` does nothing: WDA would wait up to 10 s for an idle app before
+    // every look at the screen, which a busy app (a chat, a feed) never is.
+    await this.fetchImpl(`${this.base}/session/${sid}/appium/settings`, {
+      method: "POST",
+      body: JSON.stringify({ settings: { waitForIdleTimeout: 0, animationCoolOffTimeout: 0 } }),
+      headers: { "content-type": "application/json" },
+      signal: AbortSignal.timeout(10_000),
+    }).catch(() => undefined);
     return sid;
   }
 
@@ -328,7 +587,12 @@ export class WdaClient implements IosScreen {
   }
 
   source() {
-    return this.call<WdaNode>("GET", "/source?format=json", undefined, { session: true });
+    return this.call<WdaNode>("GET", SOURCE_ROUTE, undefined, { session: true, timeoutMs: SOURCE_TIMEOUT_MS });
+  }
+
+  /** The phone's lock screen shows (no session needed). */
+  async locked() {
+    return (await this.call<boolean>("GET", "/wda/locked", undefined, { timeoutMs: 10_000 })) === true;
   }
 
   async tap(x: number, y: number) {
@@ -370,6 +634,35 @@ export class WdaClient implements IosScreen {
   async terminate(bundleId: string) {
     await this.call("POST", "/wda/apps/terminate", { bundleId }, { session: true });
   }
+}
+
+/**
+ * A flow's screen: each call goes to the phone's running helper (`get`), and one the helper died under is tried
+ * once more on a fresh one, once a flow.
+ */
+export function recoveringScreen(get: () => Promise<IosScreen>): IosScreen {
+  let recovered = false;
+  const call = async <T>(f: (s: IosScreen) => Promise<T>): Promise<T> => {
+    try {
+      return await f(await get());
+    } catch (err) {
+      if (!(err instanceof HelperGone) || recovered) throw err;
+      recovered = true;
+      return f(await get());
+    }
+  };
+  return {
+    screenshot: () => call((s) => s.screenshot()),
+    windowSize: () => call((s) => s.windowSize()),
+    source: () => call((s) => s.source()),
+    tap: (x, y) => call((s) => s.tap(x, y)),
+    swipe: (x1, y1, x2, y2, ms) => call((s) => s.swipe(x1, y1, x2, y2, ms)),
+    keys: (text) => call((s) => s.keys(text)),
+    button: (name) => call((s) => s.button(name)),
+    lock: () => call((s) => s.lock()),
+    launch: (id) => call((s) => s.launch(id)),
+    terminate: (id) => call((s) => s.terminate(id)),
+  };
 }
 
 /**
@@ -433,6 +726,8 @@ interface Failure {
   tries: number;
   /** Xcode's words matched none of the reasons: `detail` is all there is to say. */
   unknown: boolean;
+  /** No team to sign with, found before xcodebuild ran: tried again each minute, as cheap as the look. */
+  precheck?: boolean;
 }
 
 export interface WdaRun {
@@ -461,9 +756,14 @@ export interface IosHelperOptions {
   now?: () => number;
   fetch?: typeof fetch;
   usbmuxSocket?: string;
-  /** Tests: the teams Xcode has (default `xcodeTeams`). */
-  teams?: () => Promise<AppleTeam[]>;
+  /** Tests: the teams Xcode has, or the whole look (default `appleLook`). */
+  teams?: () => Promise<AppleTeam[] | AppleLook>;
+  /** Tests: the Mac's screen is locked (default `macScreenLocked`). */
+  screenLocked?: () => Promise<boolean>;
 }
+
+/** A helper used this recently answered then: older, it's asked whether it still runs before it's handed out. */
+const HEALTHY_FOR_MS = 5000;
 
 const frameTimeoutMs = 5000;
 const FRAMES_IDLE_MS = 30_000;
@@ -486,7 +786,9 @@ const retryOf = (f: Failure): keyof typeof RETRY_MS =>
 const retryWait = (f: Failure) =>
   f.reason === "locked" || f.reason === "device_support"
     ? RETRY_MS.check
-    : Math.min(RETRY_MS[retryOf(f)] * 2 ** (f.tries - 1), RETRY_MS.other);
+    : f.precheck
+      ? RETRY_MS.account
+      : Math.min(RETRY_MS[retryOf(f)] * 2 ** (f.tries - 1), RETRY_MS.other);
 
 export class IosHelper {
   private readonly dir: string;
@@ -499,6 +801,8 @@ export class IosHelper {
   /** Phones an op is starting the helper for: a setup check finishing meanwhile leaves it running. */
   private readonly wanted = new Set<string>();
   private xcode: string | null = null;
+  /** The last build waited for the Mac's screen to be unlocked (`Deferred`). */
+  private macLocked = false;
 
   constructor(private readonly opts: IosHelperOptions) {
     this.dir = path.join(opts.home, ".agentes-runner", "wda");
@@ -592,11 +896,18 @@ export class IosHelper {
         this.failed.delete(key);
       })
       .catch((err: unknown) => {
+        if (err instanceof Deferred) {
+          if (!this.macLocked) this.opts.log(`iPhone test helper: waiting, ${err.message}`);
+          this.macLocked = true;
+          return;
+        }
         const detail = err instanceof Error ? err.message : String(err);
         const known = err instanceof HelperFailure ? err.reason : null;
         const reason = known ?? (this.meta(key) ? "helper_expired" : "helper_missing");
-        this.fail(key, { reason, detail, check: false, unknown: known === null });
-        this.opts.log(`iPhone test helper: ${detail}`);
+        const precheck = err instanceof HelperFailure && err.precheck;
+        this.fail(key, { reason, detail, check: false, unknown: known === null, ...(precheck ? { precheck } : {}) });
+        // A missing team is looked for again each minute: said once.
+        if (!precheck || this.failed.get(key)?.tries === 1) this.opts.log(`iPhone test helper: ${detail}`);
       })
       .finally(() => {
         lock.release();
@@ -634,8 +945,16 @@ export class IosHelper {
     const xcode = await this.xcodeVersion(xcrun);
     let team: AppleTeam | undefined;
     if (target.kind === "device") {
-      team = (await (this.opts.teams ?? (() => xcodeTeams(this.opts.env)))())[0];
-      if (!team) throw new HelperFailure("apple_account_missing", "Xcode isn't signed in to an Apple Account.");
+      // One report has Xcode 27 dropping the account when it signs while the keychain is locked.
+      if (await (this.opts.screenLocked ?? (() => macScreenLocked(this.opts.env)))())
+        throw new Deferred("the Mac's screen is locked");
+      this.macLocked = false;
+      const found = await (this.opts.teams ?? (() => appleLook({ env: this.opts.env, log: this.opts.log })))();
+      const look = Array.isArray(found) ? appleLookOf(found, 0) : found;
+      team = look.teams[0];
+      if (!team && look.account === "no_team")
+        throw new HelperFailure("apple_team_missing", "Xcode is signed in but shows no team yet.", true);
+      if (!team) throw new HelperFailure("apple_account_missing", "Xcode isn't signed in to an Apple Account.", true);
     }
     const project = await this.source();
     const derived = path.join(this.dir, key);
@@ -697,10 +1016,14 @@ export class IosHelper {
   async run(kind: PhoneKind, udid: string, xcrun: string): Promise<WdaRun> {
     const key = this.keyOf(kind, udid);
     const up = this.running.get(udid);
-    if (up) {
+    if (up && (this.now() - up.lastUsed < HEALTHY_FOR_MS || (await up.client.ready()))) {
       up.lastUsed = this.now();
       up.kept = true;
       return up;
+    }
+    if (up && this.running.get(udid) === up) {
+      this.opts.log(`iPhone test helper: ${udid} stopped answering, starting it again`);
+      this.drop(udid, up);
     }
     if (this.heldElsewhere(udid)) {
       throw new RunnerError("phone_busy", "Another workspace's connection on this computer is using this iPhone.");
@@ -718,7 +1041,11 @@ export class IosHelper {
         const failure = this.failed.get(key);
         throw new RunnerError(
           "phone_not_ready",
-          failure ? helperWords(failure.reason, failure.detail) : "The test helper is still being set up on this Mac.",
+          failure
+            ? helperWords(failure.reason, failure.detail)
+            : this.macLocked
+              ? "This Mac's screen is locked, and the test helper is signed only while it's unlocked. Unlock the Mac, then try again."
+              : "The test helper is still being set up on this Mac.",
         );
       }
     }
@@ -769,8 +1096,9 @@ export class IosHelper {
     const child = started.child;
     if (!child) throw new RunnerError("internal", "The test helper couldn't start.");
     let said = "";
+    // The tail: why it stopped comes last, after a long run's output.
     const hear = (chunk: Buffer) => {
-      if (said.length < 256 * 1024) said += chunk.toString("utf8");
+      said = (said + chunk.toString("utf8")).slice(-256 * 1024);
     };
     child.stdout?.on("data", hear);
     child.stderr?.on("data", hear);
@@ -799,7 +1127,13 @@ export class IosHelper {
         throw fail(err instanceof RunnerError ? err : new RunnerError("internal", String(err)));
       }
     }
-    const client = new WdaClient(`http://127.0.0.1:${http}`, this.opts.fetch);
+    let run: WdaRun | null = null;
+    const client = new WdaClient(`http://127.0.0.1:${http}`, this.opts.fetch, {
+      onGone: (reason) => {
+        if (reason && !sim) this.fail(key, { reason, detail: reason, check: true, unknown: false });
+        if (run && this.running.get(udid) === run) this.drop(udid, run);
+      },
+    });
     const deadline = this.now() + (sim ? 180_000 : 300_000);
     while (!(await client.ready())) {
       if (gone || this.now() > deadline) {
@@ -815,12 +1149,17 @@ export class IosHelper {
       await new Promise((r) => setTimeout(r, 500));
     }
     if (!sim) this.failed.delete(key);
-    const run: WdaRun = { child, client, mjpegPort: frames, forwards, lastUsed: this.now(), kept: false, frames: null };
-    this.running.set(udid, run);
+    const up: WdaRun = { child, client, mjpegPort: frames, forwards, lastUsed: this.now(), kept: false, frames: null };
+    run = up;
+    this.running.set(udid, up);
     void started.done.then(() => {
-      if (this.running.get(udid) === run) this.drop(udid, run);
+      if (this.running.get(udid) !== up) return;
+      const reason = helperReason(said);
+      this.opts.log(`iPhone test helper stopped (${udid}): ${failureLine(said) || "no words"}`);
+      if (reason && !sim) this.fail(key, { reason, detail: failureLine(said), check: true, unknown: false });
+      this.drop(udid, up);
     });
-    return run;
+    return up;
   }
 
   private drop(udid: string, run: WdaRun) {
@@ -995,10 +1334,14 @@ class HelperFailure extends Error {
   constructor(
     readonly reason: PhoneReason | null,
     message: string,
+    readonly precheck = false,
   ) {
     super(message);
   }
 }
+
+/** Not now, and nothing failed: the next poll tries again. */
+class Deferred extends Error {}
 
 function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {

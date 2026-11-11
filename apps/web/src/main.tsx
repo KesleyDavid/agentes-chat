@@ -6,7 +6,7 @@ import "./styles.css";
 import { authConfigQuery, createApiClient, createSnapshot, keys, type Me, meQuery, outbox } from "@agenteschat/client";
 import { ErrorBoundary } from "@agenteschat/client/lib/error-boundary";
 import { errorText } from "@agenteschat/client/lib/errors";
-import { trackInput } from "@agenteschat/ui";
+import { holdSkies, trackInput } from "@agenteschat/ui";
 import { AppProviders, type AppServices } from "./app/providers";
 import { createQueryClient } from "./app/query-client";
 import { createBetterAuthClient } from "./auth/better-auth";
@@ -59,6 +59,8 @@ if (platform) {
   document.documentElement.dataset.desktop = platform;
   applyDesktopDevice(i18n, platform);
   if (asksForPhone(window.location.search)) askForPhone();
+  // Linux's WebKitGTK paints in software there: the skies stand still, or their frames keep a core busy (holdSkies).
+  if (platform === "linux") holdSkies();
 }
 // Focus rings only while the keys move the focus (`data-pointer` on <html>, read by the stylesheet).
 trackInput();

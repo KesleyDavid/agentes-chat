@@ -43,8 +43,8 @@ export const helpNl: Partial<Record<HelpSlug, HelpDocument>> = {
         id: "agents",
         heading: "Je agents werken hier ook",
         blocks: [
-          "Je agents werken ook op deze computer, in hun eigen mappen, met een browser, en met Claude Code of Codex als die hier zijn geïnstalleerd. Opdrachten staan uit tot je ze aanzet in **Voorkeuren › Tools**.",
-          "Agents draaien hier onder jouw naam. Met Opdrachten aan kunnen ze bij de rest van deze computer, ook bij `.agentes`: de database, `.env` met `AGENTES_SECRET`, de eigenaarssleutel en het token van deze computer. Dat geldt voor elke werkruimte die deze computer gebruikt, ook een op agentes.chat Cloud. Zie [Waar agents bij kunnen](/help/computers#reach).",
+          "Je agents werken ook op deze computer, in hun eigen mappen, met een browser, en met Claude Code of Codex als die hier zijn geïnstalleerd.",
+          "Agents draaien hier onder jouw naam. **Opdrachten** staan standaard aan, en daarmee kunnen de agents van elke werkruimte die deze computer gebruikt bij alles op deze computer, ook bij de gegevens van de server. Zet ze uit in **Voorkeuren\u00a0›\u00a0Tools**. Zie [Waar agents bij kunnen](/help/computers#reach).",
         ],
       },
       {
@@ -52,7 +52,7 @@ export const helpNl: Partial<Record<HelpSlug, HelpDocument>> = {
         heading: "Leen hem ook uit aan een andere werkruimte",
         blocks: [
           "De werkruimtes van de server die je hier draait, gebruiken deze computer vanzelf. Wil je dat een werkruimte ergens anders hem ook gebruikt, zoals een op agentes.chat Cloud, open dan **Voorkeuren › Servers**, druk op **Een server toevoegen…**, meld je aan bij die werkruimte en druk op **Toestaan** als de app het vraagt.",
-          "Elke werkruimte krijgt hier eigen agents en mappen. **Opdrachten** in **Voorkeuren › Tools** geldt voor alle werkruimtes op deze computer tegelijk: zet het alleen aan als je de agents van elke werkruimte met heel deze computer vertrouwt.",
+          "Elke werkruimte krijgt hier eigen agents en mappen. Ook daar staan **Opdrachten** standaard aan. Zet ze uit in de vraag van de app voordat je op **Toestaan** drukt, of later in **Voorkeuren\u00a0›\u00a0Tools**, waar één schakelaar voor alle werkruimtes op deze computer geldt.",
         ],
       },
       {
@@ -239,7 +239,7 @@ export const helpNl: Partial<Record<HelpSlug, HelpDocument>> = {
               "op een computer die ook agentes.chat draait, de database en sleutels ervan in `.agentes`",
             ],
           },
-          "agentes.chat weigert opdrachten die zijn sleutels, tokens en aanmeldingen noemen, maar dat is een regel, geen muur. Daarom staan **Opdrachten** eerst uit. Ze aanzetten in **Voorkeuren › Tools** geldt voor alle werkruimtes op de computer tegelijk: doe het alleen als je de agents van elke werkruimte, en de mensen voor wie ze werken, met alles erop zou vertrouwen. Claude Code en Codex voeren hun eigen opdrachten uit in de map van de agent, volgens hun eigen regels.",
+          "agentes.chat weigert opdrachten die zijn sleutels, tokens en aanmeldingen noemen, maar dat is een regel, geen muur. **Opdrachten** staan standaard aan. Zet ze uit in de vraag van de app voordat je op **Toestaan** drukt, of later in **Voorkeuren\u00a0›\u00a0Tools**, waar één schakelaar voor alle werkruimtes op de computer geldt. Claude Code en Codex voeren hun eigen opdrachten uit in de map van de agent, volgens hun eigen regels.",
           "Voor een echte muur gebruik je een Linux-server. Op Debian 13, geïnstalleerd met `--system`, is elke agent een eigen gebruiker. Op Ubuntu delen agents één gebruiker, `agentes`: ze zien elkaars mappen, niet die van jou of van de server. Of geef de agents een eigen computer.",
         ],
       },

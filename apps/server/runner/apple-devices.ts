@@ -1,4 +1,5 @@
 import type { RunnerPhone } from "@agenteschat/adapters/machine-protocol";
+import { udidKey } from "./usbmux";
 
 /**
  * iPhones a Mac reaches (bring your own devices): real ones from `xcrun devicectl list devices --json-output`
@@ -11,21 +12,41 @@ type Phone = Omit<RunnerPhone, "holder">;
 const rec = (v: unknown): Record<string, unknown> => (typeof v === "object" && v !== null ? (v as never) : {});
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
-export function parseDevicectl(json: unknown): Phone[] {
+/** The major version of "17.4.1"; 0 when unknown. */
+export const majorOf = (version: string) => Number.parseInt(version, 10) || 0;
+
+/** The first iOS that CoreDevice (devicectl, Xcode's test runs on a phone) drives. */
+export const IOS_MIN = 17;
+
+/** An iPhone devicectl lists but can't drive: iOS before 17, reached through the old MobileDevice only. */
+const tooOld = (d: unknown) => {
+  const os = majorOf(str(rec(rec(d).deviceProperties).osVersionNumber));
+  // The version decides when devicectl gives one: a flag alone never turns a working iPhone away.
+  return os > 0 ? os < IOS_MIN : rec(rec(d).connectionProperties).isMobileDeviceOnly === true;
+};
+
+const devicesOf = (json: unknown) => {
   const devices = rec(rec(rec(json).result)).devices;
-  if (!Array.isArray(devices)) return [];
+  return Array.isArray(devices) ? devices : [];
+};
+
+/** An iPhone too old for devicectl that it doesn't say is plugged in: usbmuxd's list says whether it is. */
+export const needsUsbList = (json: unknown) =>
+  devicesOf(json).some((d) => str(rec(rec(d).connectionProperties).transportType) !== "wired" && tooOld(d));
+
+/** `usb`: the UDIDs usbmuxd has over a cable (`udidKey`), for phones devicectl doesn't say are wired. */
+export function parseDevicectl(json: unknown, usb: ReadonlySet<string> = new Set()): Phone[] {
   const out: Phone[] = [];
-  for (const d of devices) {
+  for (const d of devicesOf(json)) {
     const hw = rec(rec(d).hardwareProperties);
     const conn = rec(rec(d).connectionProperties);
     const props = rec(rec(d).deviceProperties);
     if (str(hw.platform) !== "iOS" || str(hw.reality) === "virtual") continue;
-    const transport = str(conn.transportType);
-    // Only a phone plugged into this Mac counts: every iPhone ever paired with Xcode (a family member's, a
-    // colleague's) shows up over the network whenever it is near, and plugging in is the person's own act.
-    if (transport !== "wired") continue;
     const serial = str(hw.udid) || str(rec(d).identifier);
     if (!serial) continue;
+    // Only a phone plugged into this Mac counts: every iPhone ever paired with Xcode (a family member's, a
+    // colleague's) shows up over the network whenever it is near, and plugging in is the person's own act.
+    if (str(conn.transportType) !== "wired" && !(tooOld(d) && usb.has(udidKey(serial)))) continue;
     const name = str(props.name);
     const phone: Phone = {
       platform: "ios",
@@ -37,7 +58,8 @@ export function parseDevicectl(json: unknown): Phone[] {
       state: "ready",
       transport: "usb",
     };
-    if (str(conn.pairingState) !== "paired") Object.assign(phone, { state: "needs_you", reason: "untrusted" });
+    if (tooOld(d)) Object.assign(phone, { state: "unsupported", reason: "os_too_old" });
+    else if (str(conn.pairingState) !== "paired") Object.assign(phone, { state: "needs_you", reason: "untrusted" });
     else if (str(props.developerModeStatus) === "disabled") {
       Object.assign(phone, { state: "needs_you", reason: "developer_mode_off" });
     }
@@ -76,6 +98,16 @@ export function parseSimctl(json: unknown): Phone[] {
     }
   }
   return out;
+}
+
+/** The phone's iOS is newer than the Mac's iPhone SDK (`xcrun --sdk iphoneos --show-sdk-version`) can drive. */
+export const sdkTooOld = (osVersion: string, sdk: string | null) =>
+  sdk !== null && majorOf(sdk) > 0 && majorOf(osVersion) > majorOf(sdk);
+
+/** `devicectl device info lockState --json-output`: the phone asks for its passcode now; null when unread. */
+export function parseLockState(json: unknown): boolean | null {
+  const v = rec(rec(json).result).passcodeRequired;
+  return typeof v === "boolean" ? v : null;
 }
 
 /** devicectl's error text for what the person must do on the iPhone, in words; null for anything else. */

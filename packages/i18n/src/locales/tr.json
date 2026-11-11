@@ -1400,6 +1400,112 @@
     "moveDown": "Aşağı taşı",
     "restoreOrder": "Varsayılan sırayı geri yükle"
   },
+  "install": {
+    "frames": "{{system}} için kurulum",
+    "step": "Adım {{n}}",
+    "previous": "Önceki adım",
+    "next": "Sonraki adım",
+    "fullGuide": "Adım adım tam anlatım",
+    "copied": "Kopyalandı. Terminale yapıştırın.",
+    "mac": {
+      "why": "<b>Uygulama beta aşamasında.</b> Bu yüzden ilk seferde Mac'iniz onay ister:",
+      "drag": "agentes.chat'i Uygulamalar'a sürükleyin.",
+      "dragLong": "İndirilen dosyayı açın ve agentes.chat'i Uygulamalar'a sürükleyin.",
+      "blocked": "Uygulamayı açın ve Bitti'ye tıklayın.",
+      "blockedSub": "Çöp Sepeti'ne Taşı'ya tıklamayın.",
+      "settings": "Ayarlar › Gizlilik ve Güvenlik bölümünde Yine de Aç'a tıklayın.",
+      "settingsLong": "Hemen ardından Sistem Ayarları › Gizlilik ve Güvenlik'i açın, Güvenlik bölümüne inin ve Yine de Aç'a tıklayın.",
+      "settingsSub": "Düğme orada yalnızca uygulamayı açmayı denedikten sonra (2. adım) görünür ve yaklaşık bir saat sonra kaybolur. Yok mu? Uygulamayı tekrar açın ve geri gelin.",
+      "settingsShort": "Yalnızca 2. adımdan hemen sonra görünür.",
+      "openSettings": "Gizlilik ve Güvenlik'i aç",
+      "confirm": "Touch ID veya parolanızla onaylayın.",
+      "confirmLong": "Yine de Aç'a tekrar tıklayın ve Touch ID veya Mac parolanızla onaylayın.",
+      "done": "Tamam: artık doğrudan açılır.",
+      "stuckTitle": "Düğme hâlâ yok mu, ya da Mac'iniz uygulamanın hasarlı olduğunu mu söylüyor?",
+      "stuckText": "Bunu Terminal'e yapıştırın ve uygulamayı tekrar açın:"
+    },
+    "windows": {
+      "why": "<b>Uygulama beta aşamasında.</b> Bu yüzden ilk seferde Windows onay ister:",
+      "keep": "Tarayıcınız sorarsa Sakla'yı seçin.",
+      "more": "Yükleyiciyi açın ve Ek bilgi'ye tıklayın.",
+      "moreLong": "Yükleyiciyi açın. Windows bilgisayarınızı korudu mesajı çıkarsa Ek bilgi'ye tıklayın.",
+      "run": "Yine de çalıştır'a tıklayın.",
+      "runLong": "Yine de çalıştır'a tıklayın ve yükleyicinin adımlarını izleyin.",
+      "done": "Tamam: artık doğrudan açılır."
+    },
+    "linux": {
+      "why": "Ubuntu, Debian ve benzeri sistemler için (x64). Linux fazladan bir şey sormaz:",
+      "apt": ".deb dosyasını çift tıklayarak ya da terminalden kurun.",
+      "aptLong": "İndirilen dosyaya çift tıklayıp Yükle'ye tıklayın ya da bunu terminale yapıştırın:",
+      "open": "agentes.chat'i uygulamalarınızdan açın."
+    },
+    "page": {
+      "docTitle": "Uygulamayı indirin · agentes.chat",
+      "title": "agentes.chat uygulamasını indirin",
+      "beta": "Beta",
+      "text": "Workspace'iniz kendi penceresinde, sisteminizin bildirimleriyle. Tek tıkla ajanlar bu bilgisayarda, kendilerine ait klasörlerde çalışır.",
+      "open": "agentes.chat'i aç",
+      "version": "Sürüm {{version}}",
+      "versionSize": "Sürüm {{version}} · {{size}}",
+      "soon": "{{system}} için henüz bir sürüm yok.",
+      "useArm": "ARM işlemcili bir bilgisayar mı? ARM sürümünü indirin",
+      "useX64": "x64 sürümünü indir",
+      "unavailable": "Uygulama şu anda buradan indirilemiyor. Birazdan tekrar deneyin.",
+      "installOn": "{{system}} için kur",
+      "system": "Sistem",
+      "whyTitle": "Bilgisayarım neden onay istiyor?",
+      "whyText": "agentes.chat beta aşamasında: Mac sürümü henüz Apple tarafından onaylanmadı (notarize edilmedi) ve Windows yükleyicisi henüz bir Microsoft sertifikası taşımıyor. Bunlar olmadan bilgisayarınız, internetten indirilen bir uygulamayı açmadan önce bir kez sorar. Sonrasında doğrudan açılır ve kendini günceller. Beta bitmeden bu adım kalkacak.",
+      "openSource": "Açık kaynak",
+      "onlyHere": "Yalnızca burada ve projenin sürümlerinde yayımlanır",
+      "signedUpdates": "İmzalı güncellemeler"
+    },
+    "scene": {
+      "finder": "Finder",
+      "file": "Dosya",
+      "edit": "Düzen",
+      "view": "Görüntü",
+      "window": "Pencere",
+      "applications": "Uygulamalar",
+      "notOpened": "“{{app}}” Açılmadı",
+      "notOpenedText": "Apple, “{{app}}” uygulamasının Mac'inize zarar verebilecek veya gizliliğinizi tehlikeye atabilecek kötü amaçlı yazılım içermediğini doğrulayamadı.",
+      "done": "Bitti",
+      "moveToTrash": "Çöp Sepeti'ne Taşı",
+      "search": "Ara",
+      "account": "Apple Hesabı",
+      "general": "Genel",
+      "appearance": "Görünüm",
+      "accessibility": "Erişilebilirlik",
+      "privacy": "Gizlilik ve Güvenlik",
+      "desktopDock": "Masaüstü ve Dock",
+      "displays": "Ekranlar",
+      "security": "Güvenlik",
+      "allowFrom": "Uygulamalara şuradan izin ver",
+      "allowValue": "App Store ve tanınmış geliştiriciler",
+      "blocked": "“{{app}}”, Mac'inizi korumak için engellendi.",
+      "openAnyway": "Yine de Aç",
+      "confirmTitle": "“{{app}}” açılsın mı?",
+      "confirmText": "Yalnızca nereden geldiğine güveniyorsanız açın.",
+      "touchIdTitle": "Sistem Ayarları",
+      "touchIdText": "Buna izin vermek için Touch ID'yi kullanın veya parolanızı girin.",
+      "password": "Parola",
+      "downloads": "İndirilenler",
+      "rare": "Bu dosya pek sık indirilmiyor. Açmadan önce güvenilir olduğundan emin olun.",
+      "delete": "Sil",
+      "keep": "Sakla",
+      "protectedTitle": "Windows bilgisayarınızı korudu",
+      "protectedText": "Microsoft Defender SmartScreen tanınmayan bir uygulamanın başlatılmasını engelledi. Bu uygulamayı çalıştırmak bilgisayarınızı riske atabilir.",
+      "protectedShort": "Microsoft Defender SmartScreen tanınmayan bir uygulamanın başlatılmasını engelledi.",
+      "moreInfo": "Ek bilgi",
+      "dontRun": "Çalıştırma",
+      "appLabel": "Uygulama:",
+      "publisher": "Yayımcı:",
+      "unknownPublisher": "Bilinmeyen yayımcı",
+      "runAnyway": "Yine de çalıştır",
+      "activities": "Etkinlikler",
+      "readingLists": "Paket listeleri okunuyor... Bitti",
+      "settingUp": "agentes-chat ({{version}}) ayarlanıyor ..."
+    }
+  },
   "legal": {
     "updated": "Son güncelleme: {{date}}",
     "contents": "Bu sayfada",
@@ -13334,6 +13440,7 @@
     "downloadFor": "{{system}} için indir",
     "downloadApp": "Uygulamayı indir",
     "otherSystems": "Diğer sistemler",
+    "armBuild": "{{system}} (ARM)",
     "onThePhone": "Telefonda",
     "onTheIphone": "iPhone'da",
     "screen": {
@@ -13410,6 +13517,8 @@
       "helper_missing": "Test yardımcısı henüz kurulmadı",
       "helper_expired": "Test yardımcısının yenilenmesi gerekiyor",
       "apple_account_missing": "Xcode'da bir Apple Account ile oturum açılmamış",
+      "apple_team_missing": "Xcode henüz bir ekip göstermiyor",
+      "ui_not_authorized": "iPhone, test yardımcısının dokunuşlarını reddetti",
       "team_limit": "Ücretsiz Apple Account uygulama sınırına ulaştı",
       "helper_untrusted": "iPhone henüz test yardımcısına güvenmiyor",
       "booting": "Başlatılıyor",
@@ -13417,7 +13526,8 @@
       "no_driverLinux": "Linux bu telefonu açamıyor",
       "os_too_old": "Bu sistem araçlar için çok eski",
       "adb_offline": "Telefon yanıt vermiyor",
-      "other": "Cihazda bir şey yapılması gerekiyor"
+      "other": "Cihazda bir şey yapılması gerekiyor",
+      "iosTooOld": "iOS {{version}} kullanıyor, ajanlar iOS 17 veya daha yenisini gerektirir"
     },
     "fix": {
       "locked": "Kilidini açın",
@@ -13431,6 +13541,8 @@
       "helper_missing": "Mac'te uygulamayı açın",
       "helper_expired": "Mac'te uygulamayı açın",
       "apple_account_missing": "Xcode'da oturum açın",
+      "apple_team_missing": "Xcode'dan iPhone'da bir kez bir uygulama çalıştırın",
+      "ui_not_authorized": "iPhone'un kilidini açın",
       "team_limit": "Kendi oluşturduğunuz bir uygulamayı silin",
       "helper_untrusted": "iPhone'da güvenin",
       "booting": "Başlamasını bekleyin",
@@ -13684,7 +13796,8 @@
       "toolsDone": "Mac tarafından indirildi",
       "toolsText": "Mac bunları indirir, yaklaşık 8 GB.",
       "accountDone": "Eklendi",
-      "accountText": "{{mac}} üzerindeki Xcode'da ücretsiz ya da ücretli bir tane ekleyin: Settings › Accounts.",
+      "accountText": "{{mac}} üzerindeki Xcode'da ücretsiz ya da ücretli bir tane ekleyin: Settings › Apple Accounts.",
+      "teamMissingText": "Xcode'da oturum açık ama henüz bir ekip görünmüyor. Xcode'da herhangi bir iOS uygulaması oluşturun, Signing & Capabilities altında ekibinizi seçin ve uygulamayı iPhone'da bir kez çalıştırın.",
       "connectedDone": "{{name}} · iOS {{version}}",
       "connectedText": "iPhone'u kabloyla {{mac}} bilgisayarına takın.",
       "trustDone": "Güvenildi",
@@ -13695,6 +13808,22 @@
       "helperText": "Mac onu her 7 günde bir oluşturur ve yeniler. Xcode'da ücretsiz bir Apple Account yeterlidir.",
       "helperUntrustedText": "Geliştiricinin adına, ardından Güven'e dokunun.",
       "teamLimitText": "iPhone'dan kendi oluşturduğunuz bir uygulamayı silin: Ücretsiz Apple Account 3 taneye izin verir.",
+      "xcodeOld": "{{name}} iOS {{version}} kullanıyor ve {{mac}} üzerindeki Xcode en fazla iOS {{sdk}} sürümünü biliyor. Xcode {{major}} yükleyin, ardından bunu Terminal'de çalıştırın.",
+      "xcodeOldAny": "{{name}} iOS {{version}} kullanıyor, bu {{mac}} üzerindeki Xcode'un bildiğinden yeni. Xcode {{major}} yükleyin, ardından bunu Terminal'de çalıştırın.",
+      "uiRefusedText": "iPhone, test yardımcısının dokunuşlarını reddetti. Kilidini açın ve isterse parolasını girin. Tekrar olursa Ayarlar › Geliştirici › UI Otomasyonunu Etkinleştir seçeneğini kapatıp açın.",
+      "tooOld": "{{name}} iOS {{version}} kullanıyor ve ajanlar iOS 17 veya daha yenisini gerektirir. Mümkünse güncelleyin ya da daha yeni bir iPhone takın.",
+      "tooOldVersion": "16 veya daha eski",
+      "pluggedIn": "Taktım",
+      "stall": {
+        "xcode": "Zaten yüklü mü? {{mac}} kullanabilsin diye Xcode'u bir kez açıp koşullarını kabul edin.",
+        "tools": "İndirme yaklaşık 8 GB ve bu sırada {{mac}} uyanık ve çevrimiçi kalmalı. Durduysa iOS'u Xcode › Settings › Components bölümünden indirin.",
+        "account": "Zaten oturum açtınız mı? Xcode'da herhangi bir iOS uygulaması oluşturun, Signing & Capabilities altında ekibinizi seçin ve uygulamayı iPhone'da bir kez çalıştırın.",
+        "connected": "{{mac}} henüz bir iPhone görmüyor. Sadece şarj değil veri de taşıyan bir kablo kullanın, iPhone'un kilidini açın ve isterse Güven'e dokunun.",
+        "trust": "Güven sorusu çıkmadı mı? iPhone'u çıkarın, kilidini açıp yeniden takın, ardından Güven'e dokunup parolasını girin.",
+        "developerMode": "Geliştirici Modu yalnızca iPhone yeniden başladıktan sonra açılır. Yeniden Başlat'a, açıldıktan sonra da Aç'a dokunun. Anahtar yok mu? iPhone'u çıkarıp yeniden takın.",
+        "uiAutomation": "Anahtar, Geliştirici Modu açık olduğunda ve iPhone yeniden başladıktan sonra görünür. Ararken kilidini açık tutun.",
+        "helper": "{{mac}} test yardımcısını oluşturup iPhone'da başlatır, ilk seferde bu birkaç dakika sürer. iPhone'un kilidini açık ve takılı tutun."
+      },
       "ready": "{{name}} ajanlar için hazır.",
       "path": {
         "settings": "Ayarlar",
@@ -14348,6 +14477,9 @@
       "membersPersonal": "Kişiler"
     },
     "advanced": "Gelişmiş",
+    "tab": {
+      "account": "Profil"
+    },
     "sectionText": {
       "account": "Profiliniz ve uygulamanın size nasıl göründüğü.",
       "notifications": "Burada size bildirim olarak ulaşanlar. Gelen kutusu her şeyi saklar.",
@@ -14620,9 +14752,6 @@
         "jev": "Ajanlar kendiliğinden çıkartmayı yalnızca Jev ile gönderir.",
         "jevLink": "Jev'i kur"
       }
-    },
-    "tab": {
-      "account": "Profil"
     }
   },
   "personalMode": {

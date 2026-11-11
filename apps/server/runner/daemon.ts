@@ -156,7 +156,7 @@ import {
 } from "./supervisor";
 import { type SettledTask, TaskManager } from "./tasks";
 import { runnerTerminalUser, systemTerminalUser, Terminals, type TerminalUser } from "./terminal";
-import { cachedToolchains, TOOLCHAINS_FILE } from "./toolchains";
+import { appleToolchains, cachedToolchains, TOOLCHAINS_FILE } from "./toolchains";
 
 /**
  * The runner's long-lived core, shared by `agentes-runner start` (terminal,
@@ -1382,7 +1382,17 @@ export class RunnerDaemon implements RequestObserver {
     if (!supervisor && this.access().tools.browser === true) void browser.prepareInBackground();
     this.toolchains ??= this.opts.toolchains
       ? { get: this.opts.toolchains, stop: () => {} }
-      : cachedToolchains(path.join(home, TOOLCHAINS_FILE));
+      : cachedToolchains(
+          path.join(home, TOOLCHAINS_FILE),
+          undefined,
+          process.platform === "darwin"
+            ? {
+                look: () => appleToolchains(),
+                // An older server drops the frame: its next hello carries the same.
+                onChange: (toolchains) => this.send({ type: "toolchains.changed", toolchains }),
+              }
+            : null,
+        );
     // Phones are reached as the person (adb's key, the Mac's pairing with the iPhone): a system-mode runner has none.
     if (!this.phones && config.mode !== "system" && this.opts.phones !== false) {
       this.phones = new PhoneManager({

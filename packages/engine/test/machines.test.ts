@@ -621,6 +621,32 @@ describe("a runner that dies mid-request (brain turns never stay working)", () =
     expect(await row()).toMatchObject({ claude: { version: "2.1.300" }, browser: { available: false }, detectedAt });
   });
 
+  test("toolchains found mid-session replace the hello's (the rest stays) and tell the org", async () => {
+    f = await setup({ machines: true });
+    const hub = f.machineHub as MachineHub;
+    const paired = await pair();
+    const runner = fakeRunner(hub);
+    const row = async () =>
+      (await f.db.select().from(schema.machines).where(eq(schema.machines.id, paired.machineId)))[0]?.executors;
+    await runner.hello(paired.token, {
+      browser: { available: true, chrome: "Google Chrome 156.0.8078.79" },
+      toolchains: { xcode: "27.0", appleAccount: "no_team" },
+    });
+    await Bun.sleep(5);
+    const events: Record<string, unknown>[] = [];
+    f.pubsub.subscribe(orgTopic(f.org.id), (e) => events.push((e as { event?: Record<string, unknown> }).event ?? {}));
+    const toolchains = {
+      xcode: "27.0",
+      xcodeSdk: "27.0",
+      appleTeam: "Sam Rivera (Personal Team)",
+      appleAccount: "team",
+    };
+    await runner.frame({ type: "toolchains.changed", toolchains });
+    await Bun.sleep(5);
+    expect(await row()).toMatchObject({ browser: { available: true }, toolchains });
+    expect(events).toContainEqual({ type: "machine.updated", machineId: paired.machineId, toolchains: true });
+  });
+
   test("a brain turn that goes quiet fails; its own events and bridge calls keep a long one alive", async () => {
     f = await setup({ machines: true });
     const hub = createMachineHub({ db: f.db, pubsub: f.pubsub, replicaId: "replica-i", brainIdleMs: 200 });

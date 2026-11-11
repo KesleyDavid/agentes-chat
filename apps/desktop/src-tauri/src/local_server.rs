@@ -241,9 +241,11 @@ pub fn loopback_url(port: u16) -> String {
 
 // ───────────────────────────── secrets and files ─────────────────────────────
 
+/// `n` bytes from the system's secure random source (`/dev/urandom` doesn't exist on Windows: reading it there
+/// failed the setup, or read whatever file someone put at `C:\dev\urandom`).
 fn random(n: usize) -> io::Result<Vec<u8>> {
     let mut bytes = vec![0u8; n];
-    fs::File::open("/dev/urandom")?.read_exact(&mut bytes)?;
+    getrandom::fill(&mut bytes)?;
     Ok(bytes)
 }
 

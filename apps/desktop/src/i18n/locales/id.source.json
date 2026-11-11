@@ -8,6 +8,12 @@
   "device.linux": {
     "value": "computer"
   },
+  "windowTitle.welcome": {
+    "value": "Welcome"
+  },
+  "windowTitle.prefs": {
+    "value": "Preferences"
+  },
   "common.cancel": {
     "value": "Cancel"
   },
@@ -215,6 +221,9 @@
   "tray.pauseHint": {
     "value": "What is already running finishes normally."
   },
+  "tray.pauseHintServer": {
+    "value": "What is already running finishes normally. The server stays up."
+  },
   "tray.resume": {
     "value": "Resume the agents"
   },
@@ -371,6 +380,12 @@
   "first.addCloud": {
     "value": "Create a workspace on agentes.chat"
   },
+  "first.addNew": {
+    "value": "Want a new workspace?"
+  },
+  "first.addNewLink": {
+    "value": "Create one"
+  },
   "first.addOwn": {
     "value": "Use your team's server"
   },
@@ -428,8 +443,29 @@
   "connect.foundHere": {
     "value": "agentes.chat is running here"
   },
+  "connect.foundNoOwner": {
+    "value": "Waiting for its owner account"
+  },
   "connect.use": {
     "value": "Use"
+  },
+  "connect.setUp": {
+    "value": "Set up"
+  },
+  "connect.noneFound": {
+    "value": "No server found."
+  },
+  "connect.lookAgain": {
+    "value": "Look again"
+  },
+  "connect.tailnetOff": {
+    "value": "Tailscale is off on this {{device}}, so servers on your Tailscale network don't show up here."
+  },
+  "connect.addressHint": {
+    "value": "An address with https, or its Tailscale one, which ends in .ts.net."
+  },
+  "connect.checkUpdates": {
+    "value": "Check for updates"
   },
   "connect.none": {
     "value": "Don't have one yet? Run this on it"
@@ -441,13 +477,16 @@
     "value": "Check the address, something like agentes.yourteam.ts.net."
   },
   "connect.httpRefused": {
-    "value": "{{host}} uses plain http, which only works on this {{device}}. Use its Tailscale address or one with https."
+    "value": "{{host}} doesn't use a secure connection (https), and only servers on this {{device}} may go without one. Use its https address or its Tailscale one."
   },
   "connect.noOwner": {
-    "value": "{{host}} has no owner account yet. Open its owner link (it ends in /owner#claim=…), on this {{device}} or on your phone."
+    "value": "{{host}} has no owner yet. Whoever installed the server got a link to create the owner account: open that link on this {{device}} or on your phone."
   },
   "connect.unreachable": {
-    "value": "We can't reach {{host}}. If it's on Tailscale, open Tailscale on this {{device}}, connect and try again."
+    "value": "We can't reach {{host}}. Check the address and that the server is on, then try again."
+  },
+  "connect.unreachableTailnet": {
+    "value": "We can't reach {{host}}, which is on your Tailscale network. Open Tailscale on this {{device}}, connect and try again."
   },
   "connect.unreachableHere": {
     "value": "Nothing answers at {{host}} on this {{device}}. Start agentes.chat here, then try again."
@@ -599,8 +638,17 @@
   "here.reason.start": {
     "value": "agentes.chat didn't answer again at its new address"
   },
+  "here.reason.notConnected": {
+    "value": "Tailscale isn't connected on this {{device}}"
+  },
+  "here.reason.back": {
+    "value": "agentes.chat didn't answer again on this {{device}} after access from your devices was turned off."
+  },
   "here.serveFix": {
     "value": "Install Tailscale from tailscale.com."
+  },
+  "here.connectTray": {
+    "value": "Connect it from its icon by the clock."
   },
   "here.operatorRun": {
     "value": "Give that permission once, in the terminal:"
@@ -624,7 +672,10 @@
     "value": "agentes.chat is already installed on this {{device}}"
   },
   "here.alreadyText": {
-    "value": "It runs on its own, installed from the terminal, at {{url}}."
+    "value": "It runs on its own, installed from the terminal. Use it in this app."
+  },
+  "here.alreadyDocker": {
+    "value": "It runs on its own, installed with Docker. Use it in this app."
   },
   "here.useIt": {
     "value": "Use it"
@@ -633,13 +684,13 @@
     "value": "agentes.chat is installed on this {{device}}, but it isn't running"
   },
   "here.notRunningText": {
-    "value": "It was installed from the terminal, in {{path}}. Start it there, then try again."
+    "value": "It was installed from the terminal, in {{path}}. To start it, run this in the terminal, then try again:"
   },
   "here.running": {
     "value": "agentes.chat already runs on this {{device}}"
   },
   "here.runningText": {
-    "value": "This app runs it, at {{url}}."
+    "value": "This app runs it. Open it to sign in."
   },
   "here.openIt": {
     "value": "Open it"
@@ -673,6 +724,12 @@
   },
   "link.chipHere": {
     "value": "This {{device}}"
+  },
+  "link.thisServer": {
+    "value": "agentes.chat on this {{device}}"
+  },
+  "link.tailnetHelp": {
+    "value": "It's on a Tailscale network: it only opens on devices connected to Tailscale with the same account."
   },
   "servers.title": {
     "value": "Servers"
@@ -740,6 +797,21 @@
   "servers.signedOut": {
     "value": "Not signed in"
   },
+  "servers.offline": {
+    "value": "Offline since {{time}}"
+  },
+  "servers.signIn": {
+    "value": "Sign in"
+  },
+  "servers.signOut": {
+    "value": "Sign out of this server"
+  },
+  "servers.signedOutDone": {
+    "value": "You signed out of {{host}}"
+  },
+  "servers.removeFromApp": {
+    "value": "Remove from this app"
+  },
   "servers.newsOne": {
     "value": "1 new notification"
   },
@@ -764,11 +836,17 @@
   "server.failing": {
     "value": "Not starting"
   },
+  "server.restarting": {
+    "value": "Restarting"
+  },
   "server.onlyHere": {
     "value": "Running · only on this {{device}}"
   },
   "server.onTailnet": {
     "value": "Running · on your Tailscale network"
+  },
+  "server.tailnetDown": {
+    "value": "Running · Tailscale isn't connected on this {{device}}"
   },
   "server.address": {
     "value": "Address"
@@ -833,6 +911,57 @@
   "server.stopHereConfirm": {
     "value": "Stop it"
   },
+  "server.stopFor1h": {
+    "value": "Stop for 1 hour"
+  },
+  "server.startNow": {
+    "value": "Start now"
+  },
+  "server.stopUntilStart": {
+    "value": "Stop until I start it"
+  },
+  "server.stopForget": {
+    "value": "Don't start it with the app…"
+  },
+  "server.stopNote": {
+    "value": "Stopping cuts everyone off, the phone included."
+  },
+  "server.stopTitle": {
+    "value": "Stop agentes.chat on this {{device}}?"
+  },
+  "server.stopBody": {
+    "value": "The phone and the team lose access until it's back."
+  },
+  "server.stoppedUntil": {
+    "value": "Stopped · back at {{time}}"
+  },
+  "server.stoppedHeld": {
+    "value": "Stopped until you start it"
+  },
+  "server.reachRestart": {
+    "value": "Turning it on or off restarts agentes.chat for a moment."
+  },
+  "server.reachOffTitle": {
+    "value": "Turn off access from your devices?"
+  },
+  "server.reachOffBody": {
+    "value": "The phone and the team lose access. Only this {{device}} keeps using it."
+  },
+  "server.reachOffConfirm": {
+    "value": "Turn off"
+  },
+  "server.failingWhy": {
+    "value": "The details say why: copy them for whoever helps you, or look at the logs."
+  },
+  "server.showLogs": {
+    "value": "Show the logs"
+  },
+  "server.help": {
+    "value": "Help"
+  },
+  "server.gotIt": {
+    "value": "Got it"
+  },
   "server.notHere": {
     "value": "Not running here. Its data is still in {{path}}."
   },
@@ -848,6 +977,15 @@
   "server.failingBanner": {
     "value": "agentes.chat isn't starting on this {{device}}"
   },
+  "server.failingBody": {
+    "value": "Open the app to see what happened and try again."
+  },
+  "server.restartedBanner": {
+    "value": "agentes.chat restarted 3 times on this {{device}}"
+  },
+  "server.restartedBody": {
+    "value": "It comes back by itself. If it keeps happening, open the app to see why."
+  },
   "server.version": {
     "value": "Version {{version}}, updated with the app"
   },
@@ -856,6 +994,9 @@
   },
   "server.updateBack": {
     "value": "The update didn't start. agentes.chat is back on {{version}}."
+  },
+  "server.updateBackBody": {
+    "value": "The new version is tried again with the app's next update."
   },
   "pair.title": {
     "value": "Let agents of {{org}} work on this {{device}}?"
@@ -1685,11 +1826,11 @@
   "iphone.checking": {
     "value": "Looking at this {{device}}…"
   },
+  "iphone.checkingStall": {
+    "value": "This {{device}} isn't answering yet. Quit agentes.chat from its menu bar icon and open it again."
+  },
   "iphone.xcodeText": {
     "value": "Install Xcode from the App Store. This step goes on by itself when it's there."
-  },
-  "iphone.xcodeOld": {
-    "value": "This iPhone needs a newer Xcode. Update it in the App Store."
   },
   "iphone.updateXcode": {
     "value": "Update Xcode"
@@ -1707,7 +1848,7 @@
     "value": "The download stopped: {{message}}"
   },
   "iphone.accountText": {
-    "value": "Add it in Xcode › Settings › Accounts. A free Apple Account is enough."
+    "value": "Add it in Xcode › Settings › Apple Accounts. A free Apple Account is enough."
   },
   "iphone.openXcode": {
     "value": "Open Xcode"
@@ -1717,9 +1858,6 @@
   },
   "iphone.unlockText": {
     "value": "Unlock the iPhone and keep it unlocked for a moment."
-  },
-  "iphone.oldText": {
-    "value": "This iPhone's iOS is too old for Xcode's tools."
   },
   "iphone.devModeHint": {
     "value": "It shows in Settings only after a Mac pairs with the iPhone. This {{device}} did that."
@@ -1804,6 +1942,27 @@
   },
   "cover.showAnyway": {
     "value": "Show it anyway"
+  },
+  "cover.copyFailed": {
+    "value": "Couldn't copy"
+  },
+  "cover.held": {
+    "value": "agentes.chat is stopped on this {{device}} until you start it."
+  },
+  "cover.heldUntil": {
+    "value": "agentes.chat is stopped on this {{device}}. It comes back by itself at {{time}}."
+  },
+  "cover.startNow": {
+    "value": "Start now"
+  },
+  "cover.openOther": {
+    "value": "Open {{server}}"
+  },
+  "cover.onlyHereWorking": {
+    "value": "Turning off access from your devices…"
+  },
+  "cover.onlyHereFailed": {
+    "value": "Couldn't turn off access from your devices."
   },
   "menu.about": {
     "value": "About agentes.chat"

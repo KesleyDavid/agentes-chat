@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { findOnScreen, LOOKUP_MS, parseIosFlow, pointOf, runIosFlow } from "../../runner/ios-flow";
-import type { IosScreen, WdaNode } from "../../runner/wda";
+import { HelperGone, HelperSlow, type IosScreen, recoveringScreen, type WdaNode } from "../../runner/wda";
 
 const SCREEN = { width: 390, height: 844 };
 const el = (over: Partial<WdaNode> & { y: number }, children?: WdaNode[]): WdaNode => ({
@@ -186,4 +186,38 @@ test("a step that fails stops the flow and says why; optional ones don't; anythi
   const key = await run("- pressKey: Tab\n");
   expect(key.output).toContain("the Tab key isn't on an iPhone");
   expect(LOOKUP_MS).toBe(10_000);
+});
+
+test("a slow look at a busy screen is asked again; a helper that died is started again once a flow", async () => {
+  const { screen, calls } = fakeScreen([LOGIN]);
+  let slow = 2;
+  const busy: IosScreen = {
+    ...screen,
+    source: async () => {
+      if (slow-- > 0) throw new HelperSlow("The test helper didn't answer: The operation timed out.");
+      return screen.source();
+    },
+  };
+  const c = clock();
+  const run = { env: {}, signal: new AbortController().signal, ...c, save: async () => "" };
+  expect((await runIosFlow("- tapOn: Sign in\n", busy, run)).passed).toBe(true);
+  expect(calls).toEqual([["tap", 195, 132]]);
+  // Each step reaches the helper running now: a dead one is replaced once, a second death ends the flow.
+  const fate = [true, false, true];
+  const dying: IosScreen = {
+    ...screen,
+    tap: async (x, y) => {
+      if (fate.shift()) throw new HelperGone("The test helper didn't answer: ECONNREFUSED");
+      return screen.tap(x, y);
+    },
+  };
+  const once = await runIosFlow(
+    '- tapOn: { point: "50%, 50%" }\n- tapOn: { point: "50%, 50%" }\n',
+    recoveringScreen(async () => dying),
+    run,
+  );
+  expect(once.output.split("\n")).toEqual([
+    "OK      tapOn",
+    "FAILED  tapOn: The test helper didn't answer: ECONNREFUSED",
+  ]);
 });

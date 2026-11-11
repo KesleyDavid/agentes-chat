@@ -1993,6 +1993,8 @@
       "helper_missing": "Pomocnik testowy nie jest jeszcze skonfigurowany",
       "helper_expired": "Pomocnik testowy wymaga odnowienia",
       "apple_account_missing": "Xcode na Macu potrzebuje konta Apple Account",
+      "apple_team_missing": "Xcode na Macu nie pokazuje jeszcze zespołu",
+      "ui_not_authorized": "Ten iPhone odrzucił stuknięcia pomocnika testowego",
       "team_limit": "Usuń z tego iPhone'a własną aplikację",
       "helper_untrusted": "Zaufaj pomocnikowi testowemu na tym iPhonie",
       "booting": "Uruchamia się",
@@ -2153,7 +2155,16 @@
       "step5Hint": "Aplikacja, którą {{host}} instaluje, żeby agenci mogli stukać i pisać na tym iPhonie. Pojawi się na tej liście po instalacji.",
       "step5Text": "Ustawienia › Ogólne › VPN i zarządzanie urządzeniem. Stuknij nazwę dewelopera, a potem Zaufaj.",
       "waiting": "Czekam, aż {{host}} go wykryje",
-      "footer": "Resztę zrobi twój Mac, a gdy jest włączony, odnawia pomocnika testowego co 7 dni."
+      "footer": "Resztę zrobi twój Mac, a gdy jest włączony, odnawia pomocnika testowego co 7 dni.",
+      "tooOld": "Ten iPhone ma iOS {{version}}, a agenci potrzebują iOS 17 lub nowszego. Zaktualizuj go, jeśli się da, albo użyj nowszego iPhone'a.",
+      "xcodeOld": "Ten iPhone ma iOS {{version}}, nowszy niż zna Xcode na {{host}}. Zainstaluj tam Xcode {{major}}, a potem uruchom xcrun devicectl manage ddis update w Terminalu.",
+      "teamMissing": "Xcode jest zalogowany, ale nie pokazuje jeszcze zespołu. W Xcode utwórz dowolną aplikację iOS, wybierz swój zespół w Signing & Capabilities i uruchom ją raz na tym iPhonie.",
+      "uiRefused": "Ten iPhone odrzucił stuknięcia pomocnika testowego. Odblokuj go i wpisz kod, jeśli poprosi. Jeśli to się powtarza, wyłącz i włącz Ustawienia › Deweloper › Włącz automatyzację UI.",
+      "pluggedIn": "Jest podłączony",
+      "stall": {
+        "plug": "{{host}} nie widzi jeszcze tego iPhone'a. Użyj kabla, który przesyła dane, a nie tylko ładuje, trzymaj ten iPhone odblokowany i stuknij Zaufaj, jeśli poprosi.",
+        "devmode": "Tryb dewelopera włącza się dopiero po ponownym uruchomieniu tego iPhone'a. Stuknij Uruchom ponownie, a po starcie Włącz. Nie ma przełącznika? Odłącz ten iPhone i podłącz go ponownie."
+      }
     },
     "notice": {
       "kind": "Urządzenia",

@@ -1,5 +1,6 @@
 import type { ComputerDevice, PhoneDevice } from "@agenteschat/client";
 import { computerName } from "@agenteschat/client/lib/computer";
+import { iosMajor, tooOldVersion, useStalled } from "@agenteschat/client/lib/devices";
 import { isPersonal } from "@agenteschat/client/lib/workspace-mode";
 import * as Device from "expo-device";
 import { Fragment, useState } from "react";
@@ -45,9 +46,26 @@ export function IphoneSetupScreen({ machineId }: { machineId?: string }) {
     : "";
   const phone = host ? thisPhoneOn(host.phones, "ios", Device.modelName) : null;
   const step = iphoneStep(phone);
+  const reason = phone && phone.status.kind !== "offline" && "reason" in phone.status ? phone.status.reason : null;
+  const tooOld = phone?.status.kind === "unsupported";
+  // A step that sits unchanged gets what most likely holds it.
+  const stalled = useStalled(host && !tooOld ? [host.id, step, phone?.id, reason].join(":") : null);
+  const [plugged, setPlugged] = useState(false);
   if (host && phone && step === IPHONE_STEPS.length)
     return <IphoneDone phone={phone} host={host} hostName={hostName} />;
-  const reason = phone && phone.status.kind !== "offline" && "reason" in phone.status ? phone.status.reason : null;
+  /** The reason's own words where a step's text doesn't say it, with its way out. */
+  const note = (r: string) =>
+    r === "apple_team_missing"
+      ? t("mobile.devices.iphone.teamMissing")
+      : r === "ui_not_authorized"
+        ? t("mobile.devices.iphone.uiRefused")
+        : r === "xcode_too_old" && phone?.osVersion
+          ? t("mobile.devices.iphone.xcodeOld", {
+              version: phone.osVersion,
+              major: iosMajor(phone.osVersion),
+              host: hostName,
+            })
+          : reasonText(t, r);
   const state = (i: number) => (i < step ? "done" : i === step ? "now" : "later");
   const choose = async () => {
     const key = await pickOne({
@@ -62,6 +80,10 @@ export function IphoneSetupScreen({ machineId }: { machineId?: string }) {
       {t("mobile.devices.iphone.waiting", { host: hostName })}
     </Note>
   );
+  const stall = (key: "plug" | "devmode") =>
+    stalled || (key === "plug" && plugged) ? (
+      <Note icon="info">{t(`mobile.devices.iphone.stall.${key}`, { host: hostName })}</Note>
+    ) : null;
   return (
     <SettingsPage
       title={t("mobile.devices.iphone.title")}
@@ -91,12 +113,30 @@ export function IphoneSetupScreen({ machineId }: { machineId?: string }) {
           />
         </View>
       ) : null}
-      {host ? (
+      {host && tooOld && phone ? (
+        <View style={styles.block}>
+          <Note icon="x">{t("mobile.devices.iphone.tooOld", { version: tooOldVersion(t, phone.osVersion) })}</Note>
+        </View>
+      ) : null}
+      {host && !tooOld ? (
         <>
           <View style={styles.steps}>
             <StepsCard>
               <Step n={1} title={t("mobile.devices.iphone.step1", { host: hostName })} state={state(0)}>
-                {step === 0 ? waiting : null}
+                {step === 0 ? (
+                  <>
+                    {waiting}
+                    {stall("plug")}
+                    {!stalled && !plugged ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        label={t("mobile.devices.iphone.pluggedIn")}
+                        onPress={() => setPlugged(true)}
+                      />
+                    ) : null}
+                  </>
+                ) : null}
               </Step>
               <Step n={2} divider title={t("mobile.devices.iphone.step2")} state={state(1)}>
                 {step === 1 ? <StepText>{t("mobile.devices.iphone.step2Text")}</StepText> : null}
@@ -114,15 +154,19 @@ export function IphoneSetupScreen({ machineId }: { machineId?: string }) {
                     <DevModeSwitch />
                     <StepText>{t("mobile.devices.iphone.step3Text")}</StepText>
                     {reason && !IPHONE_STEP_REASONS.has(reason) ? (
-                      <Note icon="info">{reasonText(t, reason)}</Note>
+                      <Note icon="info">{note(reason)}</Note>
                     ) : (
-                      waiting
+                      <>
+                        {waiting}
+                        {stall("devmode")}
+                      </>
                     )}
                   </>
                 ) : null}
               </Step>
               <Step n={4} divider title={t("mobile.devices.iphone.step4")} state={state(3)}>
                 {step <= 3 ? <StepText>{t("mobile.devices.iphone.step4Text")}</StepText> : null}
+                {step === 3 && reason === "ui_not_authorized" ? <Note icon="info">{note(reason)}</Note> : null}
               </Step>
               <Step
                 n={5}
@@ -133,7 +177,7 @@ export function IphoneSetupScreen({ machineId }: { machineId?: string }) {
               >
                 <StepText>{t("mobile.devices.iphone.step5Text")}</StepText>
                 {step === 4 && reason && !IPHONE_STEP_REASONS.has(reason) ? (
-                  <Note icon="info">{reasonText(t, reason)}</Note>
+                  <Note icon="info">{note(reason)}</Note>
                 ) : null}
               </Step>
             </StepsCard>

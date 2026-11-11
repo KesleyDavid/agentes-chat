@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { RunnerError } from "./errors";
-import { type IosScreen, pressKey, type WdaNode } from "./wda";
+import { HelperSlow, type IosScreen, pressKey, type WdaNode } from "./wda";
 
 /**
  * Maestro flows on a real iPhone, which Maestro itself no longer drives (2.11.0): the YAML is read here and its common
@@ -217,12 +217,21 @@ export async function runIosFlow(text: string, screen: IosScreen, run: IosFlowRu
     if (!id) throw new FlowStep("no app: give appId in the flow's header or the command");
     return id;
   };
-  /** Polls the screen until `found` holds for `sel`'s elements, up to `ms`. */
+  /** What `sel` names on the screen now. One slow look at a busy screen isn't the end: it's asked again until `until`. */
+  const look = async (sel: Selector, until: number) => {
+    try {
+      return findOnScreen(await screen.source(), sel, await window());
+    } catch (err) {
+      if (!(err instanceof HelperSlow) || now() >= until || run.signal.aborted) throw err;
+      return null;
+    }
+  };
+  /** Polls the screen until `want` holds for `sel`'s elements, up to `ms`. */
   const lookup = async (sel: Selector, ms: number, want: (list: WdaNode[]) => boolean) => {
     const until = Math.min(now() + ms, run.deadline);
     for (;;) {
-      const list = findOnScreen(await screen.source(), sel, await window());
-      if (want(list)) return list;
+      const list = await look(sel, until);
+      if (list && want(list)) return list;
       if (now() >= until || run.signal.aborted) return null;
       await sleep(POLL_MS);
     }
@@ -289,7 +298,7 @@ export async function runIosFlow(text: string, screen: IosScreen, run: IosFlowRu
       const finger = { DOWN: "UP", UP: "DOWN", LEFT: "RIGHT", RIGHT: "LEFT" }[direction] ?? direction;
       for (;;) {
         const s = await window();
-        if (findOnScreen(await screen.source(), sel, s).length > 0) return;
+        if (((await look(sel, until)) ?? []).length > 0) return;
         if (now() >= until || run.signal.aborted) throw new FlowStep(`${describe(sel)} didn't come into view`);
         const [x1, y1, x2, y2] = swipeLine(finger, s);
         await screen.swipe(x1, y1, x2, y2, 400);

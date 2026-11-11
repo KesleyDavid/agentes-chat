@@ -44,7 +44,7 @@ removes the old one's container.
 6. **The agents' computer:** this machine, by default where it can be (Linux as root with systemd built
    with `BPF_FRAMEWORK`, apt-get and 4 GB of memory or more, each agent a user of its own with a screen; on
    Linux without `BPF_FRAMEWORK`, such as Ubuntu, simple mode: every agent as one user, `agentes`, without
-   sudo; a Mac, agents working as you with a browser, Claude Code and Codex, commands off unless you say yes).
+   sudo; a Mac, agents working as you with a browser, Claude Code and Codex, commands on unless you say no).
    Then **what the agents need there**: it checks for their browser (Google Chrome, or Chromium on ARM), the
    packages for their screens, Claude Code and Codex, says what's there, and asks about each one missing
    (yes by default; `--requirements all|none|<list>` answers for all).

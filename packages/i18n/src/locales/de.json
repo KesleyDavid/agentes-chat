@@ -1400,6 +1400,112 @@
     "moveDown": "Nach unten",
     "restoreOrder": "Standardreihenfolge wiederherstellen"
   },
+  "install": {
+    "frames": "So installierst du es auf {{system}}",
+    "step": "Schritt {{n}}",
+    "previous": "Vorheriger Schritt",
+    "next": "Nächster Schritt",
+    "fullGuide": "Alle Schritte im Detail",
+    "copied": "Kopiert. Füge es im Terminal ein.",
+    "mac": {
+      "why": "<b>Die App ist in der Beta.</b> Deshalb bittet dein Mac beim ersten Mal um eine Bestätigung:",
+      "drag": "Zieh agentes.chat in den Ordner Programme.",
+      "dragLong": "Öffne die heruntergeladene Datei und zieh agentes.chat in den Ordner Programme.",
+      "blocked": "Öffne die App und klick auf Fertig.",
+      "blockedSub": "Klick nicht auf In den Papierkorb legen.",
+      "settings": "Klick unter Systemeinstellungen › Datenschutz & Sicherheit auf Dennoch öffnen.",
+      "settingsLong": "Öffne gleich danach Systemeinstellungen › Datenschutz & Sicherheit, scroll zu Sicherheit und klick auf Dennoch öffnen.",
+      "settingsSub": "Die Taste erscheint dort erst, nachdem du versucht hast, die App zu öffnen (Schritt 2), und verschwindet nach etwa einer Stunde. Nicht da? Öffne die App noch einmal und komm zurück.",
+      "settingsShort": "Sie erscheint nur direkt nach Schritt 2.",
+      "openSettings": "Datenschutz & Sicherheit öffnen",
+      "confirm": "Bestätige mit Touch ID oder deinem Passwort.",
+      "confirmLong": "Klick noch einmal auf Dennoch öffnen und bestätige mit Touch ID oder dem Passwort deines Macs.",
+      "done": "Fertig: Ab jetzt öffnet sie sich sofort.",
+      "stuckTitle": "Immer noch keine Taste, oder dein Mac sagt, die App sei beschädigt?",
+      "stuckText": "Füge das im Terminal ein und öffne die App noch einmal:"
+    },
+    "windows": {
+      "why": "<b>Die App ist in der Beta.</b> Deshalb bittet Windows beim ersten Mal um eine Bestätigung:",
+      "keep": "Wenn dein Browser fragt, wähl Beibehalten.",
+      "more": "Öffne das Installationsprogramm und klick auf Weitere Informationen.",
+      "moreLong": "Öffne das Installationsprogramm. Wenn Der Computer wurde durch Windows geschützt erscheint, klick auf Weitere Informationen.",
+      "run": "Klick auf Trotzdem ausführen.",
+      "runLong": "Klick auf Trotzdem ausführen und folge dem Installationsprogramm.",
+      "done": "Fertig: Ab jetzt öffnet sie sich sofort."
+    },
+    "linux": {
+      "why": "Für Ubuntu, Debian und ähnliche Systeme (x64). Linux fragt nichts zusätzlich:",
+      "apt": "Installier die .deb per Doppelklick oder über das Terminal.",
+      "aptLong": "Doppelklick auf die heruntergeladene Datei und klick auf Installieren, oder füge das im Terminal ein:",
+      "open": "Öffne agentes.chat aus deinen Apps."
+    },
+    "page": {
+      "docTitle": "App herunterladen · agentes.chat",
+      "title": "Lade die agentes.chat-App herunter",
+      "beta": "Beta",
+      "text": "Dein Workspace in einem eigenen Fenster, mit den Benachrichtigungen deines Systems. Mit einem Klick arbeiten Agenten auf diesem Computer, in eigenen Ordnern.",
+      "open": "agentes.chat öffnen",
+      "version": "Version {{version}}",
+      "versionSize": "Version {{version}} · {{size}}",
+      "soon": "Für {{system}} gibt es noch keine Version.",
+      "useArm": "Computer mit ARM-Chip? Lade die ARM-Version herunter",
+      "useX64": "x64-Version herunterladen",
+      "unavailable": "Die App kann gerade nicht von hier heruntergeladen werden. Versuch es gleich noch einmal.",
+      "installOn": "Auf {{system}} installieren",
+      "system": "System",
+      "whyTitle": "Warum bittet mein Computer um eine Bestätigung?",
+      "whyText": "agentes.chat ist in der Beta: Die Mac-Version ist noch nicht von Apple notarisiert, und das Windows-Installationsprogramm trägt noch kein Microsoft-Zertifikat. Ohne sie fragt dein Computer einmal nach, bevor er eine aus dem Internet geladene App öffnet. Danach öffnet sie sich sofort und aktualisiert sich selbst. Vor dem Ende der Beta fällt dieser Schritt weg.",
+      "openSource": "Open Source",
+      "onlyHere": "Nur hier und in den Releases des Projekts veröffentlicht",
+      "signedUpdates": "Signierte Updates"
+    },
+    "scene": {
+      "finder": "Finder",
+      "file": "Ablage",
+      "edit": "Bearbeiten",
+      "view": "Darstellung",
+      "window": "Fenster",
+      "applications": "Programme",
+      "notOpened": "„{{app}}“ wurde nicht geöffnet",
+      "notOpenedText": "Apple konnte nicht überprüfen, ob „{{app}}“ frei von Schadsoftware ist, die deinem Mac schaden oder deine Privatsphäre gefährden kann.",
+      "done": "Fertig",
+      "moveToTrash": "In den Papierkorb legen",
+      "search": "Suchen",
+      "account": "Apple Account",
+      "general": "Allgemein",
+      "appearance": "Erscheinungsbild",
+      "accessibility": "Bedienungshilfen",
+      "privacy": "Datenschutz & Sicherheit",
+      "desktopDock": "Schreibtisch & Dock",
+      "displays": "Displays",
+      "security": "Sicherheit",
+      "allowFrom": "Programme erlauben, die geladen wurden von",
+      "allowValue": "App Store & verifizierte Entwickler",
+      "blocked": "„{{app}}“ wurde blockiert, um deinen Mac zu schützen.",
+      "openAnyway": "Dennoch öffnen",
+      "confirmTitle": "„{{app}}“ öffnen?",
+      "confirmText": "Öffne es nur, wenn du seiner Herkunft vertraust.",
+      "touchIdTitle": "Systemeinstellungen",
+      "touchIdText": "Verwende Touch ID oder gib dein Passwort ein, um dies zu erlauben.",
+      "password": "Passwort",
+      "downloads": "Downloads",
+      "rare": "Diese Datei wird nicht häufig heruntergeladen. Stellen Sie sicher, dass Sie ihr vertrauen, bevor Sie sie öffnen.",
+      "delete": "Löschen",
+      "keep": "Beibehalten",
+      "protectedTitle": "Der Computer wurde durch Windows geschützt",
+      "protectedText": "Von Microsoft Defender SmartScreen wurde der Start einer unbekannten App verhindert. Die Ausführung dieser App stellt ein Risiko für Ihren PC dar.",
+      "protectedShort": "Von Microsoft Defender SmartScreen wurde der Start einer unbekannten App verhindert.",
+      "moreInfo": "Weitere Informationen",
+      "dontRun": "Nicht ausführen",
+      "appLabel": "App:",
+      "publisher": "Herausgeber:",
+      "unknownPublisher": "Unbekannter Herausgeber",
+      "runAnyway": "Trotzdem ausführen",
+      "activities": "Aktivitäten",
+      "readingLists": "Paketlisten werden gelesen… Fertig",
+      "settingUp": "agentes-chat ({{version}}) wird eingerichtet …"
+    }
+  },
   "legal": {
     "updated": "Zuletzt aktualisiert am {{date}}",
     "contents": "Auf dieser Seite",
@@ -13399,6 +13505,7 @@
     "downloadFor": "Für {{system}} herunterladen",
     "downloadApp": "App herunterladen",
     "otherSystems": "Andere Systeme",
+    "armBuild": "{{system}} (ARM)",
     "onThePhone": "Auf dem Handy",
     "onTheIphone": "Auf dem iPhone",
     "screen": {
@@ -13475,6 +13582,8 @@
       "helper_missing": "Die Test-App ist noch nicht eingerichtet",
       "helper_expired": "Die Test-App muss erneuert werden",
       "apple_account_missing": "Xcode ist bei keinem Apple Account angemeldet",
+      "apple_team_missing": "Xcode zeigt noch kein Team",
+      "ui_not_authorized": "Das iPhone hat die Eingaben der Test-App abgelehnt",
       "team_limit": "Der kostenlose Apple Account hat sein App-Limit erreicht",
       "helper_untrusted": "Das iPhone vertraut der Test-App noch nicht",
       "booting": "Startet",
@@ -13482,7 +13591,8 @@
       "no_driverLinux": "Linux kann dieses Handy nicht öffnen",
       "os_too_old": "Dieses System ist zu alt für die Tools",
       "adb_offline": "Das Handy antwortet nicht",
-      "other": "Auf dem Gerät fehlt noch etwas"
+      "other": "Auf dem Gerät fehlt noch etwas",
+      "iosTooOld": "Es läuft mit iOS {{version}}, Agenten brauchen iOS 17 oder neuer"
     },
     "fix": {
       "locked": "Entsperre es",
@@ -13496,6 +13606,8 @@
       "helper_missing": "Öffne die App auf dem Mac",
       "helper_expired": "Öffne die App auf dem Mac",
       "apple_account_missing": "Melde dich in Xcode an",
+      "apple_team_missing": "Führe in Xcode einmal eine App auf dem iPhone aus",
+      "ui_not_authorized": "Entsperre das iPhone",
       "team_limit": "Entferne eine selbst erstellte App",
       "helper_untrusted": "Vertraue ihr auf dem iPhone",
       "booting": "Warte, bis es gestartet ist",
@@ -13749,7 +13861,8 @@
       "toolsDone": "Vom Mac geladen",
       "toolsText": "Der Mac lädt sie herunter, etwa 8 GB.",
       "accountDone": "Hinzugefügt",
-      "accountText": "Füge in Xcode auf {{mac}} einen hinzu, kostenlos oder bezahlt: Settings › Accounts.",
+      "accountText": "Füge in Xcode auf {{mac}} einen hinzu, kostenlos oder bezahlt: Settings › Apple Accounts.",
+      "teamMissingText": "Xcode ist angemeldet, zeigt aber noch kein Team. Erstelle in Xcode eine beliebige iOS-App, wähle unter Signing & Capabilities dein Team und führe sie einmal auf dem iPhone aus.",
       "connectedDone": "{{name}} · iOS {{version}}",
       "connectedText": "Schließ das iPhone mit einem Kabel an {{mac}} an.",
       "trustDone": "Vertraut",
@@ -13760,6 +13873,22 @@
       "helperText": "Wird vom Mac erstellt und alle 7 Tage erneuert. Ein kostenloser Apple Account in Xcode reicht.",
       "helperUntrustedText": "Tippe auf den Namen des Entwicklers und dann auf Vertrauen.",
       "teamLimitText": "Entferne eine selbst erstellte App vom iPhone: Ein kostenloser Apple Account erlaubt 3.",
+      "xcodeOld": "{{name}} läuft mit iOS {{version}}, Xcode auf {{mac}} kennt höchstens iOS {{sdk}}. Installiere Xcode {{major}} und führe dann das hier im Terminal aus.",
+      "xcodeOldAny": "{{name}} läuft mit iOS {{version}}, neuer als Xcode auf {{mac}} kennt. Installiere Xcode {{major}} und führe dann das hier im Terminal aus.",
+      "uiRefusedText": "Das iPhone hat die Eingaben der Test-App abgelehnt. Entsperre es und gib seinen Code ein, wenn es danach fragt. Passiert es wieder, schalte Einstellungen › Entwickler › UI-Automatisierung aktivieren aus und wieder ein.",
+      "tooOld": "{{name}} läuft mit iOS {{version}}, Agenten brauchen iOS 17 oder neuer. Aktualisiere es, wenn das geht, oder schließ ein neueres iPhone an.",
+      "tooOldVersion": "16 oder älter",
+      "pluggedIn": "Es ist angeschlossen",
+      "stall": {
+        "xcode": "Schon installiert? Öffne Xcode einmal und stimme den Bedingungen zu, damit {{mac}} es nutzen kann.",
+        "tools": "Der Download hat etwa 8 GB und braucht {{mac}} wach und online. Ist er stehen geblieben, lade iOS unter Xcode › Settings › Components.",
+        "account": "Schon angemeldet? Erstelle in Xcode eine beliebige iOS-App, wähle unter Signing & Capabilities dein Team und führe sie einmal auf dem iPhone aus.",
+        "connected": "{{mac}} sieht noch kein iPhone. Nimm ein Kabel, das Daten überträgt und nicht nur lädt, entsperre das iPhone und tippe auf Vertrauen, wenn es fragt.",
+        "trust": "Keine Vertrauen-Abfrage? Zieh das iPhone ab, entsperre es und schließ es wieder an, dann tippe auf Vertrauen und gib seinen Code ein.",
+        "developerMode": "Der Entwicklermodus geht erst nach einem Neustart des iPhones an. Tippe auf Neustart und danach auf Aktivieren. Kein Schalter da? Zieh das iPhone ab und schließ es wieder an.",
+        "uiAutomation": "Der Schalter erscheint, wenn der Entwicklermodus an ist und das iPhone neu gestartet hat. Lass es beim Suchen entsperrt.",
+        "helper": "{{mac}} erstellt die Test-App und startet sie auf dem iPhone, das dauert beim ersten Mal ein paar Minuten. Lass das iPhone entsperrt und angeschlossen."
+      },
       "ready": "{{name}} ist bereit für Agenten.",
       "path": {
         "settings": "Einstellungen",
@@ -14413,6 +14542,9 @@
       "membersPersonal": "Personen"
     },
     "advanced": "Erweitert",
+    "tab": {
+      "account": "Profil"
+    },
     "sectionText": {
       "account": "Dein Profil und wie die App für dich aussieht.",
       "notifications": "Was dich hier als Benachrichtigung erreicht. Der Posteingang behält alles.",
@@ -14685,9 +14817,6 @@
         "jev": "Agenten senden nur mit Jev von selbst Sticker.",
         "jevLink": "Jev einrichten"
       }
-    },
-    "tab": {
-      "account": "Profil"
     }
   },
   "personalMode": {

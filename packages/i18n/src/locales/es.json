@@ -1440,6 +1440,112 @@
     "moveDown": "Bajar",
     "restoreOrder": "Restaurar el orden predeterminado"
   },
+  "install": {
+    "frames": "Cómo instalar en {{system}}",
+    "step": "Paso {{n}}",
+    "previous": "Paso anterior",
+    "next": "Paso siguiente",
+    "fullGuide": "Paso a paso completo",
+    "copied": "Copiado. Pégalo en la terminal.",
+    "mac": {
+      "why": "<b>La app está en beta.</b> Por eso, la primera vez, tu Mac te pide que confirmes:",
+      "drag": "Arrastra agentes.chat a Aplicaciones.",
+      "dragLong": "Abre el archivo descargado y arrastra agentes.chat a Aplicaciones.",
+      "blocked": "Abre la app y haz clic en Aceptar.",
+      "blockedSub": "No hagas clic en Trasladar a la papelera.",
+      "settings": "En Ajustes › Privacidad y seguridad, haz clic en Abrir igualmente.",
+      "settingsLong": "Justo después, abre Ajustes del Sistema › Privacidad y seguridad, baja hasta Seguridad y haz clic en Abrir igualmente.",
+      "settingsSub": "El botón aparece ahí solo después de que intentes abrir la app (paso 2), y desaparece al cabo de una hora más o menos. ¿No está? Abre la app otra vez y vuelve.",
+      "settingsShort": "Aparece solo justo después del paso 2.",
+      "openSettings": "Abrir Privacidad y seguridad",
+      "confirm": "Confirma con Touch ID o tu contraseña.",
+      "confirmLong": "Haz clic otra vez en Abrir igualmente y confirma con Touch ID o la contraseña de tu Mac.",
+      "done": "Listo: a partir de ahora se abre directamente.",
+      "stuckTitle": "¿Sigue sin aparecer el botón, o tu Mac dice que la app está dañada?",
+      "stuckText": "Pega esto en Terminal y abre la app otra vez:"
+    },
+    "windows": {
+      "why": "<b>La app está en beta.</b> Por eso, la primera vez, Windows te pide que confirmes:",
+      "keep": "Si tu navegador pregunta, elige Conservar.",
+      "more": "Abre el instalador y haz clic en Más información.",
+      "moreLong": "Abre el instalador. Si aparece Windows protegió su PC, haz clic en Más información.",
+      "run": "Haz clic en Ejecutar de todas formas.",
+      "runLong": "Haz clic en Ejecutar de todas formas y sigue el instalador.",
+      "done": "Listo: a partir de ahora se abre directamente."
+    },
+    "linux": {
+      "why": "Para Ubuntu, Debian y sistemas similares (x64). Linux no pide nada más:",
+      "apt": "Instala el .deb con doble clic, o desde la terminal.",
+      "aptLong": "Haz doble clic en el archivo descargado y luego en Instalar, o pega esto en la terminal:",
+      "open": "Abre agentes.chat desde tus aplicaciones."
+    },
+    "page": {
+      "docTitle": "Descarga la app · agentes.chat",
+      "title": "Descarga la app de agentes.chat",
+      "beta": "Beta",
+      "text": "Tu espacio de trabajo en una ventana propia, con las notificaciones de tu sistema. Con un clic, los agentes trabajan en esta computadora, en carpetas propias.",
+      "open": "Abrir agentes.chat",
+      "version": "Versión {{version}}",
+      "versionSize": "Versión {{version}} · {{size}}",
+      "soon": "Todavía no hay versión para {{system}}.",
+      "useArm": "¿Equipo con procesador ARM? Descarga la versión ARM",
+      "useX64": "Descargar la versión x64",
+      "unavailable": "Ahora mismo no se puede descargar la app desde aquí. Inténtalo de nuevo en un momento.",
+      "installOn": "Instalar en {{system}}",
+      "system": "Sistema",
+      "whyTitle": "¿Por qué mi computadora pide confirmación?",
+      "whyText": "agentes.chat está en beta: la versión para Mac todavía no está notarizada por Apple, y el instalador de Windows todavía no lleva un certificado de Microsoft. Sin ellos, tu computadora pregunta una vez antes de abrir una app descargada de internet. Después, se abre directamente y se actualiza sola. Antes de que termine la beta, este paso desaparece.",
+      "openSource": "Código abierto",
+      "onlyHere": "Publicada solo aquí y en los lanzamientos del proyecto",
+      "signedUpdates": "Actualizaciones firmadas"
+    },
+    "scene": {
+      "finder": "Finder",
+      "file": "Archivo",
+      "edit": "Edición",
+      "view": "Visualización",
+      "window": "Ventana",
+      "applications": "Aplicaciones",
+      "notOpened": "No se ha abierto “{{app}}”",
+      "notOpenedText": "Apple no ha podido verificar que “{{app}}” esté libre de software malicioso que pueda dañar tu Mac o poner en riesgo tu privacidad.",
+      "done": "Aceptar",
+      "moveToTrash": "Trasladar a la papelera",
+      "search": "Buscar",
+      "account": "Cuenta de Apple",
+      "general": "General",
+      "appearance": "Apariencia",
+      "accessibility": "Accesibilidad",
+      "privacy": "Privacidad y seguridad",
+      "desktopDock": "Escritorio y Dock",
+      "displays": "Pantallas",
+      "security": "Seguridad",
+      "allowFrom": "Permitir aplicaciones de",
+      "allowValue": "App Store y desarrolladores conocidos",
+      "blocked": "Se ha bloqueado “{{app}}” para proteger tu Mac.",
+      "openAnyway": "Abrir igualmente",
+      "confirmTitle": "¿Abrir “{{app}}”?",
+      "confirmText": "Ábrela solo si confías en su origen.",
+      "touchIdTitle": "Ajustes del Sistema",
+      "touchIdText": "Usa Touch ID o introduce tu contraseña para permitirlo.",
+      "password": "Contraseña",
+      "downloads": "Descargas",
+      "rare": "Este archivo no se descarga con frecuencia. Asegúrate de que confías en él antes de abrirlo.",
+      "delete": "Eliminar",
+      "keep": "Conservar",
+      "protectedTitle": "Windows protegió su PC",
+      "protectedText": "Microsoft Defender SmartScreen impidió el inicio de una aplicación no reconocida. Si ejecutas esta aplicación, podrías poner en riesgo tu PC.",
+      "protectedShort": "Microsoft Defender SmartScreen impidió el inicio de una aplicación no reconocida.",
+      "moreInfo": "Más información",
+      "dontRun": "No ejecutar",
+      "appLabel": "Aplicación:",
+      "publisher": "Editor:",
+      "unknownPublisher": "Editor desconocido",
+      "runAnyway": "Ejecutar de todas formas",
+      "activities": "Actividades",
+      "readingLists": "Leyendo lista de paquetes... Hecho",
+      "settingUp": "Configurando agentes-chat ({{version}}) ..."
+    }
+  },
   "legal": {
     "updated": "Última actualización: {{date}}",
     "contents": "En esta página",
@@ -13783,6 +13889,7 @@
     "downloadFor": "Descargar para {{system}}",
     "downloadApp": "Descargar la app",
     "otherSystems": "Otros sistemas",
+    "armBuild": "{{system}} (ARM)",
     "onThePhone": "En el teléfono",
     "onTheIphone": "En el iPhone",
     "screen": {
@@ -13860,6 +13967,8 @@
       "helper_missing": "La app de pruebas aún no está configurada",
       "helper_expired": "Hay que renovar la app de pruebas",
       "apple_account_missing": "Xcode no ha iniciado sesión con una Apple Account",
+      "apple_team_missing": "Xcode aún no muestra un equipo",
+      "ui_not_authorized": "El iPhone rechazó los toques de la app de pruebas",
       "team_limit": "La Apple Account gratuita llegó a su límite de apps",
       "helper_untrusted": "El iPhone aún no confía en la app de pruebas",
       "booting": "Iniciando",
@@ -13867,7 +13976,8 @@
       "no_driverLinux": "Linux no puede abrir este teléfono",
       "os_too_old": "Este sistema es demasiado antiguo para las herramientas",
       "adb_offline": "El teléfono no responde",
-      "other": "Necesita algo en el dispositivo"
+      "other": "Necesita algo en el dispositivo",
+      "iosTooOld": "Usa iOS {{version}}, los agentes necesitan iOS 17 o posterior"
     },
     "fix": {
       "locked": "Desbloquéalo",
@@ -13881,6 +13991,8 @@
       "helper_missing": "Abre la app en la Mac",
       "helper_expired": "Abre la app en la Mac",
       "apple_account_missing": "Inicia sesión en Xcode",
+      "apple_team_missing": "Ejecuta una vez una app en el iPhone desde Xcode",
+      "ui_not_authorized": "Desbloquea el iPhone",
       "team_limit": "Elimina una app que creaste",
       "helper_untrusted": "Confía en ella en el iPhone",
       "booting": "Espera a que inicie",
@@ -14136,7 +14248,8 @@
       "toolsDone": "Descargadas por la Mac",
       "toolsText": "La Mac las descarga, unos 8 GB.",
       "accountDone": "Añadida",
-      "accountText": "Añade una, gratuita o de pago, en Xcode en {{mac}}: Settings › Accounts.",
+      "accountText": "Añade una, gratuita o de pago, en Xcode en {{mac}}: Settings › Apple Accounts.",
+      "teamMissingText": "Xcode tiene la sesión iniciada pero aún no muestra un equipo. En Xcode, crea cualquier app de iOS, elige tu equipo en Signing & Capabilities y ejecútala una vez en el iPhone.",
       "connectedDone": "{{name}} · iOS {{version}}",
       "connectedText": "Conecta el iPhone a {{mac}} con un cable.",
       "trustDone": "De confianza",
@@ -14147,6 +14260,22 @@
       "helperText": "La Mac la crea y la renueva cada 7 días. Basta con una Apple Account gratuita en Xcode.",
       "helperUntrustedText": "Toca el nombre del desarrollador y luego Confiar.",
       "teamLimitText": "Elimina del iPhone una app que creaste tú: una Apple Account gratuita permite 3.",
+      "xcodeOld": "{{name}} usa iOS {{version}} y Xcode en {{mac}} conoce como mucho iOS {{sdk}}. Instala Xcode {{major}} y luego ejecuta esto en Terminal.",
+      "xcodeOldAny": "{{name}} usa iOS {{version}}, más nuevo de lo que conoce Xcode en {{mac}}. Instala Xcode {{major}} y luego ejecuta esto en Terminal.",
+      "uiRefusedText": "El iPhone rechazó los toques de la app de pruebas. Desbloquéalo y escribe su código si lo pide. Si vuelve a pasar, desactiva y activa Configuración › Desarrollador › Activar automatización de la IU.",
+      "tooOld": "{{name}} usa iOS {{version}}, y los agentes necesitan iOS 17 o posterior. Actualízalo si se puede, o conecta un iPhone más nuevo.",
+      "tooOldVersion": "16 o anterior",
+      "pluggedIn": "Ya está conectado",
+      "stall": {
+        "xcode": "¿Ya está instalado? Abre Xcode una vez y acepta sus términos, para que {{mac}} pueda usarlo.",
+        "tools": "La descarga pesa unos 8 GB y necesita que {{mac}} no entre en reposo y tenga internet. Si se detuvo, descarga iOS en Xcode › Settings › Components.",
+        "account": "¿Ya iniciaste sesión? En Xcode, crea cualquier app de iOS, elige tu equipo en Signing & Capabilities y ejecútala una vez en el iPhone.",
+        "connected": "{{mac}} aún no ve ningún iPhone. Usa un cable que transmita datos, no solo carga, desbloquea el iPhone y toca Confiar si lo pide.",
+        "trust": "¿No aparece Confiar? Desconecta el iPhone, desbloquéalo y vuelve a conectarlo, luego toca Confiar y escribe su código.",
+        "developerMode": "El Modo de desarrollador solo se activa después de reiniciar el iPhone. Toca Reiniciar y luego Activar cuando vuelva. ¿No ves el interruptor? Desconecta el iPhone y vuelve a conectarlo.",
+        "uiAutomation": "El interruptor aparece cuando el Modo de desarrollador está activado y el iPhone se reinició. Mantenlo desbloqueado mientras lo buscas.",
+        "helper": "{{mac}} crea la app de pruebas y la abre en el iPhone, lo que tarda unos minutos la primera vez. Mantén el iPhone desbloqueado y conectado."
+      },
       "ready": "{{name}} está listo para los agentes.",
       "path": {
         "settings": "Configuración",
@@ -14814,6 +14943,9 @@
       "membersPersonal": "Personas"
     },
     "advanced": "Avanzado",
+    "tab": {
+      "account": "Perfil"
+    },
     "sectionText": {
       "account": "Tu perfil y cómo se ve la app para ti.",
       "notifications": "Lo que te llega como aviso aquí. La bandeja de entrada guarda todo.",
@@ -15090,9 +15222,6 @@
         "jev": "Los agentes envían stickers por su cuenta solo con Jev.",
         "jevLink": "Configurar Jev"
       }
-    },
-    "tab": {
-      "account": "Perfil"
     }
   },
   "personalMode": {

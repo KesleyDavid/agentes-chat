@@ -1,7 +1,7 @@
 import type { MachineErrorCode } from "@agenteschat/adapters/machine-protocol";
 
 /** The runner's own version, sent in `hello` and at pairing. */
-export const RUNNER_VERSION = "0.11.0";
+export const RUNNER_VERSION = "0.12.0";
 
 /** A failure the runner reports to the server with a protocol error code. */
 export class RunnerError extends Error {

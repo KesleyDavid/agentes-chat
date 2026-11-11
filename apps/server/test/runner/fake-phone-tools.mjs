@@ -6,6 +6,8 @@
 //   facts: { serial: what the facts shell prints }   keyguard: { serial: what the lock screen check prints }
 //   install: adb install's answer (installFail: its error, exit 1)   monkey, logcat, pidof: { app: pid }
 //   simctl, devicectl: the JSON each lists   launchFail: devicectl's error   simlog: `log show`'s text
+//   devicectlFail: `devicectl list devices` fails with it   sdk: the iPhone SDK's version   lockState: devicectl says the iPhone asks for its passcode
+//   wdaLocked: WDA says the lock screen shows   wdaRefuse: WDA's error for a tap
 //   maestroExit, maestroOutput   javaMissing: maestro says JAVA_HOME isn't set
 //   videoFirst: maestro answers once a flow's recording (`*-flow.mp4`, not empty) sits beside its YAML, as on a phone
 //   where the recorder is up before the flow ends (on a loaded machine maestro's process could end before the
@@ -117,6 +119,11 @@ else if (tool === "xcrun" && args[0] === "xcodebuild") {
   const line = args.join(" ");
   const json = args[args.indexOf("--json-output") + 1];
   if (line.startsWith("simctl list devices")) out(JSON.stringify(state.simctl ?? { devices: {} }));
+  else if (line === "--sdk iphoneos --show-sdk-version") state.sdk ? out(`${state.sdk}\n`) : fail("no SDK\n");
+  else if (line.startsWith("devicectl device info lockState")) {
+    writeFileSync(json, JSON.stringify({ result: { passcodeRequired: state.lockState === true } }));
+    out("");
+  } else if (line.startsWith("devicectl list devices") && state.devicectlFail) fail(state.devicectlFail);
   else if (line.startsWith("devicectl list devices")) {
     writeFileSync(json, JSON.stringify(state.devicectl ?? { result: { devices: [] } }));
     out("");
@@ -201,6 +208,9 @@ function fakeWda() {
           res.end(JSON.stringify({ value, ...extra }));
         };
         if (req.url === "/status") send({ ready: true });
+        else if (req.url === "/wda/locked") send(now.wdaLocked === true);
+        else if (now.wdaRefuse && req.url.endsWith("/wda/tap"))
+          send({ error: "unknown error", message: now.wdaRefuse });
         else if (req.url === "/session") send({ sessionId: "s1" }, { sessionId: "s1" });
         else if (req.url === "/screenshot") send(png().toString("base64"));
         else if (req.url.endsWith("/window/size")) send({ width: 390, height: 844 });

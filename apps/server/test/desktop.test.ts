@@ -62,6 +62,10 @@ test("release body and checksum parsing", () => {
     minVersion: "0.2.0",
   });
   expect(parseReleaseBody(null)).toEqual({ notes: "" });
+  // The first-open steps the CI adds are for the release page, not the app's update notes.
+  expect(parseReleaseBody("- item\n\n<!-- install -->\n## Installing (first open)\nmin-version: 9.9.9")).toEqual({
+    notes: "- item",
+  });
   expect(parseSha256(`${SUM.toUpperCase()}  file.dmg`)).toBe(SUM);
   expect(parseSha256("nope")).toBeNull();
 });
@@ -146,14 +150,18 @@ test("Windows and Linux: each platform's own files, from the newest release that
   const all = (v: string) => [
     asset(`agentes_${v}_universal.dmg`),
     asset(`agentes_${v}_universal.dmg.sha256`),
-    asset(`agentes_${v}_x64-setup.exe`),
-    asset(`agentes_${v}_x64-setup.exe.sha256`),
-    asset(`agentes_${v}_x64-setup.exe.sig`),
-    asset(`agentes_${v}_amd64.deb`),
-    asset(`agentes_${v}_amd64.deb.sha256`),
-    asset(`agentes_${v}_amd64.AppImage`),
-    asset(`agentes_${v}_amd64.AppImage.sha256`),
-    asset(`agentes_${v}_amd64.AppImage.sig`),
+    ...["x64", "arm64"].flatMap((arch) => [
+      asset(`agentes_${v}_${arch}-setup.exe`),
+      asset(`agentes_${v}_${arch}-setup.exe.sha256`),
+      asset(`agentes_${v}_${arch}-setup.exe.sig`),
+    ]),
+    ...["amd64", "arm64"].flatMap((arch) => [
+      asset(`agentes_${v}_${arch}.deb`),
+      asset(`agentes_${v}_${arch}.deb.sha256`),
+      asset(`agentes_${v}_${arch}.AppImage`),
+      asset(`agentes_${v}_${arch}.AppImage.sha256`),
+      asset(`agentes_${v}_${arch}.AppImage.sig`),
+    ]),
   ];
   // 0.4.0 was a Mac-only build: Windows and Linux keep 0.3.0.
   const github = fakeGithub([release("0.4.0"), release("0.3.0", { assets: all("0.3.0") })]);
@@ -171,7 +179,14 @@ test("Windows and Linux: each platform's own files, from the newest release that
   expect(await latest("target=linux&arch=x64")).toMatchObject({
     url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_amd64.deb",
   });
-  expect(await latest("target=windows&arch=arm64")).toBe(404);
+  // ARM64 has builds of its own on Windows and Linux; a chip with none gets nothing.
+  expect(await latest("target=windows&arch=arm64")).toMatchObject({
+    url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_arm64-setup.exe",
+  });
+  expect(await latest("target=linux&arch=aarch64")).toMatchObject({
+    url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_arm64.deb",
+  });
+  expect(await latest("target=linux&arch=armv7")).toBe(404);
   expect(await latest("target=freebsd&arch=x64")).toBe(404);
 
   const update = async (query: string) => {
@@ -185,6 +200,13 @@ test("Windows and Linux: each platform's own files, from the newest release that
   expect(await update("target=linux&arch=x86_64&current=0.2.0&bundle=appimage")).toMatchObject({
     url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_amd64.AppImage",
   });
+  expect(await update("target=windows&arch=aarch64&current=0.2.0")).toMatchObject({
+    url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_arm64-setup.exe",
+  });
+  expect(await update("target=linux&arch=aarch64&current=0.2.0&bundle=appimage")).toMatchObject({
+    url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_arm64.AppImage",
+  });
+  expect(await update("target=linux&arch=aarch64&current=0.2.0&bundle=deb")).toBe(204);
   // A deb install can't take the AppImage (the updater would refuse it after the whole download): it downloads
   // the new deb instead, and so does an app that doesn't say which it is.
   expect(await update("target=linux&arch=x86_64&current=0.2.0&bundle=deb")).toBe(204);

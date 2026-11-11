@@ -134,19 +134,25 @@ function ask(socketPath: string, message: Record<string, string | number>, timeo
   });
 }
 
-const norm = (udid: string) => udid.replace(/-/g, "").toUpperCase();
+/** usbmuxd's spelling of a UDID and devicectl's, alike. */
+export const udidKey = (udid: string) => udid.replace(/-/g, "").toUpperCase();
+
+/** The phones plugged in (not over Wi-Fi): usbmuxd's number by UDID (dashes dropped, upper case). */
+export async function usbmuxPlugged(socketPath = USBMUXD_SOCKET): Promise<Map<string, number>> {
+  const { reply, socket } = await ask(socketPath, { MessageType: "ListDevices" });
+  socket.destroy();
+  const out = new Map<string, number>();
+  for (const d of Array.isArray(reply.DeviceList) ? reply.DeviceList : []) {
+    const props = (d as Record<string, Plist>).Properties as Record<string, Plist> | undefined;
+    if (props?.ConnectionType !== "USB" || typeof props.SerialNumber !== "string") continue;
+    if (typeof props.DeviceID === "number") out.set(udidKey(props.SerialNumber), props.DeviceID);
+  }
+  return out;
+}
 
 /** usbmuxd's number for the phone with this UDID, plugged in (not over Wi-Fi); null when it isn't. */
 export async function usbmuxDeviceId(udid: string, socketPath = USBMUXD_SOCKET): Promise<number | null> {
-  const { reply, socket } = await ask(socketPath, { MessageType: "ListDevices" });
-  socket.destroy();
-  const list = Array.isArray(reply.DeviceList) ? reply.DeviceList : [];
-  for (const d of list) {
-    const props = (d as Record<string, Plist>).Properties as Record<string, Plist> | undefined;
-    if (props?.ConnectionType !== "USB" || typeof props.SerialNumber !== "string") continue;
-    if (norm(props.SerialNumber) === norm(udid) && typeof props.DeviceID === "number") return props.DeviceID;
-  }
-  return null;
+  return (await usbmuxPlugged(socketPath)).get(udidKey(udid)) ?? null;
 }
 
 /** A raw socket to `port` on the phone (`Connect` with the port in network byte order). */

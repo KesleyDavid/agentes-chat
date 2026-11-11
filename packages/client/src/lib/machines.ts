@@ -165,16 +165,43 @@ export function platformOf(userAgent: string): Platform {
 /** A phone or a tablet, from its browser's user agent: the app is for computers. */
 export const isHandheld = (userAgent: string) => /Android|iPhone|iPad|iPod/i.test(userAgent);
 
+/** A desktop build, as `/api/desktop/latest` asks for it. */
+export interface DesktopBuild {
+  target: "darwin" | "windows" | "linux";
+  arch: "aarch64" | "x86_64";
+}
+
 /**
- * The app's build for the computer a browser runs on, as `/api/desktop/latest` names it: one build for both Mac
- * chips, x64 on Windows and Linux. Null where none fits: a phone or a tablet, or a Linux on another chip.
+ * The app's build for the computer a browser runs on: one build for both Mac chips; x64 or ARM64 on Windows and
+ * Linux. A Windows browser says x64 even on ARM (Windows runs x64 apps there, emulated), unless `cpu` (the browser's
+ * own `userAgentData` architecture, `desktopCpu`) says "arm". Null where none fits: a phone or a tablet, or a Linux
+ * on another chip.
  */
-export function desktopTargetOf(userAgent: string) {
+export function desktopTargetOf(userAgent: string, cpu?: string | null): DesktopBuild | null {
   const platform = platformOf(userAgent);
-  if (isHandheld(userAgent) || (platform === "linux" && !/x86_64|x64|amd64/i.test(userAgent))) return null;
-  return platform === "mac"
-    ? ({ target: "darwin", arch: "aarch64" } as const)
-    : ({ target: platform, arch: "x86_64" } as const);
+  if (isHandheld(userAgent)) return null;
+  if (platform === "mac") return { target: "darwin", arch: "aarch64" };
+  const arm = cpu === "arm" || /\b(aarch64|arm64)\b/i.test(userAgent);
+  if (platform === "linux" && !arm && !/x86_64|x64|amd64/i.test(userAgent)) return null;
+  return { target: platform, arch: arm ? "aarch64" : "x86_64" };
+}
+
+/**
+ * The computer's architecture as a Chromium browser reports it (`navigator.userAgentData`, "arm" or "x86"): the one
+ * way to tell a Windows on ARM. Null where the browser doesn't say (Safari, Firefox).
+ */
+export async function desktopCpu(): Promise<string | null> {
+  const data = (
+    globalThis.navigator as
+      | { userAgentData?: { getHighEntropyValues?(hints: string[]): Promise<{ architecture?: string }> } }
+      | undefined
+  )?.userAgentData;
+  if (!data?.getHighEntropyValues) return null;
+  try {
+    return (await data.getHighEntropyValues(["architecture"])).architecture ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /** Which portrait a computer gets; same names as `ComputerKind` in @agenteschat/ui. */

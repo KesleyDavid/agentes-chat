@@ -21,6 +21,7 @@ import { Link } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { HelpLink } from "@/components/HelpLink";
+import { DownloadWithGuide } from "@/components/install/guide";
 import { CommandBlock } from "@/components/machine-bits";
 import { useOrg } from "@/components/org-context";
 import { ThisMacButton, useAgentsHere } from "@/components/ThisMac";
@@ -28,7 +29,7 @@ import { inDesktopApp } from "@/lib/desktop";
 import { AndroidFlow, IphoneFlow } from "./ConnectPhone";
 import { JoinRequestForm } from "./dialogs";
 import { FlowFooter, type FlowProps } from "./flow";
-import { DownloadButtons, StatusPill } from "./parts";
+import { StatusPill } from "./parts";
 import { useConnectLink, useDevices, useLinkState } from "./queries";
 
 export type ConnectStep = "choose" | "this" | "server" | "computer" | "link" | "android" | "iphone";
@@ -253,9 +254,7 @@ function ComputerFlow({
           <li>
             <span className="apps-step">
               <span>{t("devices.computer.step1")}</span>
-              <span className="dv-step__acts">
-                <DownloadButtons primary onLine={onLine} />
-              </span>
+              <DownloadWithGuide primary onLine={onLine} />
             </span>
           </li>
           <li>
@@ -512,9 +511,7 @@ function OpenInApp({
       </div>
       <section className="dv-app dv-app--get" aria-labelledby="dv-app-get">
         <GroupHeading level={3} id="dv-app-get" title={t("devices.thisApp.noApp")} />
-        <span className="dv-step__acts">
-          <DownloadButtons onLine={onLine} />
-        </span>
+        <DownloadWithGuide onLine={onLine} />
         <p className="small muted">{t("devices.thisApp.afterInstall")}</p>
         <p className="small muted">
           <button type="button" className="ac-link" onClick={() => onLine?.()}>

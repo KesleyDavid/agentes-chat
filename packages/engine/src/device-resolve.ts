@@ -353,7 +353,7 @@ export function phoneReasonText(
       return { text: `${host} has no Xcode. Ask the person to install it from the App Store.`, byItself: false };
     case "xcode_too_old":
       return {
-        text: `${phone} runs an iOS that needs a newer Xcode on ${host}. Ask the person to update Xcode.`,
+        text: `${phone} runs an iOS newer than Xcode on ${host} can drive. Ask the person to install the Xcode matching the iPhone's iOS (27 for iOS 27), then run \`xcrun devicectl manage ddis update\`.`,
         byItself: false,
       };
     case "helper_missing":
@@ -365,7 +365,17 @@ export function phoneReasonText(
       return { text: `${host} is renewing the test helper on ${phone} (its free signature ran out).`, byItself: true };
     case "apple_account_missing":
       return {
-        text: `I couldn't set up the test helper on ${phone}: Xcode on ${host} isn't signed in to an Apple Account. Ask the person to sign in under Xcode → Settings → Accounts (a free one is enough).`,
+        text: `I couldn't set up the test helper on ${phone}: Xcode on ${host} isn't signed in to an Apple Account. Ask the person to sign in under Xcode → Settings → Apple Accounts (a free one is enough).`,
+        byItself: false,
+      };
+    case "apple_team_missing":
+      return {
+        text: `I couldn't set up the test helper on ${phone}: Xcode on ${host} is signed in but shows no team yet. Ask the person to make any iOS app in Xcode, pick their team under Signing & Capabilities and run it on the iPhone once.`,
+        byItself: false,
+      };
+    case "ui_not_authorized":
+      return {
+        text: `${phone} refused the test helper's taps. Ask the person to unlock it and enter its passcode if it asks, and if it keeps happening to turn Settings → Developer → Enable UI Automation off and on.`,
         byItself: false,
       };
     case "team_limit":
@@ -393,7 +403,10 @@ export function phoneReasonText(
     case "device_support":
       return { text: `${host} is preparing ${phone} (it downloads what Xcode needs for it).`, byItself: true };
     case "os_too_old":
-      return { text: `${phone} runs a system too old for the testing tools. Use another phone.`, byItself: false };
+      return {
+        text: `${phone} runs a system too old for the testing tools (an iPhone needs iOS 17 or newer). Use another phone.`,
+        byItself: false,
+      };
     default:
       return { text: `${phone} isn't ready${reason ? ` (${reason})` : ""}.`, byItself: false };
   }

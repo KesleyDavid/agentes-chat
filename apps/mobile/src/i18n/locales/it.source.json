@@ -114,7 +114,7 @@
     "value": "We can't reach {{host}}. Check the address and your connection, and try again."
   },
   "auth.server.unreachableTailscale": {
-    "value": "We can't reach {{host}}. It's on Tailscale: open the Tailscale app, connect and try again."
+    "value": "We can't reach {{host}}. It's on Tailscale: open the Tailscale app, connect and try again. Connected already? The computer it runs on may be asleep, or its app closed."
   },
   "auth.server.certificate": {
     "value": "The certificate of {{host}} isn't valid. Talk to whoever runs the server."

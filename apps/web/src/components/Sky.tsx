@@ -343,6 +343,38 @@ export function AuthHorizon({ clear }: { clear?: Clear }) {
   );
 }
 
+/**
+ * The `/download` page's sky: the sign-in horizon turned over, soft tones at the top fading into the page, where the
+ * app (the agents' home on this computer) is offered. Two agents pass; the title and the button stay clear.
+ */
+export function DownloadSky({ clear }: { clear?: Clear }) {
+  const opts: SkyOptions = {
+    pixel: 4,
+    surface: "--bg",
+    palette: (bg) => softTones("sky", bg),
+    body: spriteTone("sky"),
+    near: 0,
+    ceil: 0.05,
+    light: 0.06,
+    sprites: 2,
+    clear,
+    base: (u, v, tt) => {
+      const s = Math.max(0, 1 - v / 0.9);
+      const e = s * s * (3 - 2 * s);
+      return 0.72 * e + 0.05 * S(u * 4 + tt * 0.4) * e;
+    },
+    blobs: (tt) => [
+      [0.15 + 0.08 * C(tt * 0.15), 0.08, 0.07, 0.07],
+      [0.85 + 0.08 * S(tt * 0.12), 0.1, 0.07, 0.07],
+    ],
+  };
+  return (
+    <span className="dlp__sky" aria-hidden="true">
+      <PixelSky options={opts} />
+    </span>
+  );
+}
+
 /* ---------- Small moments ---------- */
 
 /** A thin dithered strip sweeping in the agent's color behind the activity bar ("Theo está pensando…"). */

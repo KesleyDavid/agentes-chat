@@ -1892,6 +1892,8 @@
       "helper_missing": "L'app di test non è ancora configurata",
       "helper_expired": "L'app di test va rinnovata",
       "apple_account_missing": "Xcode sul Mac ha bisogno di un Apple Account",
+      "apple_team_missing": "Xcode sul Mac non mostra ancora un team",
+      "ui_not_authorized": "Questo iPhone ha rifiutato i tocchi dell'app di test",
       "team_limit": "Rimuovi da questo iPhone un'app creata da te",
       "helper_untrusted": "Autorizza l'app di test su questo iPhone",
       "booting": "Si sta avviando",
@@ -2051,7 +2053,16 @@
       "step5Hint": "L'app che {{host}} installa perché gli agenti possano toccare e scrivere su questo iPhone. Compare in questo elenco una volta installata.",
       "step5Text": "Impostazioni › Generali › VPN e gestione dispositivi. Tocca il nome dello sviluppatore, poi Autorizza.",
       "waiting": "In attesa che {{host}} lo rilevi",
-      "footer": "Il tuo Mac fa il resto, e rinnova l'app di test ogni 7 giorni finché è acceso."
+      "footer": "Il tuo Mac fa il resto, e rinnova l'app di test ogni 7 giorni finché è acceso.",
+      "tooOld": "Questo iPhone usa iOS {{version}}, e gli agenti hanno bisogno di iOS 17 o successivo. Aggiornalo se può, o usa un iPhone più recente.",
+      "xcodeOld": "Questo iPhone usa iOS {{version}}, più recente di quanto conosca Xcode su {{host}}. Installa lì Xcode {{major}}, poi esegui xcrun devicectl manage ddis update nel Terminale.",
+      "teamMissing": "Xcode ha effettuato l'accesso ma non mostra ancora un team. In Xcode crea un'app iOS qualsiasi, scegli il tuo team in Signing & Capabilities ed eseguila una volta su questo iPhone.",
+      "uiRefused": "Questo iPhone ha rifiutato i tocchi dell'app di test. Sbloccalo e inserisci il codice se lo chiede. Se succede ancora, disattiva e riattiva Impostazioni › Sviluppatore › Abilita automazione UI.",
+      "pluggedIn": "È collegato",
+      "stall": {
+        "plug": "{{host}} non vede ancora questo iPhone. Usa un cavo che trasmette dati, non solo ricarica, tieni questo iPhone sbloccato e tocca Autorizza se lo chiede.",
+        "devmode": "La Modalità sviluppatore si attiva solo dopo il riavvio di questo iPhone. Tocca Riavvia, poi Attiva quando si riaccende. Nessun interruttore? Scollega questo iPhone e ricollegalo."
+      }
     },
     "notice": {
       "kind": "Dispositivi",

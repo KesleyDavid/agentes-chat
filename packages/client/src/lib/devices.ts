@@ -1,4 +1,5 @@
 import type { TFunction } from "i18next";
+import { useEffect, useState } from "react";
 import type {
   AppNotification,
   ComputerDevice,
@@ -77,6 +78,8 @@ const REASONS = new Set([
   "helper_missing",
   "helper_expired",
   "apple_account_missing",
+  "apple_team_missing",
+  "ui_not_authorized",
   "team_limit",
   "helper_untrusted",
   "booting",
@@ -101,6 +104,19 @@ export const fixText = (t: TFunction, reason: string, os?: string | null) =>
   say(t, `devices.fix.${reasonKey(reason, os)}`);
 
 /**
+ * `hostOs`: the host's system, which a phone with no driver reads by. `ios`: an iPhone's iOS version, which its
+ * "too old" line names.
+ */
+type StatusOptions = { host?: string | null; hostOs?: string | null; now?: Date; ios?: string | null };
+
+/** An iPhone's iOS version, for `StatusOptions.ios`. */
+export const iosOf = (d: ComputerDevice | PhoneDevice) =>
+  "platform" in d && d.platform === "ios" ? d.osVersion : null;
+
+/** The version a "too old" line names: devicectl gives none for some iPhones below iOS 17. */
+export const tooOldVersion = (t: TFunction, version: string) => version || t("devices.iphone.tooOldVersion");
+
+/**
  * The quiet line under a row's pill: "for Rui since 14:10", "last seen 14:02", "with Ana's iMac", "until 18:00";
  * for Needs you the fix itself ("Turn on Developer Mode"). Null when the pill says it all.
  */
@@ -108,7 +124,7 @@ export function statusDetail(
   t: TFunction,
   locale: string,
   s: DeviceStatus,
-  options: { host?: string | null; hostOs?: string | null; now?: Date } = {},
+  options: StatusOptions = {},
 ): string | null {
   const now = options.now ?? new Date();
   switch (s.kind) {
@@ -126,7 +142,9 @@ export function statusDetail(
       if (s.withHost && options.host) return t("devices.detail.withHost", { host: options.host });
       return s.lastSeenAt ? t("devices.detail.lastSeen", { time: clockAt(locale, s.lastSeenAt, now) }) : null;
     case "unsupported":
-      return reasonText(t, s.reason);
+      return s.reason === "os_too_old" && options.ios != null
+        ? t("devices.reason.iosTooOld", { version: tooOldVersion(t, options.ios) })
+        : reasonText(t, s.reason);
     default:
       return null;
   }
@@ -137,7 +155,7 @@ export function statusSentence(
   t: TFunction,
   locale: string,
   s: DeviceStatus,
-  options: { host?: string | null; hostOs?: string | null; now?: Date } = {},
+  options: StatusOptions = {},
 ): string | null {
   const now = options.now ?? new Date();
   switch (s.kind) {
@@ -516,9 +534,45 @@ const IPHONE_REASON: Record<string, IphoneStep> = {
   helper_missing: "helper",
   helper_expired: "helper",
   apple_account_missing: "account",
+  apple_team_missing: "account",
+  ui_not_authorized: "uiAutomation",
+  os_too_old: "connected",
   team_limit: "helper",
   helper_untrusted: "helper",
 };
+
+const hasAppleTeam = (host: ComputerDevice) => !!host.toolchains.appleTeam || host.toolchains.appleAccount === "team";
+
+/** Xcode lists an Apple Account that shows no team yet: the account step says how to get one, not "sign in". */
+export const iphoneNoTeam = (host: ComputerDevice | undefined, phone: PhoneDevice | null) =>
+  host?.toolchains.appleAccount === "no_team" ||
+  (!!phone && "reason" in phone.status && phone.status.reason === "apple_team_missing");
+
+/** An iPhone's iOS major version ("27" from "27.0.1"), for the Xcode it needs. */
+export const iosMajor = (version: string) => version.split(".")[0] ?? version;
+
+/** What Xcode needs for an iPhone on a newer iOS than it knows, after installing the matching Xcode. */
+export const DDIS_UPDATE = "xcrun devicectl manage ddis update";
+
+/** A step under way or waiting on the person this long, unchanged, says what most likely holds it and one way out. */
+export const SETUP_STALL_MS = 45_000;
+
+/**
+ * Whether `key` (the step and what the device reports) stayed the same for `SETUP_STALL_MS`. A new key starts over;
+ * null: nothing waits.
+ */
+export function useStalled(key: string | null, ms = SETUP_STALL_MS): boolean {
+  const [since, setSince] = useState(() => ({ key, at: Date.now() }));
+  const [, rerender] = useState(0);
+  useEffect(() => {
+    setSince({ key, at: Date.now() });
+    if (key === null) return;
+    // Read again just after the time is up: the answer is the clock's.
+    const timer = setTimeout(() => rerender((n) => n + 1), ms + 100);
+    return () => clearTimeout(timer);
+  }, [key, ms]);
+  return key !== null && since.key === key && Date.now() - since.at >= ms;
+}
 
 /** The iPhone a Mac reaches (a real one first), for the iPhone guide. */
 export const iphoneOf = (host: ComputerDevice | undefined) =>
@@ -536,8 +590,11 @@ export function iphoneSteps(
   let at: IphoneStep | null;
   let needs = false;
   if (!phone) {
-    at = !host?.toolchains.xcode ? "xcode" : !host.toolchains.appleTeam ? "account" : "connected";
+    at = !host?.toolchains.xcode ? "xcode" : !hasAppleTeam(host) ? "account" : "connected";
     needs = at !== "connected";
+  } else if (phone.status.kind === "unsupported") {
+    // An iPhone below iOS 17: nothing the person does on this Mac makes it usable, so it ends here.
+    [at, needs] = ["connected", true];
   } else if (phone.status.kind === "needs_you" || phone.status.kind === "preparing") {
     at = IPHONE_REASON[phone.status.reason] ?? "helper";
     // While the Mac builds or renews the test helper the phone is preparing; needs_you there means it failed.

@@ -86,6 +86,8 @@ const PHONE_STEP: Partial<Record<string, IphoneSetupStep>> = {
   helper_missing: "helper",
   helper_expired: "helper",
   apple_account_missing: "account",
+  apple_team_missing: "account",
+  ui_not_authorized: "uiAutomation",
   helper_untrusted: "helper",
   team_limit: "helper",
 };

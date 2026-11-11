@@ -430,13 +430,22 @@ a.dv-row__detail {
   flex-direction: column;
   gap: var(--space-1);
   margin: 0;
-  padding-inline-start: var(--space-4);
+  padding: 0;
+  list-style: none;
   font-size: var(--text-sm);
   line-height: 18px;
   color: var(--ink2);
   overflow-wrap: anywhere;
 }
-.dv-slow__list > li::marker {
+/* The bullets sit on the heading's edge and the words hang after them, so the list starts where its heading does. */
+.dv-slow__list > li {
+  position: relative;
+  padding-inline-start: var(--space-4);
+}
+.dv-slow__list > li::before {
+  content: "•";
+  position: absolute;
+  inset-inline-start: 0;
   color: var(--faint);
 }
 .dv-links {
@@ -1185,4 +1194,9 @@ html:not([data-pointer]) .dv-screen:focus-visible {
   .dv-screen__frame {
     --dv-screen-h: min(60vh, 35rem);
   }
+}
+/* What most likely holds a step that sat unchanged, and the one way out. */
+.dv-step__stall {
+  margin: 0;
+  color: var(--ink2);
 }

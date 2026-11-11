@@ -1,7 +1,8 @@
 import { afterEach, expect, test } from "bun:test";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { cachedToolchains, probeToolchains } from "../../runner/toolchains";
+import type { RunnerToolchains } from "@agenteschat/adapters/machine-protocol";
+import { appleToolchains, cachedToolchains, probeToolchains } from "../../runner/toolchains";
 import { removeDirs, tempDir } from "./helpers";
 
 const dirs: string[] = [];
@@ -16,6 +17,7 @@ const TOOLS: Record<string, string> = {
   maestro: "printf 'A new version is available\\n2.11.0\\n'",
   "xcode-select": "echo /Applications/Xcode.app/Contents/Developer",
   xcodebuild: "printf 'Xcode 26.3\\nBuild version 17C529\\n'",
+  xcrun: "echo 26.2",
   node: "echo v24.22.1",
   podman: "echo 'podman version 5.4.2'",
 };
@@ -42,7 +44,9 @@ test("what this computer builds with: each tool's version, the Android SDK's fol
     scrcpy: "4.0",
     maestro: "2.11.0",
     xcode: "26.3",
+    xcodeSdk: "26.2",
     appleTeam: "Sam Rivera (Personal Team)",
+    appleAccount: "team",
     node: "24.22.1",
     podman: "5.4.2",
   });
@@ -63,4 +67,63 @@ test("the cache: the last look at once, a fresh one written for the next hello",
   expect(cache.get()).toEqual({ git: "2.50.1", node: "24.22.1" });
   expect(JSON.parse(readFileSync(file, "utf8"))).toEqual({ git: "2.50.1", node: "24.22.1" });
   cache.stop();
+});
+
+test("Xcode's part, looked at every minute: a team found, or Xcode updated, goes out as the whole list", async () => {
+  const c = computer(["xcode-select", "xcodebuild", "xcrun"]);
+  // Signed in to Xcode, no team yet: the setup's account step says so.
+  expect(
+    await appleToolchains({
+      env: c.env,
+      platform: "darwin",
+      home: c.root,
+      dirs: [],
+      teams: async () => ({ teams: [], account: "no_team" }),
+    }),
+  ).toEqual({ xcode: "26.3", xcodeSdk: "26.2", appleTeam: undefined, appleAccount: "no_team" });
+  expect(await appleToolchains({ env: c.env, platform: "linux", home: c.root, dirs: [] })).toEqual({});
+  const file = path.join(c.root, "toolchains.json");
+  writeFileSync(file, JSON.stringify({ git: "2.50.1", xcode: "26.3", appleAccount: "no_team" }));
+  const told: unknown[] = [];
+  let apple: RunnerToolchains = { xcode: "26.3", appleAccount: "no_team" };
+  const cache = cachedToolchains(file, () => new Promise(() => {}), {
+    look: async () => apple,
+    onChange: (t) => told.push(t),
+  });
+  // The full look still running: the minute's look waits for it.
+  await cache.lookApple();
+  expect(told).toEqual([]);
+  cache.stop();
+  const quiet = cachedToolchains(file, async () => JSON.parse(readFileSync(file, "utf8")), {
+    look: async () => apple,
+    onChange: (t) => told.push(t),
+  });
+  await quiet.look();
+  await quiet.lookApple();
+  expect(told).toEqual([]);
+  apple = { xcode: "26.3", xcodeSdk: "26.2", appleTeam: "Sam Rivera (Personal Team)", appleAccount: "team" };
+  await quiet.lookApple();
+  const whole = { git: "2.50.1", ...apple };
+  expect(told).toEqual([whole]);
+  expect(quiet.get()).toEqual(whole);
+  expect(JSON.parse(readFileSync(file, "utf8"))).toEqual(whole);
+  quiet.stop();
+  // hello carried the file's last look, and the start's full look found more: the server hears it the next minute,
+  // again each minute while nothing could be sent.
+  writeFileSync(file, JSON.stringify({ git: "2.50.1", xcode: "26.3", appleAccount: "no_team" }));
+  const sent: unknown[] = [];
+  let online = false;
+  const late = cachedToolchains(file, async () => whole, {
+    look: async () => apple,
+    onChange: (t) => online && sent.push(t) > 0,
+  });
+  expect(late.get()).toEqual({ git: "2.50.1", xcode: "26.3", appleAccount: "no_team" });
+  await late.look();
+  await late.lookApple();
+  expect(sent).toEqual([]);
+  online = true;
+  await late.lookApple();
+  await late.lookApple();
+  expect(sent).toEqual([whole]);
+  late.stop();
 });

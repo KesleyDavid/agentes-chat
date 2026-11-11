@@ -1801,6 +1801,8 @@
       "helper_missing": "Test yardımcısı henüz kurulmadı",
       "helper_expired": "Test yardımcısının yenilenmesi gerekiyor",
       "apple_account_missing": "Mac'teki Xcode'un bir Apple Account'a ihtiyacı var",
+      "apple_team_missing": "Mac'teki Xcode henüz bir ekip göstermiyor",
+      "ui_not_authorized": "Bu iPhone, test yardımcısının dokunuşlarını reddetti",
       "team_limit": "Kendi oluşturduğunuz bir uygulamayı bu iPhone'dan silin",
       "helper_untrusted": "Bu iPhone'da test yardımcısına güvenin",
       "booting": "Başlatılıyor",
@@ -1959,7 +1961,16 @@
       "step5Hint": "Ajanların bu iPhone'da dokunup yazabilmesi için {{host}} bilgisayarının yüklediği uygulama. Yüklendiğinde bu listede görünür.",
       "step5Text": "Ayarlar › Genel › VPN ve Aygıt Yönetimi. Geliştiricinin adına, ardından Güven'e dokunun.",
       "waiting": "{{host}} bilgisayarının onu görmesi bekleniyor",
-      "footer": "Gerisini Mac'iniz yapar ve açık olduğu sürece test yardımcısını her 7 günde bir yeniler."
+      "footer": "Gerisini Mac'iniz yapar ve açık olduğu sürece test yardımcısını her 7 günde bir yeniler.",
+      "tooOld": "Bu iPhone iOS {{version}} kullanıyor ve ajanlar iOS 17 veya daha yenisini gerektirir. Mümkünse güncelleyin ya da daha yeni bir iPhone kullanın.",
+      "xcodeOld": "Bu iPhone iOS {{version}} kullanıyor, bu {{host}} üzerindeki Xcode'un bildiğinden yeni. Oraya Xcode {{major}} yükleyin, ardından Terminal'de xcrun devicectl manage ddis update komutunu çalıştırın.",
+      "teamMissing": "Xcode'da oturum açık ama henüz bir ekip görünmüyor. Xcode'da herhangi bir iOS uygulaması oluşturun, Signing & Capabilities altında ekibinizi seçin ve uygulamayı bu iPhone'da bir kez çalıştırın.",
+      "uiRefused": "Bu iPhone, test yardımcısının dokunuşlarını reddetti. Kilidini açın ve isterse parolanızı girin. Tekrar olursa Ayarlar › Geliştirici › UI Otomasyonunu Etkinleştir seçeneğini kapatıp açın.",
+      "pluggedIn": "Taktım",
+      "stall": {
+        "plug": "{{host}} henüz bu iPhone'u görmüyor. Sadece şarj değil veri de taşıyan bir kablo kullanın, bu iPhone'un kilidini açık tutun ve isterse Güven'e dokunun.",
+        "devmode": "Geliştirici Modu yalnızca bu iPhone yeniden başladıktan sonra açılır. Yeniden Başlat'a, açıldıktan sonra da Aç'a dokunun. Anahtar yok mu? Bu iPhone'u çıkarıp yeniden takın."
+      }
     },
     "notice": {
       "kind": "Cihazlar",

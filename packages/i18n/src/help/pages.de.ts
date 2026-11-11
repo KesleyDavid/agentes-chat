@@ -43,8 +43,8 @@ export const helpDe: Partial<Record<HelpSlug, HelpDocument>> = {
         id: "agents",
         heading: "Deine Agenten arbeiten auch hier",
         blocks: [
-          "Deine Agenten arbeiten auch auf diesem Computer, in eigenen Ordnern, mit einem Browser und mit Claude Code oder Codex, wenn sie hier installiert sind. Befehle bleiben aus, bis du sie unter **Einstellungen › Tools** einschaltest.",
-          "Agenten laufen hier als du. Mit eingeschalteten Befehlen erreichen sie den Rest dieses Computers, auch `.agentes`: die Datenbank, `.env` mit `AGENTES_SECRET`, den Inhaberschlüssel und das Token dieses Computers. Das gilt für jeden Workspace, der diesen Computer nutzt, auch für einen auf agentes.chat Cloud. Siehe [Was Agenten erreichen können](/help/computers#reach).",
+          "Deine Agenten arbeiten auch auf diesem Computer, in eigenen Ordnern, mit einem Browser und mit Claude Code oder Codex, wenn sie hier installiert sind.",
+          "Agenten laufen hier als du. **Befehle** sind von Anfang an eingeschaltet, und damit erreichen die Agenten jedes Workspace, der diesen Computer nutzt, alles darauf, auch die Daten des Servers. Ausschalten kannst du sie unter **Einstellungen\u00a0›\u00a0Tools**. Siehe [Was Agenten erreichen können](/help/computers#reach).",
         ],
       },
       {
@@ -52,7 +52,7 @@ export const helpDe: Partial<Record<HelpSlug, HelpDocument>> = {
         heading: "Auch einem anderen Workspace leihen",
         blocks: [
           "Die Workspaces des Servers, den du hier betreibst, nutzen diesen Computer von selbst. Damit ihn auch ein Workspace an anderer Stelle nutzen kann, etwa einer auf agentes.chat Cloud, öffne **Einstellungen › Server**, drück **Server hinzufügen…**, melde dich bei diesem Workspace an und drück **Erlauben**, wenn die App fragt.",
-          "Jeder Workspace bekommt hier eigene Agenten und Ordner. **Befehle** unter **Einstellungen › Tools** gilt für alle Workspaces auf diesem Computer zugleich: Schalte es nur ein, wenn du den Agenten jedes Workspace diesen ganzen Computer anvertraust.",
+          "Jeder Workspace bekommt hier eigene Agenten und Ordner. **Befehle** sind auch für ihn von Anfang an eingeschaltet. Schalte sie in der Frage der App aus, bevor du **Erlauben** drückst, oder später unter **Einstellungen\u00a0›\u00a0Tools**, wo ein Schalter für alle Workspaces auf diesem Computer gilt.",
         ],
       },
       {
@@ -239,7 +239,7 @@ export const helpDe: Partial<Record<HelpSlug, HelpDocument>> = {
               "auf einem Computer, der auch agentes.chat ausführt, dessen Datenbank und Schlüssel in `.agentes`",
             ],
           },
-          "agentes.chat lehnt Befehle ab, die seine Schlüssel, Tokens und Anmeldungen nennen, aber das ist eine Regel, keine Mauer. Deshalb sind **Befehle** zu Beginn aus. Sie unter **Einstellungen › Tools** einzuschalten gilt für alle Workspaces auf dem Computer zugleich: Tu es nur, wenn du den Agenten jedes Workspace und den Personen, für die sie arbeiten, alles darauf anvertrauen würdest. Claude Code und Codex führen ihre eigenen Befehle im Ordner des Agenten aus, nach ihren eigenen Regeln.",
+          "agentes.chat lehnt Befehle ab, die seine Schlüssel, Tokens und Anmeldungen nennen, aber das ist eine Regel, keine Mauer. **Befehle** sind von Anfang an eingeschaltet. Schalte sie in der Frage der App aus, bevor du **Erlauben** drückst, oder später unter **Einstellungen\u00a0›\u00a0Tools**, wo ein Schalter für alle Workspaces auf dem Computer gilt. Claude Code und Codex führen ihre eigenen Befehle im Ordner des Agenten aus, nach ihren eigenen Regeln.",
           "Für eine echte Mauer nimm einen Linux-Server. Unter Debian 13, installiert mit `--system`, ist jeder Agent ein eigener Benutzer. Unter Ubuntu teilen sich die Agenten einen Benutzer, `agentes`: Sie sehen die Ordner der anderen, aber nicht deine oder die des Servers. Oder gib den Agenten einen eigenen Computer.",
         ],
       },

@@ -36,7 +36,16 @@ import {
   runningAdbServer,
   WAKE_SHELL,
 } from "./adb";
-import { APPLE_APP, appleNeedsYou, parseDevicectl, parseSimctl } from "./apple-devices";
+import {
+  APPLE_APP,
+  appleNeedsYou,
+  IOS_MIN,
+  needsUsbList,
+  parseDevicectl,
+  parseLockState,
+  parseSimctl,
+  sdkTooOld,
+} from "./apple-devices";
 import { jpegSize } from "./browser";
 import { RunnerError } from "./errors";
 import { killTree } from "./exec";
@@ -47,7 +56,8 @@ import { acquireLock, pidAlive, readLock } from "./lock";
 import { usualDirs } from "./login-path";
 import { isInside } from "./paths";
 import type { DataSocket } from "./streams";
-import { IosHelper, wdaScreenDriver } from "./wda";
+import { USBMUXD_SOCKET, usbmuxPlugged } from "./usbmux";
+import { IosHelper, recoveringScreen, wdaScreenDriver } from "./wda";
 import { type PairRequest, parseMdnsServices, serialOfMdnsName, WifiPairer, wifiOutdated } from "./wifi-pair";
 
 /**
@@ -64,6 +74,8 @@ import { type PairRequest, parseMdnsServices, serialOfMdnsName, WifiPairer, wifi
 export const POLL_MS = 3_000;
 /** iPhones and simulators are looked at every this many polls (`devicectl` costs about a second). */
 export const APPLE_EVERY = 2;
+/** Apple looks in a row devicectl may fail (a busy Mac) before the iPhones it last listed are taken as gone. */
+export const APPLE_MISSES_KEPT = 2;
 export const IDLE_MS = 5 * 60_000;
 /** A phone's facts (model, screen, battery) are read again after this long. */
 export const FACTS_TTL_MS = 5 * 60_000;
@@ -204,13 +216,21 @@ export const REASON_WORDS: Partial<Record<PhoneReason, string>> = {
   team_limit:
     "The free Apple Account has reached its limit of apps on this iPhone. Remove an app you built yourself from it, then try again.",
   apple_account_missing:
-    "Xcode on this Mac isn't signed in to an Apple Account: Xcode › Settings › Accounts, then add one (a free one is enough).",
+    "Xcode on this Mac isn't signed in to an Apple Account: Xcode › Settings › Apple Accounts, then add one (a free one is enough).",
+  apple_team_missing:
+    "Xcode is signed in but shows no team yet. In Xcode, make any iOS app, pick your team under Signing & Capabilities and run it on the iPhone once.",
+  ui_not_authorized:
+    "The iPhone refused the test helper's taps. Unlock it and enter its passcode if it asks. If it keeps happening, turn Settings › Developer › Enable UI Automation off and on.",
   helper_untrusted:
     "The iPhone doesn't trust the test helper yet: on the iPhone, Settings › General › VPN & Device Management, tap the developer, then Trust.",
   ui_automation_off: "Turn on UI Automation on the iPhone: Settings › Developer › Enable UI Automation.",
-  xcode_too_old: "This iPhone's iOS needs a newer Xcode on this Mac.",
+  xcode_too_old:
+    "This iPhone's iOS is newer than Xcode on this Mac. Install the Xcode matching the iPhone's iOS (27 for iOS 27), then run `xcrun devicectl manage ddis update`.",
   device_support: "Xcode is still preparing the iPhone. Try again in a few minutes.",
 };
+
+/** Helper failures an Xcode older than the iPhone's iOS explains (its device support or test daemon too old). */
+const OLD_XCODE_SIGNS = new Set<PhoneReason>(["device_support", "ui_not_authorized"]);
 
 /** Reasons only the test helper has: an iPhone still installs, opens apps and reads its log meanwhile. */
 const HELPER_REASONS = new Set<PhoneReason>([
@@ -220,6 +240,10 @@ const HELPER_REASONS = new Set<PhoneReason>([
   "team_limit",
   "helper_untrusted",
   "ui_automation_off",
+  "apple_team_missing",
+  "ui_not_authorized",
+  // devicectl installs and opens apps on an iOS newer than the Mac's SDK: only the helper needs the matching Xcode.
+  "xcode_too_old",
 ]);
 const NEEDS_HELPER = new Set(["phone.screenshot", "phone.record", "phone.flow"]);
 
@@ -237,7 +261,10 @@ export const labelOf = (p: Pick<Phone, "name" | "model">) => p.name ?? p.model;
 /** Why a phone can't be used now, as the phone ops and `doctor` word it; null when it's ready. */
 export function phoneNotReady(p: Phone): { title: string; fix: string } | null {
   if (p.state === "ready") return null;
-  const fix = (p.reason && REASON_WORDS[p.reason]) ?? "Try again in a moment.";
+  const fix =
+    p.platform === "ios" && p.reason === "os_too_old"
+      ? `It runs iOS ${p.osVersion || "16 or older"}, and agents need iOS ${IOS_MIN} or newer.`
+      : ((p.reason && REASON_WORDS[p.reason]) ?? "Try again in a moment.");
   return { title: `${labelOf(p)} ${p.state === "unsupported" ? "can't be used" : "isn't ready"}`, fix };
 }
 
@@ -280,6 +307,8 @@ interface Tools {
   syslog: string | null;
   plutil: string | null;
   ffmpeg: string | null;
+  /** The Mac's iPhone SDK ("26.2"): the newest iOS its Xcode drives. */
+  sdk: string | null;
 }
 
 export interface PhoneManagerOptions {
@@ -314,6 +343,8 @@ export interface PhoneManagerOptions {
   iosScreen?: IosScreenDriverFactory | null;
   /** How often a Wi-Fi pairing looks at the network (`PAIR_POLL_MS`). */
   pairPollMs?: number;
+  /** usbmuxd's socket (`USBMUXD_SOCKET`): which iPhones too old for devicectl are plugged in. */
+  usbmuxSocket?: string;
   /** Windows: `PNP_SHELL`'s output (default: PowerShell runs it); null when it couldn't. */
   pnp?: () => Promise<string | null>;
 }
@@ -416,6 +447,7 @@ export class PhoneManager {
   private reconnecting: Promise<void> | null = null;
   private readonly pairer: WifiPairer;
   private appleSeen: Phone[] | null = null;
+  private appleMisses = 0;
   /** Until when a phone guide asked to look for phones Windows has no driver for (`phone.look`). */
   private lookUntil = 0;
   private driverless: { at: number; phones: Phone[] } | null = null;
@@ -609,7 +641,7 @@ export class PhoneManager {
     if (tools.adb) found.push(...(await this.scanAndroid(tools.adb, reach)));
     found.push(...(await this.scanDriverless(found)));
     if (tools.xcrun) {
-      if (this.appleSeen === null || this.tick % APPLE_EVERY === 0) this.appleSeen = await this.scanApple(tools.xcrun);
+      if (this.appleSeen === null || this.tick % APPLE_EVERY === 0) this.appleSeen = await this.scanApple(tools);
       found.push(...this.appleSeen);
     } else this.appleSeen = null;
     this.tick++;
@@ -619,7 +651,8 @@ export class PhoneManager {
     const now = this.now();
     if (tools.adb) this.reconnect(tools.adb, now);
     for (const [key, hold] of [...this.holds]) {
-      if (!this.seen.has(key)) await this.drop(key, false);
+      // An op under way finds out by itself when its phone went: one missed look doesn't end it.
+      if (!this.seen.has(key) && hold.busy === 0) await this.drop(key, false);
       else if (hold.busy === 0 && now - hold.lastUsed >= (this.opts.idleMs ?? IDLE_MS)) await this.drop(key, true);
     }
     this.ios?.reap(new Set([...this.holds.keys()].filter((k) => k.startsWith("ios:")).map((k) => k.slice(4))));
@@ -639,9 +672,14 @@ export class PhoneManager {
     if (xcrun && (!select || (await runTool(select, ["-p"], { timeoutMs: 5000, env: this.env })).code !== 0)) {
       xcrun = null;
     }
+    const sdk = xcrun
+      ? await runTool(xcrun, ["--sdk", "iphoneos", "--show-sdk-version"], { timeoutMs: 10_000, env: this.env })
+      : null;
+    const sdkVersion = sdk?.code === 0 ? sdk.stdout.toString("utf8").trim() : "";
     const tools: Tools = {
       adb,
       xcrun,
+      sdk: /^\d+(\.\d+)*$/.test(sdkVersion) ? sdkVersion : null,
       scrcpy: find("scrcpy"),
       maestro: find("maestro"),
       bundletool: find("bundletool"),
@@ -768,7 +806,8 @@ export class PhoneManager {
     }
   }
 
-  private async scanApple(xcrun: string): Promise<Phone[]> {
+  private async scanApple(tools: Tools): Promise<Phone[]> {
+    const xcrun = tools.xcrun as string;
     const out: Phone[] = [];
     const sims = await runTool(xcrun, ["simctl", "list", "devices", "booted", "-j"], {
       timeoutMs: 15_000,
@@ -779,27 +818,56 @@ export class PhoneManager {
     } catch {
       // not JSON: an Xcode mid-update
     }
-    const file = path.join(os.tmpdir(), `agentes-devicectl-${process.pid}-${this.tick}.json`);
-    const real = await runTool(xcrun, ["devicectl", "list", "devices", "--quiet", "--json-output", file], {
-      timeoutMs: 20_000,
-      env: this.env,
-    });
-    try {
-      if (real.code === 0) {
-        for (const phone of parseDevicectl(JSON.parse(await readFile(file, "utf8")))) {
-          // Ready to the Mac, the iPhone still waits for its test helper: built, renewed and checked by itself.
-          // Read-only (`doctor`) says the helper's state and builds nothing (`need` without xcrun only looks).
-          const need =
-            phone.state === "ready" && this.ios ? this.ios.need(phone.serial, this.opts.readOnly ? null : xcrun) : null;
-          out.push(need ? { ...phone, ...need } : phone);
+    const devices = await this.devicectlJson(xcrun, ["list", "devices"]);
+    // devicectl failing or slow for a look or two (a busy Mac) isn't every iPhone unplugged: the last ones stand.
+    if (devices === null) {
+      if (++this.appleMisses > APPLE_MISSES_KEPT) return out;
+      return [...out, ...(this.appleSeen ?? []).filter((p) => p.kind === "device")];
+    }
+    this.appleMisses = 0;
+    const usb = needsUsbList(devices)
+      ? new Set((await usbmuxPlugged(this.opts.usbmuxSocket ?? USBMUXD_SOCKET).catch(() => new Map())).keys())
+      : undefined;
+    for (const phone of parseDevicectl(devices, usb)) {
+      const key = keyOf(phone);
+      if (phone.state === "ready" && this.locked.has(key)) {
+        const lock = parseLockState(
+          await this.devicectlJson(xcrun, ["device", "info", "lockState", "--device", phone.serial]),
+        );
+        if (lock) {
+          out.push({ ...phone, state: "needs_you", reason: "locked" });
+          continue;
         }
+        this.locked.delete(key);
       }
+      // Ready to the Mac, the iPhone still waits for its test helper: built, renewed and checked by itself.
+      // Read-only (`doctor`) says the helper's state and builds nothing (`need` without xcrun only looks).
+      const need =
+        phone.state === "ready" && this.ios ? this.ios.need(phone.serial, this.opts.readOnly ? null : xcrun) : null;
+      // An iOS newer than this Mac's iPhone SDK often still works (apps open, screenshots), so the version alone
+      // turns nothing away: it names the likely cause once the helper itself is stuck.
+      // device_support is only "preparing" to the helper, but with an older SDK the person has the way out.
+      const oldXcode = !!need && OLD_XCODE_SIGNS.has(need.reason) && sdkTooOld(phone.osVersion, tools.sdk);
+      const named = oldXcode ? { state: "needs_you" as const, reason: "xcode_too_old" as const } : {};
+      out.push(need ? { ...phone, ...need, ...named } : phone);
+    }
+    return out;
+  }
+
+  /** `xcrun devicectl <args> --quiet --json-output`, read; null when it failed (no devicectl before Xcode 15). */
+  private async devicectlJson(xcrun: string, args: string[]): Promise<unknown> {
+    const file = path.join(os.tmpdir(), `agentes-devicectl-${process.pid}-${this.tick}-${args[0]}.json`);
+    try {
+      const r = await runTool(xcrun, ["devicectl", ...args, "--quiet", "--json-output", file], {
+        timeoutMs: 20_000,
+        env: this.env,
+      });
+      return r.code === 0 && !r.timedOut ? JSON.parse(await readFile(file, "utf8")) : null;
     } catch {
-      // no devicectl (an Xcode before 15), or nothing written
+      return null;
     } finally {
       await rm(file, { force: true });
     }
-    return out;
   }
 
   /** Sends the list if it changed since the last one sent. */
@@ -1484,6 +1552,17 @@ export class PhoneManager {
     const yaml = await this.outFile(io, "flow", "yaml");
     await writeFile(yaml.abs, flow);
     const run = await this.helper(phone, tools);
+    if (phone.kind === "device" && (await run.client.locked().catch(() => false))) {
+      // Polls look again (devicectl's lock state) until it's unlocked.
+      const key = keyOf(phone);
+      this.locked.add(key);
+      const lockedNow = (p: Phone): Phone => (keyOf(p) === key ? { ...p, state: "needs_you", reason: "locked" } : p);
+      this.appleSeen = this.appleSeen?.map(lockedNow) ?? null;
+      const seen = this.seen.get(key);
+      if (seen) this.seen.set(key, lockedNow(seen));
+      this.changed();
+      throw new RunnerError("phone_not_ready", `${labelOf(phone)} is locked. ${REASON_WORDS.locked}`);
+    }
     const video = req.record === true ? await this.outFile(io, "flow", "mp4") : null;
     const recorder = video
       ? phone.kind === "simulator"
@@ -1492,7 +1571,9 @@ export class PhoneManager {
       : null;
     if (recorder) await sleep(this.opts.settleMs ?? 1500);
     const started = this.now();
-    const result = await runIosFlow(flow, run.client, {
+    // Each step reaches the helper running now: one that died mid-flow is started again, once.
+    const screen = recoveringScreen(async () => (await this.helper(phone, tools)).client.scoped(io.signal));
+    const result = await runIosFlow(flow, screen, {
       env: Object.fromEntries(vars),
       signal: io.signal,
       deadline: Date.now() + timeoutSeconds * 1000,

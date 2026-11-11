@@ -120,6 +120,22 @@ const REDUCE = "(prefers-reduced-motion: reduce)";
 export const prefersReducedMotion = () =>
   typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(REDUCE).matches;
 
+/** Every sky held still (`holdSkies`), and what each live sky does when that changes. */
+let held = false;
+const onHold = new Set<() => void>();
+
+/**
+ * Holds every sky still, as with reduced motion: drawn once, and again on a resize or a theme change. For the Linux
+ * app, whose WebKitGTK paints without the GPU there (its DMA-BUF renderer is off, apps/desktop/src-tauri/src/main.rs):
+ * each frame of a moving sky repainted it and everything over it in software, 30 times a second, which kept a core
+ * busy and made clicks slow.
+ */
+export function holdSkies(hold = true) {
+  if (held === hold) return;
+  held = hold;
+  for (const changed of onHold) changed();
+}
+
 interface Sky {
   dirty: boolean;
   /** It draws on a coming frame: it moves and is on screen, or it is still and was asked to draw again. */
@@ -171,7 +187,7 @@ export function startSky(canvas: HTMLCanvasElement, get: () => SkyOptions): () =
   if (!ctx || !parent) return () => {};
   const host: HTMLElement = parent;
   const motion = typeof window.matchMedia === "function" ? window.matchMedia(REDUCE) : null;
-  let reduced = motion?.matches === true;
+  let reduced = held || motion?.matches === true;
   let w = 0;
   let h = 0;
   let px = 0;
@@ -398,11 +414,12 @@ export function startSky(canvas: HTMLCanvasElement, get: () => SkyOptions): () =
   watchTheme();
   // The setting can change while the page is open: a still sky starts moving, a moving one stops.
   const onMotion = () => {
-    reduced = motion?.matches === true;
+    reduced = held || motion?.matches === true;
     sky.dirty = true;
     wake();
   };
   motion?.addEventListener?.("change", onMotion);
+  onHold.add(onMotion);
   resize();
   const observers: { disconnect(): void }[] = [];
   if (typeof ResizeObserver !== "undefined") {
@@ -428,6 +445,7 @@ export function startSky(canvas: HTMLCanvasElement, get: () => SkyOptions): () =
     live.delete(sky);
     untrack();
     motion?.removeEventListener?.("change", onMotion);
+    onHold.delete(onMotion);
     for (const o of observers) o.disconnect();
   };
 }

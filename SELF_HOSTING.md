@@ -174,7 +174,11 @@ Agents run commands and code, drive a browser, and can think with Claude Code or
 you connect (Agent computers, below). A computer must reach the instance, so on Tailscale, install
 Tailscale on it and sign in to the same tailnet first.
 
-The agentes.chat desktop app (macOS, Windows and Linux) opens your instance in a window of its own:
+The agentes.chat desktop app (macOS, Windows and Linux) opens your instance in a window of its own.
+Download it from `/download` on your instance (or the latest `desktop-v*` release). It's in beta: the Mac
+build isn't notarized by Apple yet and the Windows installer isn't signed, so the first open asks once (macOS:
+**System Settings › Privacy & Security › Open Anyway**, right after you try to open it; Windows: **More info ›
+Run anyway**). `/download` shows each step with pictures. Then:
 
 1. On its first screen, under **Sign in to agentes.chat**, click **Use your own server**, then
    **Connect to my server**.
@@ -190,9 +194,11 @@ sign-in.
 
 - **Agents on that computer:** in the instance's onboarding or **Settings › Devices**, click **Use
   this Mac** (**Use this PC** on Windows, **Use this computer** on Linux). The app asks first, in its
-  own dialog naming the instance and the organization. Its agents start with no folders of yours and
-  commands off, even when other organizations' agents there have commands on; you choose more in the
-  app's Preferences. The app pairs a computer with agentes.chat Cloud the same way. Until you pair it,
+  own dialog naming the instance and the organization. Its agents start with commands, the browser and
+  Claude Code or Codex when the computer has them, and no folders of yours. Commands are on by
+  default. Turn them off in the app's **Preferences › Tools**, where one switch counts for every
+  workspace on the computer. Folders are added in **Preferences › Folders**. The app pairs a computer
+  with agentes.chat Cloud the same way. Until you pair it,
   nothing of the computer is used. The app never offers the computer that runs the instance: its agents
   work there through the instance itself (This server as the agents' computer, below).
 - **Linux, a server or a VM:** **Settings › Devices › Connect a device** shows the command, and
@@ -210,8 +216,8 @@ version too, when it installs one). On Linux the AppImage updates itself; a deb 
 <details>
 <summary><b>Phones for agents</b></summary>
 
-Agents use a phone through a computer you connected (Connect a computer, above): **Settings → Devices
-→ Connect a device**, then **Android phone** or **iPhone**. The steps follow what that computer sees.
+Agents use a phone through a computer you connected (Connect a computer, above): **Settings › Devices
+› Connect a device**, then **Android phone** or **iPhone**. The steps follow what that computer sees.
 
 - **Android by cable** (recommended): the computer needs Android platform-tools (`adb` on the PATH or
   in `ANDROID_HOME`, which Android Studio installs). On the phone, turn on Developer options and USB
@@ -225,10 +231,11 @@ Agents use a phone through a computer you connected (Connect a computer, above):
   computer's Wi-Fi, where it must stay. On a Mac, the agentes.chat app needs **System
   Settings › Privacy & Security › Local Network**, or the computer never hears the phone. Wireless
   debugging turns off when the phone restarts.
-- **iPhone through a Mac:** Xcode from the App Store, with an Apple Account added in its **Settings ›
-  Accounts** (a free one is enough: the Mac renews the test helper every 7 days). The Mac downloads the
-  iOS tools, about 8 GB. Then plug the iPhone in, trust the Mac, and turn on Developer Mode and UI
-  Automation. A newer iOS needs an Xcode that knows it: update Xcode when the iPhone updates.
+- **iPhone through a Mac:** an iPhone on iOS 17 or newer, and Xcode from the App Store with an Apple
+  Account added in its **Settings › Apple Accounts** (a free one is enough: the Mac renews the test
+  helper every 7 days). The Mac downloads the iOS tools, about 8 GB. Then plug the iPhone in, trust the
+  Mac, and turn on Developer Mode and UI Automation. A newer iOS needs an Xcode that knows it: update
+  Xcode when the iPhone updates.
 
 Android's pairing QR aside, the steps show no QR code: one that opens them in the agentes.chat phone
 app waits until the app is in the App Store and Google Play, since until then it would only open the
@@ -550,6 +557,8 @@ computer and opens agentes.chat, signed in.
   your sign-in, not this computer's token, not your agents' connections (they pause while it is down).
   If something else holds the port when it starts, it moves to a free one. With reach on, Tailscale
   shares it only while it runs.
+- **Agents with Commands on can reach everything on this Mac**, the server's data in `~/.agentes`
+  included. Commands are on by default. Turn them off in the app's **Preferences › Tools**.
 - **No password:** the app signs you in, and on its sign-in screen **Continue on this Mac** does it again
   whenever your session ends. For a browser on another device, add one in **Settings › Your account**, **Add
   a password**.
@@ -1110,7 +1119,7 @@ Install the ones you want on that computer, as the user that runs the runner: Cu
 `curl https://cursor.com/install -fsS | bash` (it lands in `~/.local/bin`, which the runner's PATH must
 include), OpenCode's with `npm install -g opencode-ai@1.19.5`, Grok Build with
 `curl -fsSL https://x.ai/cli/install.sh | bash` (it puts `grok` in `~/.local/bin` too; agents think with it only
-through a Grok account added in Settings, AI and usage, never the computer's own sign-in; on Linux its sandbox needs
+through a Grok account added in Settings, AI and usage, never the computer's own sign-in. On Linux its sandbox needs
 bubblewrap, `sudo apt install -y bubblewrap`, or Grok Build refuses to start and every turn fails), Google's
 Antigravity CLI with
 `curl -fsSL https://antigravity.google/cli/install.sh | bash` (`agy` in `~/.local/bin`; Gemini accounts sign in on Linux
@@ -1358,7 +1367,7 @@ mode** instead: every agent works as one user, `agentes`, made without sudo, so 
 folders but not yours or the server's; its service is a user unit kept running with
 `loginctl enable-linger`, with its own copy of the token in `/home/agentes/host-computer-token`),
 and on a Mac agents work as you, in folders of their own, with a browser, Claude Code and Codex, and
-commands off unless you say yes. It writes `HOST_COMPUTER_TOKEN` to `.env` and to
+commands on unless you say no. It writes `HOST_COMPUTER_TOKEN` to `.env` and to
 `host-computer-token` beside it (readable by you only), installs what runs the agents there from the
 address the app is published on (`BIND_ADDRESS` and `HOST_PORT`), and waits for it to answer, up to
 90 seconds. Running the setup again leaves it running while it answers and is up to date, and sets it

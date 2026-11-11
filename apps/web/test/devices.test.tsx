@@ -3,6 +3,7 @@ import { domWindow, setupDom } from "@agenteschat/ui/testing/dom";
 
 setupDom();
 
+import type { PhoneDevice } from "@agenteschat/client";
 import { ANDROID_SLOW_MS, ANDROID_USB_DRIVERS } from "@agenteschat/client/lib/devices";
 import { act, cleanup, fireEvent, within } from "@testing-library/react";
 import { createFakeApi, ENG_ID, fakeDevicesOf, fakeMachinesOf } from "./fake-api";
@@ -532,6 +533,75 @@ describe("Connect a device", () => {
     const states = [...dialog.querySelectorAll(".dv-step")].map((s) => s.getAttribute("data-state"));
     expect(states).toEqual(["done", "done", "done", "done", "done", "needs", "waiting", "waiting"]);
     expect(dialog.querySelector(".ac-setpath")?.textContent).toBe("SettingsPrivacy & SecurityDeveloper Mode");
+  });
+
+  test("an iPhone: each state has its way out, an old one ends the guide, a still step says why", async () => {
+    type Status = PhoneDevice["status"];
+    /** The fixture with Sam's iPhone in `status` (null: unplugged) and the Mac's toolchains topped up. */
+    const iphoneAs = (status: Status | null, over: Partial<PhoneDevice> = {}, tools: Record<string, string> = {}) => {
+      const list = acmeDevices();
+      const mac = list.devices.find((d) => d.id === MAC);
+      const iphone = mac?.phones.find((p) => p.id === IPHONE);
+      if (!mac || !iphone) throw new Error("fixture");
+      Object.assign(mac.toolchains, tools);
+      if (status) Object.assign(iphone, { status, ...over });
+      else mac.phones = mac.phones.filter((p) => p.id !== IPHONE);
+      return list;
+    };
+    const app = await open(`/org/${ORG_ID}/settings/devices/iphone-setup?computer=${MAC}`);
+    const dialog = () => screen().getByRole("dialog", { name: "Connect an iPhone" });
+    const step = () => dialog().querySelector('.dv-step[data-state="current"], .dv-step[data-state="needs"]');
+    const show = async (list: ReturnType<typeof acmeDevices>) => {
+      app.devices.set(list);
+      await refetch(app.services);
+    };
+    const team = { appleTeam: "Sam Rivera (Personal Team)" };
+
+    await show(iphoneAs({ kind: "needs_you", reason: "ui_not_authorized" }));
+    expect(step()?.textContent).toContain("Turn on UI Automation");
+    expect(step()?.textContent).toContain("The iPhone refused the test helper's taps. Unlock it");
+
+    await show(iphoneAs({ kind: "needs_you", reason: "xcode_too_old" }, {}, { xcodeSdk: "26.2" }));
+    expect(step()?.textContent).toContain(
+      "Sam's iPhone 16 runs iOS 27.1 and Xcode on Sam's MacBook Pro knows iOS 26.2 at most. Install Xcode 27, then run this in Terminal.",
+    );
+    expect(step()?.querySelector(".machine-command__code")?.textContent).toBe("xcrun devicectl manage ddis update");
+
+    // Below iOS 17: the guide ends at being connected, says why, and nothing spins.
+    await show(iphoneAs({ kind: "unsupported", reason: "os_too_old" }, { osVersion: "16.7.10" }));
+    expect(step()?.textContent).toContain("Sam's iPhone 16 runs iOS 16.7.10, and agents need iOS 17 or newer.");
+    expect(dialog().querySelector(".dv-step__mark .ac-pixspin")).toBeNull();
+    expect(within(dialog()).queryByRole("button", { name: "Done" })).toBeNull();
+    // devicectl names no version for some of them.
+    await show(iphoneAs({ kind: "unsupported", reason: "os_too_old" }, { osVersion: "" }));
+    expect(step()?.textContent).toContain("Sam's iPhone 16 runs iOS 16 or older, and agents need iOS 17 or newer.");
+
+    // Xcode lists an account that shows no team yet: how to get one, not "sign in".
+    await show(iphoneAs(null, {}, { appleAccount: "no_team" }));
+    expect(step()?.textContent).toContain("Apple Account in Xcode");
+    expect(step()?.textContent).toContain("Xcode is signed in but shows no team yet.");
+
+    // Plugged in, the Mac sees no iPhone: what to check, at once.
+    await show(iphoneAs(null, {}, team));
+    expect(step()?.getAttribute("data-state")).toBe("current");
+    await click(within(step() as HTMLElement).getByRole("button", { name: "It's plugged in" }));
+    expect(step()?.querySelector(".dv-step__stall")?.textContent).toBe(
+      "Sam's MacBook Pro doesn't see an iPhone yet. Use a cable that carries data, not only power, unlock the iPhone and tap Trust if it asks.",
+    );
+
+    // The Mac builds the helper: 45 s with nothing new, and it says what that waits for.
+    await show(iphoneAs({ kind: "preparing", reason: "helper_missing" }, {}, team));
+    expect(step()?.textContent).toContain("Test helper");
+    expect(step()?.querySelector(".dv-step__stall")).toBeNull();
+    try {
+      setSystemTime(new Date(Date.now() + 46_000));
+      await refetch(app.services);
+      expect(step()?.querySelector(".dv-step__stall")?.textContent).toContain(
+        "Sam's MacBook Pro builds the test helper and starts it on the iPhone",
+      );
+    } finally {
+      setSystemTime();
+    }
   });
 });
 

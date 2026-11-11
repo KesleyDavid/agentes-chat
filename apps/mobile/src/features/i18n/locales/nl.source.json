@@ -4415,6 +4415,12 @@
   "devices.reason.apple_account_missing": {
     "value": "Xcode on the Mac needs an Apple Account"
   },
+  "devices.reason.apple_team_missing": {
+    "value": "Xcode on the Mac shows no team yet"
+  },
+  "devices.reason.ui_not_authorized": {
+    "value": "This iPhone refused the test helper's taps"
+  },
   "devices.reason.team_limit": {
     "value": "Remove an app you built from this iPhone"
   },
@@ -4825,6 +4831,27 @@
   },
   "devices.iphone.footer": {
     "value": "Your Mac does the rest, and renews the test helper every 7 days while it's on."
+  },
+  "devices.iphone.tooOld": {
+    "value": "This iPhone runs iOS {{version}}, and agents need iOS 17 or newer. Update it if it can, or use a newer iPhone."
+  },
+  "devices.iphone.xcodeOld": {
+    "value": "This iPhone runs iOS {{version}}, newer than Xcode on {{host}} knows. Install Xcode {{major}} there, then run xcrun devicectl manage ddis update in Terminal."
+  },
+  "devices.iphone.teamMissing": {
+    "value": "Xcode is signed in but shows no team yet. In Xcode, make any iOS app, pick your team under Signing & Capabilities and run it on this iPhone once."
+  },
+  "devices.iphone.uiRefused": {
+    "value": "This iPhone refused the test helper's taps. Unlock it and enter its passcode if it asks. If it keeps happening, turn Settings › Developer › Enable UI Automation off and on."
+  },
+  "devices.iphone.pluggedIn": {
+    "value": "It's plugged in"
+  },
+  "devices.iphone.stall.plug": {
+    "value": "{{host}} doesn't see this iPhone yet. Use a cable that carries data, not only power, keep this iPhone unlocked and tap Trust if it asks."
+  },
+  "devices.iphone.stall.devmode": {
+    "value": "Developer Mode turns on only after this iPhone restarts. Tap Restart, then Turn On once it's back. No switch there? Unplug this iPhone and plug it in again."
   },
   "devices.notice.kind": {
     "value": "Devices"

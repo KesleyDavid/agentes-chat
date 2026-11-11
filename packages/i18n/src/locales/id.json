@@ -1361,6 +1361,112 @@
     "moveDown": "Pindah ke bawah",
     "restoreOrder": "Kembalikan urutan bawaan"
   },
+  "install": {
+    "frames": "Cara memasang di {{system}}",
+    "step": "Langkah {{n}}",
+    "previous": "Langkah sebelumnya",
+    "next": "Langkah berikutnya",
+    "fullGuide": "Langkah demi langkah lengkap",
+    "copied": "Disalin. Tempel di terminal.",
+    "mac": {
+      "why": "<b>Aplikasinya masih beta.</b> Jadi pada kali pertama, Mac-mu meminta konfirmasi:",
+      "drag": "Seret agentes.chat ke Aplikasi.",
+      "dragLong": "Buka file yang diunduh lalu seret agentes.chat ke Aplikasi.",
+      "blocked": "Buka aplikasinya lalu klik Selesai.",
+      "blockedSub": "Jangan klik Pindahkan ke Tong Sampah.",
+      "settings": "Di Pengaturan › Privasi & Keamanan, klik Tetap Buka.",
+      "settingsLong": "Segera setelahnya, buka Pengaturan Sistem › Privasi & Keamanan, gulir ke Keamanan lalu klik Tetap Buka.",
+      "settingsSub": "Tombolnya hanya muncul di sana setelah kamu mencoba membuka aplikasinya (langkah 2), dan hilang setelah sekitar satu jam. Tidak ada? Buka aplikasinya lagi lalu kembali ke sini.",
+      "settingsShort": "Hanya muncul tepat setelah langkah 2.",
+      "openSettings": "Buka Privasi & Keamanan",
+      "confirm": "Konfirmasi dengan Touch ID atau kata sandimu.",
+      "confirmLong": "Klik Tetap Buka lagi lalu konfirmasi dengan Touch ID atau kata sandi Mac-mu.",
+      "done": "Beres: mulai sekarang aplikasinya langsung terbuka.",
+      "stuckTitle": "Tombolnya tetap tidak ada, atau Mac-mu bilang aplikasinya rusak?",
+      "stuckText": "Tempel ini di Terminal lalu buka aplikasinya lagi:"
+    },
+    "windows": {
+      "why": "<b>Aplikasinya masih beta.</b> Jadi pada kali pertama, Windows meminta konfirmasi:",
+      "keep": "Kalau browser-mu bertanya, pilih Simpan.",
+      "more": "Buka penginstalnya lalu klik Info selengkapnya.",
+      "moreLong": "Buka penginstalnya. Kalau muncul Windows melindungi PC kamu, klik Info selengkapnya.",
+      "run": "Klik Tetap jalankan.",
+      "runLong": "Klik Tetap jalankan lalu ikuti penginstalnya.",
+      "done": "Beres: mulai sekarang aplikasinya langsung terbuka."
+    },
+    "linux": {
+      "why": "Untuk Ubuntu, Debian, dan sistem serupa (x64). Linux tidak meminta apa pun tambahan:",
+      "apt": "Pasang .deb dengan klik dua kali, atau dari terminal.",
+      "aptLong": "Klik dua kali file yang diunduh lalu klik Pasang, atau tempel ini di terminal:",
+      "open": "Buka agentes.chat dari daftar aplikasimu."
+    },
+    "page": {
+      "docTitle": "Unduh aplikasinya · agentes.chat",
+      "title": "Unduh aplikasi agentes.chat",
+      "beta": "Beta",
+      "text": "Workspace-mu di jendelanya sendiri, dengan notifikasi sistemmu. Dengan satu klik, agen bekerja di komputer ini, di folder mereka sendiri.",
+      "open": "Buka agentes.chat",
+      "version": "Versi {{version}}",
+      "versionSize": "Versi {{version}} · {{size}}",
+      "soon": "Belum ada versi untuk {{system}}.",
+      "useArm": "Komputer dengan chip ARM? Unduh versi ARM",
+      "useX64": "Unduh versi x64",
+      "unavailable": "Aplikasinya tidak bisa diunduh dari sini sekarang. Coba lagi sebentar lagi.",
+      "installOn": "Pasang di {{system}}",
+      "system": "Sistem",
+      "whyTitle": "Kenapa komputerku meminta konfirmasi?",
+      "whyText": "agentes.chat masih beta: versi Mac belum dinotarisasi oleh Apple, dan penginstal Windows belum membawa sertifikat Microsoft. Tanpa keduanya, komputermu bertanya sekali sebelum membuka aplikasi yang diunduh dari internet. Setelah itu, aplikasinya langsung terbuka dan memperbarui dirinya sendiri. Sebelum beta berakhir, langkah ini akan hilang.",
+      "openSource": "Sumber terbuka",
+      "onlyHere": "Hanya diterbitkan di sini dan di rilis proyek",
+      "signedUpdates": "Pembaruan bertanda tangan"
+    },
+    "scene": {
+      "finder": "Finder",
+      "file": "Arsip",
+      "edit": "Edit",
+      "view": "Lihat",
+      "window": "Jendela",
+      "applications": "Aplikasi",
+      "notOpened": "“{{app}}” Tidak Dibuka",
+      "notOpenedText": "Apple tidak dapat memverifikasi bahwa “{{app}}” bebas dari malware yang dapat membahayakan Mac atau privasimu.",
+      "done": "Selesai",
+      "moveToTrash": "Pindahkan ke Tong Sampah",
+      "search": "Cari",
+      "account": "Akun Apple",
+      "general": "Umum",
+      "appearance": "Tampilan",
+      "accessibility": "Aksesibilitas",
+      "privacy": "Privasi & Keamanan",
+      "desktopDock": "Desktop & Dock",
+      "displays": "Layar",
+      "security": "Keamanan",
+      "allowFrom": "Izinkan aplikasi dari",
+      "allowValue": "App Store & Pengembang Dikenal",
+      "blocked": "“{{app}}” diblokir untuk melindungi Mac-mu.",
+      "openAnyway": "Tetap Buka",
+      "confirmTitle": "Buka “{{app}}”?",
+      "confirmText": "Buka hanya jika kamu memercayai asalnya.",
+      "touchIdTitle": "Pengaturan Sistem",
+      "touchIdText": "Gunakan Touch ID atau masukkan kata sandimu untuk mengizinkan ini.",
+      "password": "Kata Sandi",
+      "downloads": "Unduhan",
+      "rare": "File ini jarang diunduh. Pastikan kamu memercayainya sebelum membukanya.",
+      "delete": "Hapus",
+      "keep": "Simpan",
+      "protectedTitle": "Windows melindungi PC kamu",
+      "protectedText": "Microsoft Defender SmartScreen mencegah aplikasi yang tidak dikenal untuk dijalankan. Menjalankan aplikasi ini dapat membahayakan PC kamu.",
+      "protectedShort": "Microsoft Defender SmartScreen mencegah aplikasi yang tidak dikenal untuk dijalankan.",
+      "moreInfo": "Info selengkapnya",
+      "dontRun": "Jangan jalankan",
+      "appLabel": "Aplikasi:",
+      "publisher": "Penerbit:",
+      "unknownPublisher": "Penerbit tidak dikenal",
+      "runAnyway": "Tetap jalankan",
+      "activities": "Aktivitas",
+      "readingLists": "Membaca daftar paket... Selesai",
+      "settingUp": "Menyiapkan agentes-chat ({{version}}) ..."
+    }
+  },
   "legal": {
     "updated": "Terakhir diperbarui {{date}}",
     "contents": "Di halaman ini",
@@ -12963,6 +13069,7 @@
     "downloadFor": "Unduh untuk {{system}}",
     "downloadApp": "Unduh aplikasinya",
     "otherSystems": "Sistem lain",
+    "armBuild": "{{system}} (ARM)",
     "onThePhone": "Di ponsel",
     "onTheIphone": "Di iPhone",
     "screen": {
@@ -13038,6 +13145,8 @@
       "helper_missing": "Helper pengujian belum disiapkan",
       "helper_expired": "Helper pengujian perlu diperbarui",
       "apple_account_missing": "Xcode belum masuk ke Apple Account",
+      "apple_team_missing": "Xcode belum menampilkan tim",
+      "ui_not_authorized": "iPhone menolak ketukan helper pengujian",
       "team_limit": "Apple Account gratis sudah mencapai batas aplikasinya",
       "helper_untrusted": "iPhone belum memercayai helper pengujian",
       "booting": "Sedang memulai",
@@ -13045,7 +13154,8 @@
       "no_driverLinux": "Linux tidak bisa membuka ponsel ini",
       "os_too_old": "Sistem ini terlalu lama untuk alat-alatnya",
       "adb_offline": "Ponselnya tidak merespons",
-      "other": "Ada yang perlu dilakukan di perangkat"
+      "other": "Ada yang perlu dilakukan di perangkat",
+      "iosTooOld": "Ini memakai iOS {{version}}, agen butuh iOS 17 atau lebih baru"
     },
     "fix": {
       "locked": "Buka kuncinya",
@@ -13059,6 +13169,8 @@
       "helper_missing": "Buka aplikasinya di Mac",
       "helper_expired": "Buka aplikasinya di Mac",
       "apple_account_missing": "Masuk di Xcode",
+      "apple_team_missing": "Jalankan app di iPhone dari Xcode sekali",
+      "ui_not_authorized": "Buka kunci iPhone",
       "team_limit": "Hapus aplikasi buatan sendiri",
       "helper_untrusted": "Percayai di iPhone",
       "booting": "Tunggu sampai menyala",
@@ -13310,7 +13422,8 @@
       "toolsDone": "Diunduh oleh Mac",
       "toolsText": "Mac mengunduhnya, sekitar 8 GB.",
       "accountDone": "Ditambahkan",
-      "accountText": "Tambahkan satu, gratis atau berbayar, di Xcode pada {{mac}}: Settings › Accounts.",
+      "accountText": "Tambahkan satu, gratis atau berbayar, di Xcode pada {{mac}}: Settings › Apple Accounts.",
+      "teamMissingText": "Xcode sudah masuk tapi belum menampilkan tim. Di Xcode, buat app iOS apa saja, pilih timmu di Signing & Capabilities, lalu jalankan di iPhone sekali.",
       "connectedDone": "{{name}} · iOS {{version}}",
       "connectedText": "Colokkan iPhone ke {{mac}} dengan kabel.",
       "trustDone": "Dipercaya",
@@ -13321,6 +13434,22 @@
       "helperText": "Dibuat dan diperbarui oleh Mac setiap 7 hari. Apple Account gratis di Xcode sudah cukup.",
       "helperUntrustedText": "Ketuk nama developernya, lalu Percayai.",
       "teamLimitText": "Hapus dari iPhone satu aplikasi buatan sendiri: Apple Account gratis hanya mengizinkan 3.",
+      "xcodeOld": "{{name}} memakai iOS {{version}}, sedangkan Xcode di {{mac}} paling tinggi mengenal iOS {{sdk}}. Instal Xcode {{major}}, lalu jalankan ini di Terminal.",
+      "xcodeOldAny": "{{name}} memakai iOS {{version}}, lebih baru dari yang dikenal Xcode di {{mac}}. Instal Xcode {{major}}, lalu jalankan ini di Terminal.",
+      "uiRefusedText": "iPhone menolak ketukan helper pengujian. Buka kuncinya dan masukkan kode sandinya jika diminta. Jika terus terjadi, matikan lalu nyalakan lagi Pengaturan › Pengembang › Aktifkan Otomatisasi UI.",
+      "tooOld": "{{name}} memakai iOS {{version}}, dan agen butuh iOS 17 atau lebih baru. Perbarui jika bisa, atau colokkan iPhone yang lebih baru.",
+      "tooOldVersion": "16 atau lebih lama",
+      "pluggedIn": "Sudah tercolok",
+      "stall": {
+        "xcode": "Sudah terinstal? Buka Xcode sekali dan setujui ketentuannya, agar {{mac}} bisa memakainya.",
+        "tools": "Unduhan sekitar 8 GB ini butuh {{mac}} tetap menyala dan online. Jika berhenti, unduh iOS di Xcode › Settings › Components.",
+        "account": "Sudah masuk? Di Xcode, buat app iOS apa saja, pilih timmu di Signing & Capabilities, lalu jalankan di iPhone sekali.",
+        "connected": "{{mac}} belum melihat iPhone. Pakai kabel yang membawa data, bukan hanya daya, buka kunci iPhone, lalu ketuk Percayai jika diminta.",
+        "trust": "Tidak muncul Percayai? Cabut iPhone, buka kuncinya, colokkan lagi, lalu ketuk Percayai dan masukkan kode sandinya.",
+        "developerMode": "Mode Pengembang baru menyala setelah iPhone dimulai ulang. Ketuk Mulai Ulang, lalu Nyalakan setelah iPhone menyala lagi. Tidak ada tombolnya? Cabut iPhone dan colokkan lagi.",
+        "uiAutomation": "Tombolnya muncul setelah Mode Pengembang menyala dan iPhone dimulai ulang. Biarkan tidak terkunci selama kamu mencarinya.",
+        "helper": "{{mac}} membuat helper pengujian dan menjalankannya di iPhone, yang butuh beberapa menit untuk pertama kali. Biarkan iPhone tidak terkunci dan tetap tercolok."
+      },
       "ready": "{{name}} siap untuk agen.",
       "path": {
         "settings": "Pengaturan",
@@ -13960,6 +14089,9 @@
       "membersPersonal": "Orang"
     },
     "advanced": "Lanjutan",
+    "tab": {
+      "account": "Profil"
+    },
     "sectionText": {
       "account": "Profilmu dan tampilan aplikasi untukmu.",
       "notifications": "Apa yang sampai padamu sebagai notifikasi di sini. Kotak masuk menyimpan semuanya.",
@@ -14228,9 +14360,6 @@
         "jev": "Agen mengirim stiker sendiri hanya dengan Jev.",
         "jevLink": "Siapkan Jev"
       }
-    },
-    "tab": {
-      "account": "Profil"
     }
   },
   "personalMode": {

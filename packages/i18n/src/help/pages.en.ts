@@ -42,8 +42,8 @@ export const helpEn: Record<HelpSlug, HelpDocument> = {
         id: "agents",
         heading: "Your agents work here too",
         blocks: [
-          "Your agents work on this computer too, in folders of their own, with a browser, and with Claude Code or Codex when they're installed here. Commands stay off until you turn them on in **Preferences\u00a0›\u00a0Tools**.",
-          "Agents here run as you. With Commands on, they can reach the rest of this computer, `.agentes` included: the database, `.env` with `AGENTES_SECRET`, the owner key and this computer's token. That holds for every workspace that uses this computer, one on agentes.chat Cloud included. See [What agents can reach](/help/computers#reach).",
+          "Your agents work on this computer too, in folders of their own, with a browser, and with Claude Code or Codex when they're installed here.",
+          "Agents here run as you. **Commands** are on by default, and with them the agents of every workspace that uses this computer can reach everything on it, the server's data included. Turn them off in **Preferences\u00a0›\u00a0Tools**. See [What agents can reach](/help/computers#reach).",
         ],
       },
       {
@@ -51,7 +51,7 @@ export const helpEn: Record<HelpSlug, HelpDocument> = {
         heading: "Lend it to another workspace too",
         blocks: [
           "The workspaces of the server you run here use this computer by themselves. To let a workspace somewhere else use it too, such as one on agentes.chat Cloud, open **Preferences\u00a0›\u00a0Servers**, press **Add a server…**, sign in to that workspace and press **Allow** when the app asks.",
-          "Each workspace gets its own agents and folders here. **Commands** in **Preferences\u00a0›\u00a0Tools** counts for every workspace on this computer at once: turn it on only if you trust every workspace's agents with all of this computer.",
+          "Each workspace gets its own agents and folders here. **Commands** are on by default for it too. Turn them off in the app's ask before you press **Allow**, or later in **Preferences\u00a0›\u00a0Tools**, where one switch counts for every workspace on this computer.",
         ],
       },
       {
@@ -236,7 +236,7 @@ export const helpEn: Record<HelpSlug, HelpDocument> = {
               "on a computer that also runs agentes.chat, its database and keys in `.agentes`",
             ],
           },
-          "agentes.chat refuses commands that name its keys, tokens and sign-ins, but that's a rule, not a wall. So **Commands** start off. Turning them on in **Preferences\u00a0›\u00a0Tools** counts for every workspace on the computer at once: do it only if you'd trust every workspace's agents, and the people they work for, with everything on it. Claude Code and Codex run their own commands in the agent's folder, under their own rules.",
+          "agentes.chat refuses commands that name its keys, tokens and sign-ins, but that's a rule, not a wall. **Commands** are on by default. Turn them off in the app's ask before you press **Allow**, or later in **Preferences\u00a0›\u00a0Tools**, where one switch counts for every workspace on the computer. Claude Code and Codex run their own commands in the agent's folder, under their own rules.",
           "For a real wall, use a Linux server. On Debian 13, installed with `--system`, each agent is a user of its own. On Ubuntu, agents share one user, `agentes`: they see each other's folders, not yours or the server's. Or give the agents a computer of their own.",
         ],
       },

@@ -1,7 +1,7 @@
 import type { ComputerDevice, DeviceStatus, PhoneDevice } from "@agenteschat/client";
 import { useDesktopLatest } from "@agenteschat/client";
 import { type AudienceIcon, audienceWords, portraitOf, statusLook, statusPill } from "@agenteschat/client/lib/devices";
-import { desktopTargetOf, downloadHref } from "@agenteschat/client/lib/machines";
+import { downloadHref } from "@agenteschat/client/lib/machines";
 import { isPersonal } from "@agenteschat/client/lib/workspace-mode";
 import {
   Avatar,
@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { AgentAvatar } from "@/components/AgentAvatar";
 import { useOrg } from "@/components/org-context";
 import { OrgMark } from "@/components/ProfilePhoto";
+import { useDesktopHere } from "@/hooks/useDesktopHere";
 import { useDirectory } from "@/hooks/useDirectory";
 import "./devices.css";
 
@@ -146,22 +147,66 @@ export function Facts({ facts }: { facts: { label: string; value: ReactNode; wid
   );
 }
 
-const SYSTEMS = [
-  { target: "darwin", arch: "aarch64", platform: "mac" },
-  { target: "windows", arch: "x86_64", platform: "windows" },
-  { target: "linux", arch: "x86_64", platform: "linux" },
+/** Every build the app comes in, as `/api/desktop/latest` names them: one for both Mac chips; x64 and ARM64 elsewhere. */
+export const DESKTOP_BUILDS = [
+  { id: "darwin", target: "darwin", arch: "aarch64", platform: "mac", arm: false },
+  { id: "windows", target: "windows", arch: "x86_64", platform: "windows", arm: false },
+  { id: "windows-arm64", target: "windows", arch: "aarch64", platform: "windows", arm: true },
+  { id: "linux", target: "linux", arch: "x86_64", platform: "linux", arm: false },
+  { id: "linux-arm64", target: "linux", arch: "aarch64", platform: "linux", arm: true },
 ] as const;
+export type DesktopDownload = (typeof DESKTOP_BUILDS)[number];
 
 /**
- * "Download for Mac" for the system this page is open on, and a small "Other systems" menu with the other two. A
- * system with no build yet shows disabled with "Em breve"; while its build is asked for, disabled with no mark, so
- * "Em breve" never flashes. A web page can't know whether the app is already installed, so it never says so. A phone
- * shows the menu alone.
+ * Each build's newest release (`data` null: none yet), and this computer's build. A Windows on ARM takes the x64 one
+ * while ARM64 has no release: Windows runs it there, emulated. A failed ask leaves that build out.
+ */
+export function useDesktopDownloads() {
+  const here = useDesktopHere();
+  const latest: Record<DesktopDownload["id"], ReturnType<typeof useDesktopLatest>> = {
+    darwin: useDesktopLatest("darwin", "aarch64"),
+    windows: useDesktopLatest("windows", "x86_64"),
+    "windows-arm64": useDesktopLatest("windows", "aarch64"),
+    linux: useDesktopLatest("linux", "x86_64"),
+    "linux-arm64": useDesktopLatest("linux", "aarch64"),
+  };
+  const origin = typeof window === "undefined" ? "" : window.location.origin;
+  const href = (b: DesktopDownload) => {
+    const url = latest[b.id].data?.url;
+    return url ? downloadHref(url, origin) : null;
+  };
+  // `null` is the server's answer that there's no build; a failed ask says nothing, so that build isn't offered.
+  const soon = (b: DesktopDownload) => latest[b.id].data === null;
+  const offered = (b: DesktopDownload) => !latest[b.id].isError;
+  let found = here ? DESKTOP_BUILDS.find((b) => b.target === here.target && b.arch === here.arch) : undefined;
+  if (found?.id === "windows-arm64" && soon(found)) found = DESKTOP_BUILDS[1];
+  const mine = found && offered(found) ? found : undefined;
+  const others = DESKTOP_BUILDS.filter((b) => b.id !== mine?.id && offered(b));
+  return { latest, href, soon, mine, others };
+}
+
+/** A build's name: its system's, and "(ARM)" after the ARM64 ones. */
+export function useBuildName() {
+  const { t } = useTranslation();
+  return (b: { target: DesktopDownload["target"]; arm: boolean }) => {
+    const system = t(`machines.os.${b.target}`);
+    return b.arm ? t("devices.armBuild", { system }) : system;
+  };
+}
+
+/**
+ * "Download for Mac" for the computer this page is open on, and a small "Other systems" menu with the other builds.
+ * A build with no release yet shows disabled with "Em breve"; while its release is asked for, disabled with no mark,
+ * so "Em breve" never flashes. A web page can't know whether the app is already installed, so it never says so. A
+ * phone shows the menu alone.
  */
 export function DownloadButtons({
   primary = false,
+  onPick,
 }: {
   primary?: boolean;
+  /** The build whose download was started (the install steps under it follow it). */
+  onPick?: (build: DesktopDownload) => void;
   /**
    * @deprecated Not used: a system with no build is disabled with "Em breve", and its terminal line is reached from
    * the flow's own link.
@@ -169,25 +214,9 @@ export function DownloadButtons({
   onLine?: (shell: "unix" | "windows") => void;
 }) {
   const { t } = useTranslation();
-  const here = desktopTargetOf(navigator.userAgent)?.target ?? null;
-  const builds = {
-    darwin: useDesktopLatest("darwin", "aarch64"),
-    windows: useDesktopLatest("windows", "x86_64"),
-    linux: useDesktopLatest("linux", "x86_64"),
-  };
-  const origin = typeof window === "undefined" ? "" : window.location.origin;
-  const hrefOf = (target: keyof typeof builds) => {
-    const url = builds[target].data?.url;
-    return url ? downloadHref(url, origin) : null;
-  };
-  // `null` is the server's answer that there's no build; a failed ask says nothing, so that system isn't offered.
-  const soon = (s: (typeof SYSTEMS)[number]) => builds[s.target].data === null;
-  const offered = (s: (typeof SYSTEMS)[number]) => !builds[s.target].isError;
-  const found = here ? SYSTEMS.find((s) => s.target === here) : undefined;
-  const mine = found && offered(found) ? found : undefined;
-  const mineHref = mine ? hrefOf(mine.target) : null;
-  const others = SYSTEMS.filter((s) => s.target !== mine?.target && offered(s));
-  const name = (s: (typeof SYSTEMS)[number]) => t(`machines.os.${s.target}`);
+  const { latest, href, soon, mine, others } = useDesktopDownloads();
+  const name = useBuildName();
+  const mineHref = mine ? href(mine) : null;
   const soonChip = <Chip icon="lock">{t("common.soon")}</Chip>;
   const variant = primary ? "primary" : "default";
   return (
@@ -195,7 +224,7 @@ export function DownloadButtons({
       {mine &&
         (mineHref ? (
           <Button asChild size="sm" variant={variant}>
-            <a href={mineHref} download>
+            <a href={mineHref} download onClick={() => onPick?.(mine)}>
               <Icon name="download" />
               {t("devices.downloadFor", { system: name(mine) })}
             </a>
@@ -203,7 +232,7 @@ export function DownloadButtons({
         ) : (
           // Beside the button, not in it: on a narrow screen the mark goes under it instead of past the edge.
           <span className="row">
-            <Button size="sm" variant={variant} icon="download" disabled loading={builds[mine.target].isPending}>
+            <Button size="sm" variant={variant} icon="download" disabled loading={latest[mine.id].isPending}>
               {t("devices.downloadFor", { system: name(mine) })}
             </Button>
             {soon(mine) && soonChip}
@@ -219,17 +248,24 @@ export function DownloadButtons({
             </Button>
           }
         >
-          {others.map((s) => {
-            const href = hrefOf(s.target);
+          {others.map((b) => {
+            const link = href(b);
             return (
               <MenuItem
-                key={s.target}
-                leading={<ProviderLogo id={s.target === "darwin" ? "apple" : s.target} size="xs" off={!href} />}
-                disabled={!href}
-                hint={soon(s) ? soonChip : undefined}
-                onSelect={href ? () => window.location.assign(href) : undefined}
+                key={b.id}
+                leading={<ProviderLogo id={b.target === "darwin" ? "apple" : b.target} size="xs" off={!link} />}
+                disabled={!link}
+                hint={soon(b) ? soonChip : undefined}
+                onSelect={
+                  link
+                    ? () => {
+                        onPick?.(b);
+                        window.location.assign(link);
+                      }
+                    : undefined
+                }
               >
-                {t("devices.downloadFor", { system: name(s) })}
+                {t("devices.downloadFor", { system: name(b) })}
               </MenuItem>
             );
           })}

@@ -2,14 +2,16 @@ name: Desktop
 
 # The desktop app for macOS, Windows and Linux. Started by hand on main with `release` = fix/feature/major: one
 # job bumps the version (patch/minor/major) in tauri.conf.json, package.json and Cargo.toml, commits and tags
-# `desktop-v<version>` on main; three jobs build it (macOS universal, signed with our Developer ID and
-# notarized when the Apple secrets are set, ad-hoc signed without them; Windows NSIS; Linux AppImage and deb),
+# `desktop-v<version>` on main; jobs build it (macOS universal, signed with our Developer ID and
+# notarized when the Apple secrets are set, ad-hoc signed without them; Windows NSIS and Linux AppImage and deb,
+# each for x64 and ARM64 on a runner of that architecture),
 # each with the updater bundle signed with the updater key;
 # one job publishes every file in the GitHub Release (the server reads those names, apps/server
 # routes/desktop.ts):
 #   macOS    agentes_<v>_universal.dmg (+ .sha256), agentes_<v>_universal.app.tar.gz (+ .sig)
-#   Windows  agentes_<v>_x64-setup.exe (+ .sha256, + .sig: the installer is its own updater bundle)
-#   Linux    agentes_<v>_amd64.deb (+ .sha256), agentes_<v>_amd64.AppImage (+ .sha256, + .sig)
+#   Windows  agentes_<v>_x64-setup.exe, agentes_<v>_arm64-setup.exe (+ .sha256, + .sig: the installer is its own
+#            updater bundle)
+#   Linux    agentes_<v>_{amd64,arm64}.deb (+ .sha256), agentes_<v>_{amd64,arm64}.AppImage (+ .sha256, + .sig)
 # Every app carries the runner and agent-browser (ADR 0040), and the server's own files, built once from the
 # same commit (the `server` job: JavaScript and WebAssembly, the same on every system), for "Run agentes.chat
 # on this computer" (ADR 0066; tauri.native.conf.json adds them to the resources). `none` only builds the
@@ -397,8 +399,22 @@ jobs:
   windows:
     needs: [version, server]
     if: ${{ contains(fromJSON('["all", "windows"]'), inputs.platforms || 'all') }}
-    # GitHub's own Windows runner: the build runs what it makes (the runner, agent-browser, the server once).
-    runs-on: windows-latest
+    # GitHub's own Windows runners, one per architecture: each build runs what it makes (the runner, agent-browser,
+    # the server once). agent-browser has no Windows ARM build: Windows on ARM runs the x64 one, emulated.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            triple: x86_64-pc-windows-msvc
+            # The baseline build: some x64 CPUs lack AVX2.
+            bun: bun-windows-x64-baseline
+            browser: win32-x64
+          - arch: arm64
+            triple: aarch64-pc-windows-msvc
+            bun: bun-windows-arm64
+            browser: win32-x64
+    runs-on: ${{ matrix.arch == 'arm64' && (vars.CI_RUNNER_WINDOWS_ARM || 'windows-11-arm') || 'windows-latest' }}
     timeout-minutes: 60
     env:
       BIN_DIR: apps/desktop/src-tauri/binaries
@@ -420,23 +436,23 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # The baseline build: some x64 CPUs lack AVX2. Tauri's sidecar name: `<name>-<target triple>.exe`.
+      # Tauri's sidecar name: `<name>-<target triple>.exe`.
       - name: Compile the runner
         shell: bash
         run: |
           mkdir -p "$BIN_DIR"
-          bun build --compile --target=bun-windows-x64-baseline apps/server/runner/main.ts \
-            --outfile "$BIN_DIR/agentes-runner-x86_64-pc-windows-msvc.exe"
-          "$BIN_DIR/agentes-runner-x86_64-pc-windows-msvc.exe" --version
+          bun build --compile --target=${{ matrix.bun }} apps/server/runner/main.ts \
+            --outfile "$BIN_DIR/agentes-runner-${{ matrix.triple }}.exe"
+          "$BIN_DIR/agentes-runner-${{ matrix.triple }}.exe" --version
 
       - name: Fetch agent-browser
         shell: bash
         run: |
           read -r AB_VERSION ASSET SHA < <(bun -e '
             import { AGENT_BROWSER_SHA256, AGENT_BROWSER_VERSION, agentBrowserAsset } from "./packages/adapters/src/machine-protocol.ts";
-            console.log([AGENT_BROWSER_VERSION, agentBrowserAsset("win32-x64"), AGENT_BROWSER_SHA256["win32-x64"]].join(" "));
+            console.log([AGENT_BROWSER_VERSION, agentBrowserAsset("${{ matrix.browser }}"), AGENT_BROWSER_SHA256["${{ matrix.browser }}"]].join(" "));
           ')
-          OUT="$BIN_DIR/agent-browser-x86_64-pc-windows-msvc.exe"
+          OUT="$BIN_DIR/agent-browser-${{ matrix.triple }}.exe"
           curl -fsSL --retry 3 -o "$OUT" \
             "https://github.com/vercel-labs/agent-browser/releases/download/v$AB_VERSION/$ASSET"
           echo "$SHA  $OUT" | sha256sum -c -
@@ -458,7 +474,7 @@ jobs:
       # The server here as the app runs it on Windows: it answers, and it stops when its stdin closes.
       - name: Run the server here once
         shell: bash
-        run: bun apps/desktop/scripts/server-smoke.ts "$BIN_DIR/agentes-runner-x86_64-pc-windows-msvc.exe" apps/desktop/src-tauri/native
+        run: bun apps/desktop/scripts/server-smoke.ts "$BIN_DIR/agentes-runner-${{ matrix.triple }}.exe" apps/desktop/src-tauri/native
 
       - name: Icons and the installer's pictures
         working-directory: apps/desktop
@@ -504,7 +520,7 @@ jobs:
             echo "::error::No signed installer in $BUNDLE"
             exit 1
           fi
-          NAME="agentes_${VERSION}_x64-setup.exe"
+          NAME="agentes_${VERSION}_${{ matrix.arch }}-setup.exe"
           mkdir -p out
           cp "$SRC" "out/$NAME"
           cp "$SRC.sig" "out/$NAME.sig"
@@ -513,15 +529,31 @@ jobs:
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: desktop-windows
+          name: desktop-windows-${{ matrix.arch }}
           path: out/*
           retention-days: 14
 
   linux:
     needs: [version, server]
     if: ${{ contains(fromJSON('["all", "macos+linux", "linux"]'), inputs.platforms || 'all') }}
-    # 22.04: an older glibc, so the app runs on more distributions.
-    runs-on: ${{ vars.CI_RUNNER_UBUNTU_22 || 'ubuntu-22.04' }}
+    # 22.04: an older glibc, so the app runs on more distributions. One runner per architecture: each build runs what
+    # it makes. `pkg`: the architecture in the files' names (Debian's).
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            triple: x86_64-unknown-linux-gnu
+            # The baseline build: some x64 CPUs lack AVX2.
+            bun: bun-linux-x64-baseline
+            browser: linux-x64
+            pkg: amd64
+          - arch: arm64
+            triple: aarch64-unknown-linux-gnu
+            bun: bun-linux-arm64
+            browser: linux-arm64
+            pkg: arm64
+    runs-on: ${{ matrix.arch == 'arm64' && (vars.CI_RUNNER_UBUNTU_22_ARM || 'ubuntu-22.04-arm') || (vars.CI_RUNNER_UBUNTU_22 || 'ubuntu-22.04') }}
     timeout-minutes: 60
     env:
       BIN_DIR: apps/desktop/src-tauri/binaries
@@ -550,23 +582,22 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # The baseline build: some x64 CPUs lack AVX2.
       - name: Compile the runner
         shell: bash
         run: |
           mkdir -p "$BIN_DIR"
-          bun build --compile --target=bun-linux-x64-baseline apps/server/runner/main.ts \
-            --outfile "$BIN_DIR/agentes-runner-x86_64-unknown-linux-gnu"
-          chmod +x "$BIN_DIR/agentes-runner-x86_64-unknown-linux-gnu"
+          bun build --compile --target=${{ matrix.bun }} apps/server/runner/main.ts \
+            --outfile "$BIN_DIR/agentes-runner-${{ matrix.triple }}"
+          chmod +x "$BIN_DIR/agentes-runner-${{ matrix.triple }}"
 
       - name: Fetch agent-browser
         shell: bash
         run: |
           read -r AB_VERSION ASSET SHA < <(bun -e '
             import { AGENT_BROWSER_SHA256, AGENT_BROWSER_VERSION, agentBrowserAsset } from "./packages/adapters/src/machine-protocol.ts";
-            console.log([AGENT_BROWSER_VERSION, agentBrowserAsset("linux-x64"), AGENT_BROWSER_SHA256["linux-x64"]].join(" "));
+            console.log([AGENT_BROWSER_VERSION, agentBrowserAsset("${{ matrix.browser }}"), AGENT_BROWSER_SHA256["${{ matrix.browser }}"]].join(" "));
           ')
-          OUT="$BIN_DIR/agent-browser-x86_64-unknown-linux-gnu"
+          OUT="$BIN_DIR/agent-browser-${{ matrix.triple }}"
           curl -fsSL --retry 3 -o "$OUT" \
             "https://github.com/vercel-labs/agent-browser/releases/download/v$AB_VERSION/$ASSET"
           echo "$SHA  $OUT" | sha256sum -c -
@@ -588,7 +619,7 @@ jobs:
       # The server here as the app runs it on Linux: it answers, and it stops when its stdin closes.
       - name: Run the server here once
         shell: bash
-        run: bun apps/desktop/scripts/server-smoke.ts "$BIN_DIR/agentes-runner-x86_64-unknown-linux-gnu" apps/desktop/src-tauri/native
+        run: bun apps/desktop/scripts/server-smoke.ts "$BIN_DIR/agentes-runner-${{ matrix.triple }}" apps/desktop/src-tauri/native
 
       - name: Icons
         working-directory: apps/desktop
@@ -617,24 +648,25 @@ jobs:
             exit 1
           fi
           mkdir -p out
-          cp "$DEB" "out/agentes_${VERSION}_amd64.deb"
-          cp "$APPIMAGE" "out/agentes_${VERSION}_amd64.AppImage"
-          cp "$APPIMAGE.sig" "out/agentes_${VERSION}_amd64.AppImage.sig"
-          (cd out && for f in "agentes_${VERSION}_amd64.deb" "agentes_${VERSION}_amd64.AppImage"; do sha256sum "$f" > "$f.sha256"; done)
+          PKG=${{ matrix.pkg }}
+          cp "$DEB" "out/agentes_${VERSION}_$PKG.deb"
+          cp "$APPIMAGE" "out/agentes_${VERSION}_$PKG.AppImage"
+          cp "$APPIMAGE.sig" "out/agentes_${VERSION}_$PKG.AppImage.sig"
+          (cd out && for f in "agentes_${VERSION}_$PKG.deb" "agentes_${VERSION}_$PKG.AppImage"; do sha256sum "$f" > "$f.sha256"; done)
           ls -l out
 
       # What the deb puts on the computer: the two sidecars and the server's files (the AppImage has the same).
       - name: Check the app's files
         shell: bash
         run: |
-          dpkg-deb -c "out/agentes_${VERSION}_amd64.deb" > deb.txt
+          dpkg-deb -c "out/agentes_${VERSION}_${{ matrix.pkg }}.deb" > deb.txt
           for f in /agentes-runner /agent-browser /server/native.js /web/index.html /licenses/bun/LICENSE.md /licenses/agent-browser/LICENSE; do
             grep -q -- "$f\$" deb.txt || { echo "::error::$f is not in the deb"; exit 1; }
           done
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: desktop-linux
+          name: desktop-linux-${{ matrix.arch }}
           path: out/*
           retention-days: 14
 
@@ -644,7 +676,7 @@ jobs:
         shell: bash
         run: |
           sudo apt-get install -y -qq xvfb imagemagick dbus
-          APPIMAGE="$PWD/out/agentes_${VERSION}_amd64.AppImage"
+          APPIMAGE="$PWD/out/agentes_${VERSION}_${{ matrix.pkg }}.AppImage"
           mkdir -p look
           look() {
             local name=$1 home
@@ -672,7 +704,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: desktop-linux-look
+          name: desktop-linux-look-${{ matrix.arch }}
           path: look/*
           retention-days: 14
           if-no-files-found: ignore
@@ -691,11 +723,11 @@ jobs:
         with:
           ref: ${{ needs.version.outputs.ref }}
 
-      # Only the three builds' files: the server's files and the Linux screenshots are artifacts too.
+      # Only the builds' files: the server's files and the Linux screenshots are artifacts too.
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           path: out
-          pattern: desktop-{macos,windows,linux}
+          pattern: desktop-{macos,windows-x64,windows-arm64,linux-x64,linux-arm64}
           merge-multiple: true
 
       - name: Publish the release
@@ -708,5 +740,8 @@ jobs:
           git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
           git tag -l --format='%(contents)' "$TAG" | sed '/^-----BEGIN PGP SIGNATURE-----/,$d' > notes.txt
           if [ ! -s notes.txt ] || ! grep -q '[^[:space:]]' notes.txt; then echo "agentes.chat $VERSION" > notes.txt; fi
+          # How to open it the first time while the builds aren't notarized/signed (ADR 0036 §10). It starts with
+          # <!-- install -->, where the server cuts the notes the app shows on an update.
+          { echo; sed -e "s|{{repo}}|$GITHUB_REPOSITORY|g" -e "s|{{version}}|$VERSION|g" .github/desktop-install.md; } >> notes.txt
           ls -l out
           gh release create "$TAG" out/* --title "agentes.chat $VERSION" --notes-file notes.txt

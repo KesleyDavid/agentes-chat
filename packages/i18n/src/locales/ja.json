@@ -1361,6 +1361,112 @@
     "moveDown": "下へ移動",
     "restoreOrder": "デフォルトの順番に戻す"
   },
+  "install": {
+    "frames": "{{system}}へのインストール方法",
+    "step": "ステップ{{n}}",
+    "previous": "前のステップ",
+    "next": "次のステップ",
+    "fullGuide": "すべての手順",
+    "copied": "コピーしました。ターミナルに貼り付けてください。",
+    "mac": {
+      "why": "<b>アプリはベータ版です。</b>そのため、初回はMacが確認を求めます:",
+      "drag": "agentes.chatをアプリケーションにドラッグします。",
+      "dragLong": "ダウンロードしたファイルを開き、agentes.chatをアプリケーションにドラッグします。",
+      "blocked": "アプリを開き、「完了」をクリックします。",
+      "blockedSub": "「ゴミ箱に入れる」はクリックしないでください。",
+      "settings": "設定 › プライバシーとセキュリティで「このまま開く」をクリックします。",
+      "settingsLong": "そのすぐ後に、システム設定 › プライバシーとセキュリティを開き、「セキュリティ」までスクロールして「このまま開く」をクリックします。",
+      "settingsSub": "このボタンは、アプリを開こうとした後（ステップ2）にだけ表示され、1時間ほどで消えます。見つからない場合は、もう一度アプリを開いてから戻ってきてください。",
+      "settingsShort": "ステップ2の直後にだけ表示されます。",
+      "openSettings": "プライバシーとセキュリティを開く",
+      "confirm": "Touch IDまたはパスワードで確認します。",
+      "confirmLong": "もう一度「このまま開く」をクリックし、Touch IDまたはMacのパスワードで確認します。",
+      "done": "完了です。次回からはすぐに開きます。",
+      "stuckTitle": "ボタンが表示されない、またはアプリが壊れているとMacに表示される場合",
+      "stuckText": "これをターミナルに貼り付けて、もう一度アプリを開いてください:"
+    },
+    "windows": {
+      "why": "<b>アプリはベータ版です。</b>そのため、初回はWindowsが確認を求めます:",
+      "keep": "ブラウザに確認された場合は「保存」を選びます。",
+      "more": "インストーラーを開き、「詳細情報」をクリックします。",
+      "moreLong": "インストーラーを開きます。「WindowsによってPCが保護されました」と表示されたら、「詳細情報」をクリックします。",
+      "run": "「実行」をクリックします。",
+      "runLong": "「実行」をクリックし、インストーラーの指示に従います。",
+      "done": "完了です。次回からはすぐに開きます。"
+    },
+    "linux": {
+      "why": "Ubuntu、Debianなどのシステム向け（x64）です。Linuxでは追加の確認はありません:",
+      "apt": ".debをダブルクリックするか、ターミナルからインストールします。",
+      "aptLong": "ダウンロードしたファイルをダブルクリックして「インストール」をクリックするか、これをターミナルに貼り付けます:",
+      "open": "アプリの一覧からagentes.chatを開きます。"
+    },
+    "page": {
+      "docTitle": "アプリをダウンロード · agentes.chat",
+      "title": "agentes.chatアプリをダウンロード",
+      "beta": "Beta",
+      "text": "ワークスペースを専用のウィンドウで開き、システムの通知を受け取れます。クリックひとつで、エージェントがこのコンピューターのそれぞれのフォルダで作業します。",
+      "open": "agentes.chatを開く",
+      "version": "バージョン{{version}}",
+      "versionSize": "バージョン{{version}} · {{size}}",
+      "soon": "{{system}}版はまだありません。",
+      "useArm": "ARMチップのコンピューターですか？ARM版をダウンロード",
+      "useX64": "x64版をダウンロード",
+      "unavailable": "現在ここからアプリをダウンロードできません。しばらくしてからもう一度お試しください。",
+      "installOn": "{{system}}にインストール",
+      "system": "システム",
+      "whyTitle": "コンピューターが確認を求めるのはなぜですか？",
+      "whyText": "agentes.chatはベータ版です。Mac版はまだAppleの公証を受けておらず、WindowsのインストーラーにはまだMicrosoftの証明書がありません。そのため、インターネットからダウンロードしたアプリを開く前に、コンピューターが一度だけ確認を求めます。その後はすぐに開き、自動でアップデートされます。ベータ版が終わるまでに、この手順はなくなります。",
+      "openSource": "オープンソース",
+      "onlyHere": "公開はここと、プロジェクトのリリースだけです",
+      "signedUpdates": "署名付きのアップデート"
+    },
+    "scene": {
+      "finder": "Finder",
+      "file": "ファイル",
+      "edit": "編集",
+      "view": "表示",
+      "window": "ウインドウ",
+      "applications": "アプリケーション",
+      "notOpened": "“{{app}}”は開かれませんでした",
+      "notOpenedText": "Appleは、“{{app}}”にMacに損害を与えたりプライバシーを侵害したりする可能性のあるマルウェアが含まれていないことを検証できませんでした。",
+      "done": "完了",
+      "moveToTrash": "ゴミ箱に入れる",
+      "search": "検索",
+      "account": "Appleアカウント",
+      "general": "一般",
+      "appearance": "外観",
+      "accessibility": "アクセシビリティ",
+      "privacy": "プライバシーとセキュリティ",
+      "desktopDock": "デスクトップとDock",
+      "displays": "ディスプレイ",
+      "security": "セキュリティ",
+      "allowFrom": "アプリケーションの実行許可",
+      "allowValue": "App Storeと確認済みの開発元",
+      "blocked": "Macを保護するために“{{app}}”はブロックされました。",
+      "openAnyway": "このまま開く",
+      "confirmTitle": "“{{app}}”を開きますか？",
+      "confirmText": "入手元が信頼できる場合にのみ開いてください。",
+      "touchIdTitle": "システム設定",
+      "touchIdText": "これを許可するには、Touch IDを使用するか、パスワードを入力してください。",
+      "password": "パスワード",
+      "downloads": "ダウンロード",
+      "rare": "このファイルは一般的にダウンロードされていません。開く前に、信頼できるファイルであることを確認してください。",
+      "delete": "削除",
+      "keep": "保存",
+      "protectedTitle": "WindowsによってPCが保護されました",
+      "protectedText": "Microsoft Defender SmartScreenは認識されないアプリの起動を停止しました。このアプリを実行すると、PCに問題が起こる可能性があります。",
+      "protectedShort": "Microsoft Defender SmartScreenは認識されないアプリの起動を停止しました。",
+      "moreInfo": "詳細情報",
+      "dontRun": "実行しない",
+      "appLabel": "アプリ:",
+      "publisher": "発行元:",
+      "unknownPublisher": "不明な発行元",
+      "runAnyway": "実行",
+      "activities": "アクティビティ",
+      "readingLists": "パッケージリストを読み込んでいます... 完了",
+      "settingUp": "agentes-chat ({{version}}) を設定しています ..."
+    }
+  },
   "legal": {
     "updated": "最終更新日 {{date}}",
     "contents": "このページの内容",
@@ -12909,6 +13015,7 @@
     "downloadFor": "{{system}}版をダウンロード",
     "downloadApp": "アプリをダウンロード",
     "otherSystems": "ほかのシステム",
+    "armBuild": "{{system}} (ARM)",
     "onThePhone": "スマートフォンで",
     "onTheIphone": "iPhoneで",
     "screen": {
@@ -12984,6 +13091,8 @@
       "helper_missing": "テストヘルパーがまだ設定されていません",
       "helper_expired": "テストヘルパーの更新が必要です",
       "apple_account_missing": "XcodeでApple Accountにサインインしていません",
+      "apple_team_missing": "Xcodeにまだチームが表示されていません",
+      "ui_not_authorized": "iPhoneがテストヘルパーのタップを拒否しました",
       "team_limit": "無料のApple Accountでアプリの上限に達しました",
       "helper_untrusted": "iPhoneがまだテストヘルパーを信頼していません",
       "booting": "起動中",
@@ -12991,7 +13100,8 @@
       "no_driverLinux": "Linuxでこのスマートフォンを開けません",
       "os_too_old": "このシステムはツールに対して古すぎます",
       "adb_offline": "スマートフォンが応答しません",
-      "other": "デバイスで対応が必要です"
+      "other": "デバイスで対応が必要です",
+      "iosTooOld": "iOS {{version}}です。エージェントにはiOS 17以降が必要です"
     },
     "fix": {
       "locked": "ロックを解除",
@@ -13005,6 +13115,8 @@
       "helper_missing": "Macでアプリを開く",
       "helper_expired": "Macでアプリを開く",
       "apple_account_missing": "Xcodeにサインイン",
+      "apple_team_missing": "XcodeからiPhoneでアプリを一度実行してください",
+      "ui_not_authorized": "iPhoneのロックを解除",
       "team_limit": "自分で作ったアプリを削除",
       "helper_untrusted": "iPhoneで信頼する",
       "booting": "起動を待つ",
@@ -13256,7 +13368,8 @@
       "toolsDone": "Macがダウンロード済み",
       "toolsText": "Macがダウンロードします。約8 GBです。",
       "accountDone": "追加済み",
-      "accountText": "{{mac}}のXcodeのSettings › Accountsで追加してください（無料でも可）。",
+      "accountText": "{{mac}}のXcodeのSettings › Apple Accountsで追加してください（無料でも可）。",
+      "teamMissingText": "Xcodeはサインイン済みですが、まだチームが表示されていません。Xcodeで任意のiOSアプリを作成し、Signing & Capabilitiesでチームを選んで、iPhoneで一度実行してください。",
       "connectedDone": "{{name}} · iOS {{version}}",
       "connectedText": "ケーブルでiPhoneを{{mac}}につないでください。",
       "trustDone": "信頼済み",
@@ -13267,6 +13380,22 @@
       "helperText": "Macが7日ごとにビルドして更新します。XcodeでApple Account（無料）を使えば十分です。",
       "helperUntrustedText": "デベロッパ名をタップしてから「信頼」をタップします。",
       "teamLimitText": "自分で作ったアプリを1つiPhoneから削除してください（無料のApple Accountでは3つまで）。",
+      "xcodeOld": "{{name}}はiOS {{version}}ですが、{{mac}}のXcodeが対応するのはiOS {{sdk}}までです。Xcode {{major}}をインストールしてから、ターミナルでこれを実行してください。",
+      "xcodeOldAny": "{{name}}はiOS {{version}}で、{{mac}}のXcodeより新しいバージョンです。Xcode {{major}}をインストールしてから、ターミナルでこれを実行してください。",
+      "uiRefusedText": "iPhoneがテストヘルパーのタップを拒否しました。ロックを解除し、求められたらパスコードを入力してください。続く場合は、設定 › デベロッパ › UIオートメーションを有効にするをオフにしてからオンにしてください。",
+      "tooOld": "{{name}}はiOS {{version}}です。エージェントにはiOS 17以降が必要です。可能ならアップデートするか、新しいiPhoneをつないでください。",
+      "tooOldVersion": "16以前",
+      "pluggedIn": "つなぎました",
+      "stall": {
+        "xcode": "インストール済みですか？Xcodeを一度開いて利用規約に同意すると、{{mac}}で使えるようになります。",
+        "tools": "ダウンロードは約8 GBで、{{mac}}がスリープせずオンラインである必要があります。止まった場合は、Xcode › Settings › ComponentsでiOSを入手してください。",
+        "account": "サインイン済みですか？Xcodeで任意のiOSアプリを作成し、Signing & Capabilitiesでチームを選んで、iPhoneで一度実行してください。",
+        "connected": "{{mac}}はまだiPhoneを認識していません。充電専用ではなくデータ通信できるケーブルを使い、iPhoneのロックを解除して、求められたら「信頼」をタップしてください。",
+        "trust": "「信頼」が表示されませんか？iPhoneを外してロックを解除し、もう一度つないでから「信頼」をタップしてパスコードを入力してください。",
+        "developerMode": "デベロッパモードはiPhoneの再起動後にオンになります。「再起動」をタップし、起動したら「オンにする」をタップしてください。スイッチがない場合は、iPhoneを外してもう一度つないでください。",
+        "uiAutomation": "スイッチは、デベロッパモードがオンになりiPhoneが再起動したあとに表示されます。探している間はロックを解除したままにしてください。",
+        "helper": "{{mac}}がテストヘルパーを作成してiPhoneで起動します。初回は数分かかります。iPhoneはロックを解除し、つないだままにしてください。"
+      },
       "ready": "{{name}}はエージェントが使える状態です。",
       "path": {
         "settings": "設定",
@@ -13906,6 +14035,9 @@
       "membersPersonal": "メンバー"
     },
     "advanced": "詳細設定",
+    "tab": {
+      "account": "プロフィール"
+    },
     "sectionText": {
       "account": "あなたのプロフィールと、アプリの表示設定。",
       "notifications": "ここで通知として届くもの。受信トレイにはすべてが残ります。",
@@ -14174,9 +14306,6 @@
         "jev": "エージェントが自分からステッカーを送るのは、Jevを使っている場合だけです。",
         "jevLink": "Jevを設定"
       }
-    },
-    "tab": {
-      "account": "プロフィール"
     }
   },
   "personalMode": {

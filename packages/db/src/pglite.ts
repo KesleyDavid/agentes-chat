@@ -141,6 +141,38 @@ interface NodeStream {
   node: unknown;
 }
 
+/** What a system says when it can't sync a folder: the answers Postgres lets pass for one (`fsync_fname_ext`), and EPERM. */
+const FOLDER_SYNC_REFUSED = new Set(["EISDIR", "EPERM", "EACCES", "EBADF", "EINVAL"]);
+const refused = (error: unknown) => FOLDER_SYNC_REFUSED.has((error as { code?: string } | null)?.code ?? "");
+
+/**
+ * Syncs a folder's list of files, after Postgres created or renamed one in it. Windows can't open a folder to read it
+ * (`openSync(folder, "r")` fails there), so it skips; a system that refuses is let through, as Postgres does. Thrown,
+ * either one became an error inside Postgres's fsync, which aborted the database ("Aborted()") as soon as an existing
+ * folder was opened on Windows. `io`: the filesystem calls (tests replace them).
+ */
+export function syncFolder(
+  path: string,
+  platform: string = process.platform,
+  io: Pick<typeof fs, "openSync" | "fsyncSync" | "closeSync"> = fs,
+): void {
+  if (platform === "win32") return;
+  let fd: number;
+  try {
+    fd = io.openSync(path, "r");
+  } catch (error) {
+    if (refused(error)) return;
+    throw error;
+  }
+  try {
+    io.fsyncSync(fd);
+  } catch (error) {
+    if (!refused(error)) throw error;
+  } finally {
+    io.closeSync(fd);
+  }
+}
+
 class DurableNodeFS extends NodeFS {
   override async init(pg: PGlite, opts: EmscriptenOptions) {
     const { emscriptenOpts } = await super.init(pg, opts);
@@ -157,12 +189,7 @@ class DurableNodeFS extends NodeFS {
             return 0;
           }
           // A folder (Postgres syncs one after creating or renaming a file in it).
-          const fd = fs.openSync(nodefs.realPath(stream.node), "r");
-          try {
-            fs.fsyncSync(fd);
-          } finally {
-            fs.closeSync(fd);
-          }
+          syncFolder(nodefs.realPath(stream.node));
           return 0;
         });
     };

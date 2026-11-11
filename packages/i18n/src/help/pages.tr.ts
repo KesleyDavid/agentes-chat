@@ -43,8 +43,8 @@ export const helpTr: Partial<Record<HelpSlug, HelpDocument>> = {
         id: "agents",
         heading: "Ajanlarınız da burada çalışır",
         blocks: [
-          "Ajanlarınız da bu bilgisayarda, kendi klasörlerinde, bir tarayıcıyla ve burada kuruluysa Claude Code ya da Codex ile çalışır. Komutlar, siz **Tercihler › Araçlar** bölümünden açana kadar kapalı kalır.",
-          "Buradaki ajanlar sizin adınıza çalışır. Komutlar açıkken bu bilgisayarın geri kalanına, `.agentes` dahil, ulaşabilirler: veritabanı, `AGENTES_SECRET` içeren `.env`, sahip anahtarı ve bu bilgisayarın jetonu. Bu, agentes.chat Cloud'daki bir çalışma alanı dahil, bu bilgisayarı kullanan her çalışma alanı için geçerlidir. [Ajanlar nelere ulaşabilir](/help/computers#reach) bölümüne bakın.",
+          "Ajanlarınız da bu bilgisayarda, kendi klasörlerinde, bir tarayıcıyla ve burada kuruluysa Claude Code ya da Codex ile çalışır.",
+          "Buradaki ajanlar sizin adınıza çalışır. **Komutlar** varsayılan olarak açıktır. Açıkken bu bilgisayarı kullanan her çalışma alanının ajanları, sunucunun verileri dahil, bu bilgisayardaki her şeye ulaşabilir. Onları **Tercihler\u00a0›\u00a0Araçlar** içinde kapatabilirsiniz. [Ajanlar nelere ulaşabilir](/help/computers#reach) bölümüne bakın.",
         ],
       },
       {
@@ -52,7 +52,7 @@ export const helpTr: Partial<Record<HelpSlug, HelpDocument>> = {
         heading: "Başka bir çalışma alanına da açın",
         blocks: [
           "Burada çalıştırdığınız sunucunun çalışma alanları bu bilgisayarı kendiliğinden kullanır. Başka bir yerdeki bir çalışma alanının da, örneğin agentes.chat Cloud'daki birinin, kullanmasını istiyorsanız **Tercihler\u00a0›\u00a0Sunucular** bölümünü açın, **Sunucu ekle…** düğmesine basın, o çalışma alanında oturum açın ve uygulama sorduğunda **İzin ver** düğmesine basın.",
-          "Her çalışma alanının burada kendi ajanları ve klasörleri olur. **Tercihler\u00a0›\u00a0Araçlar** içindeki **Komutlar**, bu bilgisayardaki tüm çalışma alanları için aynı anda geçerlidir: yalnızca her çalışma alanının ajanlarına bu bilgisayarın tamamını emanet edebiliyorsanız açın.",
+          "Her çalışma alanının burada kendi ajanları ve klasörleri olur. **Komutlar** onun için de varsayılan olarak açıktır. Onları uygulamanın sorusunda **İzin ver**'e basmadan önce ya da daha sonra **Tercihler\u00a0›\u00a0Araçlar** içinde kapatın. Oradaki tek anahtar bu bilgisayardaki tüm çalışma alanları için geçerlidir.",
         ],
       },
       {
@@ -199,7 +199,7 @@ export const helpTr: Partial<Record<HelpSlug, HelpDocument>> = {
               "agentes.chat'i de çalıştıran bir bilgisayarda, onun `.agentes` içindeki veritabanı ve anahtarları",
             ],
           },
-          "agentes.chat anahtarların, token'ların ve oturum bilgilerinin adını geçiren komutları reddeder, ama bu bir kuraldır, duvar değil. Bu yüzden **Komutlar** kapalı başlar. Onları **Tercihler\u00a0›\u00a0Araçlar** içinde açmak bilgisayardaki tüm çalışma alanları için aynı anda geçerlidir: bunu yalnızca her çalışma alanının ajanlarına ve onların çalıştığı kişilere bilgisayardaki her şeyi emanet edebiliyorsanız yapın. Claude Code ve Codex kendi komutlarını ajanın klasöründe, kendi kurallarıyla çalıştırır.",
+          "agentes.chat anahtarların, token'ların ve oturum bilgilerinin adını geçiren komutları reddeder, ama bu bir kuraldır, duvar değil. **Komutlar** varsayılan olarak açıktır. Onları uygulamanın sorusunda **İzin ver**'e basmadan önce ya da daha sonra **Tercihler\u00a0›\u00a0Araçlar** içinde kapatın. Oradaki tek anahtar bilgisayardaki tüm çalışma alanları için geçerlidir. Claude Code ve Codex kendi komutlarını ajanın klasöründe, kendi kurallarıyla çalıştırır.",
           "Gerçek bir duvar için bir Linux sunucu kullanın. Debian 13'te `--system` ile kurulduğunda her ajan ayrı bir kullanıcıdır. Ubuntu'da ajanlar tek bir kullanıcıyı, `agentes` kullanıcısını paylaşır: birbirlerinin klasörlerini görürler, sizinkileri ya da sunucununkileri görmezler. Ya da ajanlara kendilerine ait bir bilgisayar verin.",
         ],
       },

@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, setSystemTime, test } from "bun:test";
+import type { RunnerPhone } from "@agenteschat/adapters/machine-protocol";
 import { setupDom } from "@agenteschat/ui/testing/dom";
 
 setupDom();
@@ -150,6 +151,60 @@ describe("the iPhone setup window", () => {
       expect(el.querySelector('[aria-current="step"] .ac-setpath')?.textContent).toBe(
         "SettingsGeneralVPN & Device Management",
       );
+    });
+  });
+
+  test("every iPhone state names its way out, and a step that sits still says what most likely holds it", async () => {
+    writePref(IPHONE_SETUP_PREF, true);
+    await mount("welcome", <WindowView name="welcome" />, async (el, host) => {
+      const step = () => el.querySelector('[aria-current="step"]');
+      const at = (name: string) => until(() => step()?.querySelector("b")?.textContent === name);
+      const phone = (over: Partial<RunnerPhone>) => {
+        for (const runner of host.runners.values())
+          runner.setPhones(runner.phones.map((p) => (p.platform === "ios" ? { ...p, ...over } : p)));
+      };
+      await at("Turn on Developer Mode");
+
+      phone({ reason: "ui_not_authorized" });
+      await at("Turn on UI Automation");
+      expect(step()?.textContent).toContain("The iPhone refused the test helper's taps. Unlock it");
+
+      for (const runner of host.runners.values()) runner.iphone = { ...runner.iphone, sdk: "26.2" };
+      phone({ reason: "xcode_too_old", osVersion: "27.0" });
+      await at("Xcode");
+      // The SDK comes with the next ask of the Mac (every 2 s), after the phone's own report.
+      await until(() => step()?.textContent?.includes("knows iOS 26.2 at most"));
+      expect(step()?.textContent).toContain("Sam's iPhone 16 runs iOS 27.0 and Xcode on");
+      expect(step()?.textContent).toContain("knows iOS 26.2 at most. Install Xcode 27, then run this in Terminal.");
+      expect(step()?.querySelector("code")?.textContent).toBe("xcrun devicectl manage ddis update");
+
+      // Below iOS 17: what it runs and what agents need, with no spinner left turning.
+      phone({ state: "unsupported", reason: "os_too_old", osVersion: "16.7.10" });
+      await at("iPhone connected");
+      expect(step()?.getAttribute("data-state")).toBe("warn");
+      expect(step()?.textContent).toContain("Sam's iPhone 16 runs iOS 16.7.10, and agents need iOS 17 or newer.");
+      expect(el.querySelector(".dk-fr__stepmark .ac-pixspin")).toBeNull();
+
+      // Xcode lists an account that shows no team: its own words, not "sign in".
+      for (const runner of host.runners.values()) runner.iphone = { ...runner.iphone, account: null, noTeam: true };
+      await at("Apple Account in Xcode");
+      expect(step()?.textContent).toContain("Xcode is signed in but shows no team yet.");
+
+      for (const runner of host.runners.values())
+        runner.iphone = { ...runner.iphone, account: { name: "Sam Rivera", personal: true } };
+      phone({ state: "preparing", reason: "helper_missing", osVersion: "27.1" });
+      await at("Test helper");
+      expect(step()?.querySelector(".dk-ip__stall")).toBeNull();
+      try {
+        // The next ask of the Mac, 45 s on with nothing changed: what the helper waits for.
+        setSystemTime(new Date(Date.now() + 46_000));
+        await until(() => step()?.querySelector(".dk-ip__stall"));
+        expect(step()?.querySelector(".dk-ip__stall")?.textContent).toContain(
+          "builds the test helper and starts it on the iPhone",
+        );
+      } finally {
+        setSystemTime();
+      }
     });
   });
 

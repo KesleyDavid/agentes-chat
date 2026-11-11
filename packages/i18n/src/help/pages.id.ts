@@ -43,8 +43,8 @@ export const helpId: Partial<Record<HelpSlug, HelpDocument>> = {
         id: "agents",
         heading: "Agen-agenmu juga bekerja di sini",
         blocks: [
-          "Agen-agenmu juga bekerja di komputer ini, di folder mereka sendiri, dengan browser, dan dengan Claude Code atau Codex kalau terpasang di sini. Perintah tetap mati sampai kamu menyalakannya di **Preferensi › Alat**.",
-          "Agen di sini berjalan sebagai kamu. Kalau Perintah menyala, mereka bisa menjangkau seluruh komputer ini, termasuk `.agentes`: database, `.env` berisi `AGENTES_SECRET`, kunci pemilik, dan token komputer ini. Itu berlaku untuk setiap ruang kerja yang memakai komputer ini, termasuk ruang kerja di agentes.chat Cloud. Lihat [Apa yang bisa dijangkau agen](/help/computers#reach).",
+          "Agen-agenmu juga bekerja di komputer ini, di folder mereka sendiri, dengan browser, dan dengan Claude Code atau Codex kalau terpasang di sini.",
+          "Agen di sini berjalan sebagai kamu. **Perintah** menyala sejak awal, dan dengan itu agen dari setiap ruang kerja yang memakai komputer ini bisa menjangkau semua isinya, termasuk data server. Matikan di **Preferensi\u00a0›\u00a0Alat**. Lihat [Apa yang bisa dijangkau agen](/help/computers#reach).",
         ],
       },
       {
@@ -52,7 +52,7 @@ export const helpId: Partial<Record<HelpSlug, HelpDocument>> = {
         heading: "Pinjamkan juga ke ruang kerja lain",
         blocks: [
           "Ruang kerja dari server yang kamu jalankan di sini memakai komputer ini dengan sendirinya. Supaya ruang kerja di tempat lain juga bisa memakainya, misalnya ruang kerja di agentes.chat Cloud, buka **Preferensi\u00a0›\u00a0Server**, tekan **Tambah server…**, masuk ke ruang kerja itu, lalu tekan **Izinkan** saat aplikasi bertanya.",
-          "Tiap ruang kerja punya agen dan foldernya sendiri di sini. **Perintah** di **Preferensi\u00a0›\u00a0Alat** berlaku untuk semua ruang kerja di komputer ini sekaligus: nyalakan hanya kalau kamu percaya menyerahkan seluruh komputer ini kepada agen dari setiap ruang kerja.",
+          "Tiap ruang kerja punya agen dan foldernya sendiri di sini. **Perintah** juga menyala sejak awal untuknya. Matikan di pertanyaan aplikasi sebelum menekan **Izinkan**, atau nanti di **Preferensi\u00a0›\u00a0Alat**, tempat satu tombol berlaku untuk semua ruang kerja di komputer ini.",
         ],
       },
       {
@@ -199,7 +199,7 @@ export const helpId: Partial<Record<HelpSlug, HelpDocument>> = {
               "di komputer yang juga menjalankan agentes.chat, database dan kuncinya di `.agentes`",
             ],
           },
-          "agentes.chat menolak perintah yang menyebut kunci, token, dan data login, tapi itu aturan, bukan tembok. Karena itu **Perintah** awalnya mati. Menyalakannya di **Preferensi\u00a0›\u00a0Alat** berlaku untuk semua ruang kerja di komputer itu sekaligus: lakukan hanya kalau kamu percaya menyerahkan semua isinya kepada agen dari setiap ruang kerja, dan kepada orang-orang yang mereka bantu. Claude Code dan Codex menjalankan perintahnya sendiri di folder agen, dengan aturannya sendiri.",
+          "agentes.chat menolak perintah yang menyebut kunci, token, dan data login, tapi itu aturan, bukan tembok. **Perintah** menyala sejak awal. Matikan di pertanyaan aplikasi sebelum menekan **Izinkan**, atau nanti di **Preferensi\u00a0›\u00a0Alat**, tempat satu tombol berlaku untuk semua ruang kerja di komputer itu. Claude Code dan Codex menjalankan perintahnya sendiri di folder agen, dengan aturannya sendiri.",
           "Untuk tembok sungguhan, pakai server Linux. Di Debian 13, kalau dipasang dengan `--system`, tiap agen jadi pengguna tersendiri. Di Ubuntu, agen berbagi satu pengguna, `agentes`: mereka bisa melihat folder satu sama lain, tapi bukan foldermu atau folder server. Atau beri agen komputer milik mereka sendiri.",
         ],
       },

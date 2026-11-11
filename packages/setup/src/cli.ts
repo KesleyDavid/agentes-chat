@@ -133,10 +133,10 @@ It asks only for what it needs and fills in only what's missing, so running it a
   --computer <yes|no>                 This machine as your agents' computer. Default yes on a Mac, and
                                       on Linux as root with systemd (built with BPF_FRAMEWORK), apt-get
                                       and 4 GB of memory or more.
-  --computer-commands <yes|no>        Whether agents may run commands there (default no on a Mac,
-                                      where they work as you, and yes on Linux, where each agent is
-                                      its own user). Linux without BPF_FRAMEWORK (Ubuntu) offers simple
-                                      mode instead: every agent as the user ${SIMPLE_USER}, without sudo
+  --computer-commands <yes|no>        Whether agents may run commands there (default yes. On a Mac
+                                      they work as you, on Linux each agent is its own user).
+                                      Linux without BPF_FRAMEWORK (Ubuntu) offers simple mode instead:
+                                      every agent as the user ${SIMPLE_USER}, without sudo
   --requirements <all|none|list>      What to install there for the agents when missing, without
                                       asking: ${REQUIREMENTS.join(", ")} (default: asked, yes each)
   --telemetry <on|off>                Send anonymous usage statistics to agentes.chat (default on)

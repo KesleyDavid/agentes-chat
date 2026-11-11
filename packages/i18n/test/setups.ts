@@ -214,6 +214,12 @@ export const SHOWN_ONLY: Record<Condition, readonly string[]> = {
     "desktop.prefs.updates.",
     "desktop.server.reveal",
     "desktop.cover.tailnetUp",
+    // The install guide: the Mac's steps and its Finder scenes show only in the Mac guide, and the download page's
+    // "why it asks" names the Mac with Windows beside it.
+    "install.mac.",
+    "install.scene.finder",
+    "install.scene.applications",
+    "install.page.whyText",
     // An iPhone works only through a Mac, so its states and steps name the Mac; "This Mac" shows only on a Mac.
     "devices.iphone.",
     "devices.reason.untrusted",
@@ -229,6 +235,9 @@ export const SHOWN_ONLY: Record<Condition, readonly string[]> = {
     "mobile.devices.reason.xcode_missing",
     "mobile.devices.reason.device_support",
     "mobile.devices.reason.apple_account_missing",
+    "mobile.devices.reason.apple_team_missing",
+    // The iPhone setup window opens only on a Mac.
+    "desktop.iphone.checkingStall",
   ],
 };
 

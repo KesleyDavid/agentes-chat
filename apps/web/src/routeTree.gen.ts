@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AutorizarRouteImport } from './routes/autorizar'
+import { Route as BaixarRouteImport } from './routes/baixar'
 import { Route as ConectandoRouteImport } from './routes/conectando'
 import { Route as ConectarRouteImport } from './routes/conectar'
+import { Route as DownloadRouteImport } from './routes/download'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OwnerRouteImport } from './routes/owner'
@@ -74,6 +76,11 @@ const AutorizarRoute = AutorizarRouteImport.update({
   path: '/autorizar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BaixarRoute = BaixarRouteImport.update({
+  id: '/baixar',
+  path: '/baixar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConectandoRoute = ConectandoRouteImport.update({
   id: '/conectando',
   path: '/conectando',
@@ -82,6 +89,11 @@ const ConectandoRoute = ConectandoRouteImport.update({
 const ConectarRoute = ConectarRouteImport.update({
   id: '/conectar',
   path: '/conectar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DownloadRoute = DownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -346,8 +358,10 @@ const OrgOrgIdSettingsDevicesPhonesPhoneIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/autorizar': typeof AutorizarRoute
+  '/baixar': typeof BaixarRoute
   '/conectando': typeof ConectandoRoute
   '/conectar': typeof ConectarRoute
+  '/download': typeof DownloadRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/owner': typeof OwnerRoute
@@ -402,8 +416,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/autorizar': typeof AutorizarRoute
+  '/baixar': typeof BaixarRoute
   '/conectando': typeof ConectandoRoute
   '/conectar': typeof ConectarRoute
+  '/download': typeof DownloadRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/owner': typeof OwnerRoute
@@ -458,8 +474,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/autorizar': typeof AutorizarRoute
+  '/baixar': typeof BaixarRoute
   '/conectando': typeof ConectandoRoute
   '/conectar': typeof ConectarRoute
+  '/download': typeof DownloadRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/owner': typeof OwnerRoute
@@ -516,8 +534,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/autorizar'
+    | '/baixar'
     | '/conectando'
     | '/conectar'
+    | '/download'
     | '/login'
     | '/onboarding'
     | '/owner'
@@ -572,8 +592,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/autorizar'
+    | '/baixar'
     | '/conectando'
     | '/conectar'
+    | '/download'
     | '/login'
     | '/onboarding'
     | '/owner'
@@ -627,8 +649,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/autorizar'
+    | '/baixar'
     | '/conectando'
     | '/conectar'
+    | '/download'
     | '/login'
     | '/onboarding'
     | '/owner'
@@ -684,8 +708,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AutorizarRoute: typeof AutorizarRoute
+  BaixarRoute: typeof BaixarRoute
   ConectandoRoute: typeof ConectandoRoute
   ConectarRoute: typeof ConectarRoute
+  DownloadRoute: typeof DownloadRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   OwnerRoute: typeof OwnerRoute
@@ -720,6 +746,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutorizarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/baixar': {
+      id: '/baixar'
+      path: '/baixar'
+      fullPath: '/baixar'
+      preLoaderRoute: typeof BaixarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/conectando': {
       id: '/conectando'
       path: '/conectando'
@@ -732,6 +765,13 @@ declare module '@tanstack/react-router' {
       path: '/conectar'
       fullPath: '/conectar'
       preLoaderRoute: typeof ConectarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/download': {
+      id: '/download'
+      path: '/download'
+      fullPath: '/download'
+      preLoaderRoute: typeof DownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1172,8 +1212,10 @@ const OrgOrgIdRouteWithChildren = OrgOrgIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AutorizarRoute: AutorizarRoute,
+  BaixarRoute: BaixarRoute,
   ConectandoRoute: ConectandoRoute,
   ConectarRoute: ConectarRoute,
+  DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   OwnerRoute: OwnerRoute,

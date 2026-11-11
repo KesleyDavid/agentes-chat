@@ -1705,6 +1705,8 @@
       "helper_missing": "テストヘルパーがまだ設定されていません",
       "helper_expired": "テストヘルパーの更新が必要です",
       "apple_account_missing": "MacのXcodeにApple Accountが必要です",
+      "apple_team_missing": "MacのXcodeにまだチームが表示されていません",
+      "ui_not_authorized": "このiPhoneがテストヘルパーのタップを拒否しました",
       "team_limit": "自分で作ったアプリをこのiPhoneから削除してください",
       "helper_untrusted": "このiPhoneでテストヘルパーを信頼してください",
       "booting": "起動中",
@@ -1862,7 +1864,16 @@
       "step5Hint": "エージェントがこのiPhoneでタップや入力をできるように、{{host}}がインストールするアプリです。インストールされるとこのリストに表示されます。",
       "step5Text": "設定 › 一般 › VPNとデバイス管理。デベロッパ名をタップしてから「信頼」をタップします。",
       "waiting": "{{host}}が検出するのを待っています",
-      "footer": "残りはMacが行います。Macの電源が入っている間は、7日ごとにテストヘルパーを更新します。"
+      "footer": "残りはMacが行います。Macの電源が入っている間は、7日ごとにテストヘルパーを更新します。",
+      "tooOld": "このiPhoneはiOS {{version}}です。エージェントにはiOS 17以降が必要です。可能ならアップデートするか、新しいiPhoneを使ってください。",
+      "xcodeOld": "このiPhoneはiOS {{version}}で、{{host}}のXcodeより新しいバージョンです。そちらにXcode {{major}}をインストールしてから、ターミナルでxcrun devicectl manage ddis updateを実行してください。",
+      "teamMissing": "Xcodeはサインイン済みですが、まだチームが表示されていません。Xcodeで任意のiOSアプリを作成し、Signing & Capabilitiesでチームを選んで、このiPhoneで一度実行してください。",
+      "uiRefused": "このiPhoneがテストヘルパーのタップを拒否しました。ロックを解除し、求められたらパスコードを入力してください。続く場合は、設定 › デベロッパ › UIオートメーションを有効にするをオフにしてからオンにしてください。",
+      "pluggedIn": "つなぎました",
+      "stall": {
+        "plug": "{{host}}はまだこのiPhoneを認識していません。充電専用ではなくデータ通信できるケーブルを使い、このiPhoneのロックを解除したまま、求められたら「信頼」をタップしてください。",
+        "devmode": "デベロッパモードはこのiPhoneの再起動後にオンになります。「再起動」をタップし、起動したら「オンにする」をタップしてください。スイッチがない場合は、このiPhoneを外してもう一度つないでください。"
+      }
     },
     "notice": {
       "kind": "デバイス",

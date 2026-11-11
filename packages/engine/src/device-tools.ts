@@ -337,7 +337,7 @@ export function createDeviceToolSource(deps: DeviceToolDeps): ToolSource {
           content: [
             `The flow ${reply.passed ? "passed" : "failed"} on ${r.phone.name} (${formatDuration(Math.round(reply.seconds))}).`,
             saveAs ? `Saved at ${saveAs}.` : "",
-            reply.output ? untrustedBlock("maestro output", truncateOutput(reply.output, 8000)) : "",
+            reply.output ? untrustedBlock("flow output", truncateOutput(reply.output, 8000)) : "",
             input.record === true && !reply.video
               ? "The recording didn't hold (cut off): run the flow again to get one."
               : "",

@@ -228,18 +228,20 @@ const HELPER_STEP = new Set([
   "helper_untrusted",
   "team_limit",
   "apple_account_missing",
+  "apple_team_missing",
 ]);
 
 /** The iPhone guide's steps, in order; `iphoneStep` is the index of the one to do now (5: all done). */
 export const IPHONE_STEPS = ["plug", "trust", "devmode", "automation", "helper"] as const;
 
 export function iphoneStep(phone: Pick<PhoneDevice, "status"> | null | undefined): number {
-  if (!phone || phone.status.kind === "offline") return 0;
+  // Below iOS 17 (`unsupported`) it never gets past being plugged in: the guide says why instead of its steps.
+  if (!phone || phone.status.kind === "offline" || phone.status.kind === "unsupported") return 0;
   if (isUp(phone.status)) return IPHONE_STEPS.length;
   const s = phone.status;
   const reason = "reason" in s ? s.reason : "";
   if (reason === "untrusted" || reason === "locked") return 1;
-  if (reason === "ui_automation_off") return 3;
+  if (reason === "ui_automation_off" || reason === "ui_not_authorized") return 3;
   if (HELPER_STEP.has(reason)) return 4;
   return 2;
 }

@@ -1,16 +1,16 @@
 import { type ChildProcess, spawn } from "node:child_process";
 import type { EventEmitter } from "node:events";
-import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { ControlIphoneSetup } from "@agenteschat/adapters/runner-control";
 import { killTree } from "./exec";
 import { extraToolDirs, runTool, which } from "./phones";
+import { type AppleLook, appleLook } from "./wda";
 
 /**
  * The Mac's side of setting up an iPhone (the desktop app's iPhone setup, `iphone.*` control requests): Xcode's
  * version, the iOS platform Xcode builds for a real iPhone with (downloaded here with `xcodebuild -downloadPlatform
- * iOS`, about 8 GB), the Apple Account in Xcode's Accounts, and opening Xcode or its App Store page. Only one
+ * iOS`, about 8 GB), the Apple Account in Xcode's Apple Accounts, and opening Xcode or its App Store page. Only one
  * download at a time; it outlives the request that started it and ends with the runner.
  */
 
@@ -46,23 +46,11 @@ export function parseIosRuntime(json: unknown): string | null {
   return best;
 }
 
-/**
- * Xcode's `IDEProvisioningTeamByIdentifier` (account → its teams): the Personal Team first, named after its person
- * ("Sam Rivera (Personal Team)" → "Sam Rivera"), else the first team by its name.
- */
-export function parseXcodeTeams(json: unknown): ControlIphoneSetup["account"] {
-  if (!json || typeof json !== "object") return null;
-  const teams = Object.values(json as Record<string, unknown>)
-    .flatMap((v) => (Array.isArray(v) ? v : []))
-    .filter((t): t is Record<string, unknown> => !!t && typeof t === "object" && typeof t.teamName === "string");
-  const personal = teams.find((t) => t.isFreeProvisioningTeam === true || t.teamType === "Personal Team");
-  const team = personal ?? teams[0];
-  if (!team) return null;
-  const name = String(team.teamName)
-    .replace(/\s*\(Personal Team\)\s*$/, "")
-    .trim()
-    .slice(0, 80);
-  return name ? { name, personal: !!personal } : null;
+/** The setup's account step from the look: its first team (the Personal Team first), named after its person. */
+export function accountOf(look: AppleLook): Pick<ControlIphoneSetup, "account" | "noTeam"> {
+  const team = look.teams[0];
+  if (team) return { account: { name: team.name, personal: team.free } };
+  return look.account === "no_team" ? { account: null, noTeam: true } : { account: null };
 }
 
 /** One line of `xcodebuild -downloadPlatform`: "Downloading iOS 26.1 Simulator (23B80): 12.3% (1.04 GB of 8.43 GB)". */
@@ -87,11 +75,14 @@ export interface IphoneSetupOptions {
 }
 
 const CHECK_MS = 15_000;
+/** The window asks every 2 s: the Apple look (up to a dozen tool runs) is kept this long. */
+const LOOK_MS = 5000;
 
 export class IphoneSetup {
   /** The download running now, or how the last one failed (cleared when one starts again). */
   private download: Platform | null = null;
   private child: ChildProcess | null = null;
+  private look: { at: number; value: Promise<AppleLook> } | null = null;
   private readonly env: NodeJS.ProcessEnv;
   private readonly platform: NodeJS.Platform;
   private readonly dirs: string[];
@@ -119,8 +110,10 @@ export class IphoneSetup {
   async check(): Promise<ControlIphoneSetup> {
     if (this.platform !== "darwin") return { xcode: null, platform: { state: "missing" }, account: null };
     const [xcode, account] = await Promise.all([this.xcode(), this.account()]);
-    if (!xcode) return { xcode, platform: { state: "missing" }, account };
-    if (this.download?.state === "downloading") return { xcode, platform: this.download, account };
+    if (!xcode) return { xcode, platform: { state: "missing" }, ...account };
+    const sdkOut = (await this.out("xcrun", ["--sdk", "iphoneos", "--show-sdk-version"]))?.trim() ?? "";
+    const step = { ...account, ...(/^\d+(\.\d+)+$/.test(sdkOut) ? { sdk: sdkOut } : {}) };
+    if (this.download?.state === "downloading") return { xcode, platform: this.download, ...step };
     const runtimes = await this.out("xcrun", ["simctl", "list", "runtimes", "-j"]);
     let version: string | null = null;
     try {
@@ -129,7 +122,7 @@ export class IphoneSetup {
       // not JSON: an Xcode mid-update
     }
     const platform: Platform = version ? { state: "installed", version } : (this.download ?? { state: "missing" });
-    return { xcode, platform, account };
+    return { xcode, platform, ...step };
   }
 
   /** Without the developer tools, macOS answers xcodebuild with an install dialog: xcode-select is asked first. */
@@ -139,17 +132,13 @@ export class IphoneSetup {
   }
 
   private async account() {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "agentes-xcode-"));
-    const file = path.join(dir, "xcode.plist");
-    try {
-      if ((await this.out("defaults", ["export", "com.apple.dt.Xcode", file])) === null) return null;
-      const json = await this.out("plutil", ["-extract", "IDEProvisioningTeamByIdentifier", "json", "-o", "-", file]);
-      return json ? parseXcodeTeams(JSON.parse(json)) : null;
-    } catch {
-      return null;
-    } finally {
-      await rm(dir, { recursive: true, force: true });
+    if (!this.look || Date.now() - this.look.at > LOOK_MS) {
+      const value = appleLook({ env: this.env, log: this.opts.log, bin: (name) => this.find(name) }).catch(
+        (): AppleLook => ({ teams: [], account: "none" }),
+      );
+      this.look = { at: Date.now(), value };
     }
+    return accountOf(await this.look.value);
   }
 
   /** Starts the iOS platform's download when Xcode is here and lacks it; answers where it stands. */

@@ -617,7 +617,7 @@ export type PhoneReason =
   | "developer_mode_off"
   /** iPhone: Settings › Developer › Enable UI Automation is off. */
   | "ui_automation_off"
-  /** iPhone: no Xcode on the Mac, or it can't serve this iOS (`xcode_too_old`). */
+  /** iPhone: no Xcode on the Mac, or its iPhone SDK is older than the phone's iOS (`xcode_too_old`). */
   | "xcode_missing"
   | "xcode_too_old"
   /** iPhone: the Mac is preparing the phone (device support download, needs internet). */
@@ -625,8 +625,12 @@ export type PhoneReason =
   /** iPhone: the test helper isn't built yet, or its free signature ran out (`helper_expired`). */
   | "helper_missing"
   | "helper_expired"
-  /** iPhone: Xcode on the Mac is signed in to no Apple Account (Xcode › Settings › Accounts), so nothing signs the helper. */
+  /** iPhone: Xcode on the Mac is signed in to no Apple Account (Xcode › Settings › Apple Accounts), so nothing signs the helper. */
   | "apple_account_missing"
+  /** iPhone: Xcode lists an Apple Account but no team yet (it shows one after its first build for an iPhone). */
+  | "apple_team_missing"
+  /** iPhone: the phone refused UI actions (unlocked, so its daily passcode grant or UI Automation). */
+  | "ui_not_authorized"
   /** iPhone: a free Apple Account's limit (3 apps of its own per phone, 10 app ids a week) stops the helper. */
   | "team_limit"
   /** iPhone: the phone doesn't trust the helper's developer yet (Settings › General › VPN & Device Management). */
@@ -635,7 +639,7 @@ export type PhoneReason =
   | "booting"
   /** Windows sees no driver for this phone (install its maker's USB driver). */
   | "no_driver"
-  /** Too old an OS for the tools (`unsupported`). */
+  /** Too old an OS for the tools (`unsupported`): Android before 5, iOS before 17. */
   | "os_too_old"
   /** adb reports the phone `offline` (replug it, or it is restarting). */
   | "adb_offline";
@@ -729,6 +733,10 @@ export interface RunnerToolchains {
   xcode?: string;
   /** The Apple Account team that signs the iPhone test helper, as Xcode names it ("Sam Rivera (Personal Team)"). */
   appleTeam?: string;
+  /** What Xcode's Apple Accounts give: a team, an account with no team yet, or no account. */
+  appleAccount?: "team" | "no_team" | "none";
+  /** The iPhone SDK's version (`xcrun --sdk iphoneos --show-sdk-version`, "26.2"): the newest iOS it drives. */
+  xcodeSdk?: string;
   node?: string;
   /** Podman's version: with the runner in system mode, the agents' containers (ADR 0169). */
   podman?: string;
@@ -2778,6 +2786,8 @@ export type RunnerFrame =
   | { type: "accounts.changed"; accounts: RunnerAccountInfo[]; ownUsage?: OwnPlanUsage }
   /** Protocol 41: the coding CLIs found changed since `hello` (`hello.executors`, whole). */
   | { type: "executors.changed"; executors: NonNullable<RunnerInfo["executors"]> }
+  /** What `hello.toolchains` said changed (an Apple team found, Xcode updated), whole. An older server drops it. */
+  | { type: "toolchains.changed"; toolchains: RunnerToolchains }
   /** `PHONES_PROTOCOL`: the phones it reaches changed (one came or went, a state or a holder changed), whole. */
   | { type: "phones.changed"; phones: RunnerPhone[] }
   /**
@@ -2847,6 +2857,8 @@ const TOOLCHAINS: readonly (keyof RunnerToolchains)[] = [
   "maestro",
   "xcode",
   "appleTeam",
+  "appleAccount",
+  "xcodeSdk",
   "node",
   "podman",
 ];
@@ -2903,8 +2915,9 @@ export function parseToolchains(v: Record<string, unknown>): RunnerToolchains {
   const out: RunnerToolchains = {};
   for (const key of TOOLCHAINS) {
     const value = cut(v[key], 100);
-    if (value) out[key] = value;
+    if (value) (out as Record<string, string>)[key] = value;
   }
+  if (out.appleAccount && !["team", "no_team", "none"].includes(out.appleAccount)) delete out.appleAccount;
   return out;
 }
 
@@ -3285,6 +3298,8 @@ export function parseRunnerFrame(raw: string): RunnerFrame | null {
     }
     case "executors.changed":
       return isObject(f.executors) ? { type: "executors.changed", executors: parseExecutors(f.executors) } : null;
+    case "toolchains.changed":
+      return isObject(f.toolchains) ? { type: "toolchains.changed", toolchains: parseToolchains(f.toolchains) } : null;
     case "access.decided": {
       if (!isString(f.requestId)) return null;
       const decision = (["granted", "denied", "expired"] as const).find((d) => d === f.decision);

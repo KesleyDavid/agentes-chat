@@ -1400,6 +1400,112 @@
     "moveDown": "Omlaag",
     "restoreOrder": "Standaardvolgorde herstellen"
   },
+  "install": {
+    "frames": "Zo installeer je het op {{system}}",
+    "step": "Stap {{n}}",
+    "previous": "Vorige stap",
+    "next": "Volgende stap",
+    "fullGuide": "Alle stappen in detail",
+    "copied": "Gekopieerd. Plak het in de terminal.",
+    "mac": {
+      "why": "<b>De app is in beta.</b> Daarom vraagt je Mac de eerste keer om een bevestiging:",
+      "drag": "Sleep agentes.chat naar Apps.",
+      "dragLong": "Open het gedownloade bestand en sleep agentes.chat naar Apps.",
+      "blocked": "Open de app en klik op Gereed.",
+      "blockedSub": "Klik niet op Verplaats naar prullenmand.",
+      "settings": "Klik in Systeeminstellingen › Privacy en beveiliging op Open toch.",
+      "settingsLong": "Open meteen daarna Systeeminstellingen › Privacy en beveiliging, scrol naar Beveiliging en klik op Open toch.",
+      "settingsSub": "De knop staat daar pas nadat je de app hebt geprobeerd te openen (stap 2), en verdwijnt na ongeveer een uur. Staat hij er niet? Open de app nog een keer en kom terug.",
+      "settingsShort": "Hij verschijnt alleen direct na stap 2.",
+      "openSettings": "Open Privacy en beveiliging",
+      "confirm": "Bevestig met Touch ID of je wachtwoord.",
+      "confirmLong": "Klik nog een keer op Open toch en bevestig met Touch ID of het wachtwoord van je Mac.",
+      "done": "Klaar: vanaf nu opent hij meteen.",
+      "stuckTitle": "Nog steeds geen knop, of zegt je Mac dat de app beschadigd is?",
+      "stuckText": "Plak dit in Terminal en open de app opnieuw:"
+    },
+    "windows": {
+      "why": "<b>De app is in beta.</b> Daarom vraagt Windows de eerste keer om een bevestiging:",
+      "keep": "Als je browser het vraagt, kies Behouden.",
+      "more": "Open het installatieprogramma en klik op Meer informatie.",
+      "moreLong": "Open het installatieprogramma. Als Uw pc is beveiligd door Windows verschijnt, klik op Meer informatie.",
+      "run": "Klik op Toch uitvoeren.",
+      "runLong": "Klik op Toch uitvoeren en volg het installatieprogramma.",
+      "done": "Klaar: vanaf nu opent hij meteen."
+    },
+    "linux": {
+      "why": "Voor Ubuntu, Debian en vergelijkbare systemen (x64). Linux vraagt niets extra:",
+      "apt": "Installeer de .deb met een dubbelklik, of via de terminal.",
+      "aptLong": "Dubbelklik op het gedownloade bestand en klik op Installeren, of plak dit in de terminal:",
+      "open": "Open agentes.chat vanuit je apps."
+    },
+    "page": {
+      "docTitle": "Download de app · agentes.chat",
+      "title": "Download de agentes.chat-app",
+      "beta": "Beta",
+      "text": "Je workspace in een eigen venster, met de meldingen van je systeem. Met één klik werken agents op deze computer, in hun eigen mappen.",
+      "open": "agentes.chat openen",
+      "version": "Versie {{version}}",
+      "versionSize": "Versie {{version}} · {{size}}",
+      "soon": "Er is nog geen versie voor {{system}}.",
+      "useArm": "Computer met een ARM-chip? Download de ARM-versie",
+      "useX64": "Download de x64-versie",
+      "unavailable": "De app kan nu niet van hier worden gedownload. Probeer het zo opnieuw.",
+      "installOn": "Installeren op {{system}}",
+      "system": "Systeem",
+      "whyTitle": "Waarom vraagt mijn computer om een bevestiging?",
+      "whyText": "agentes.chat is in beta: de Mac-versie is nog niet door Apple genotariseerd, en het Windows-installatieprogramma heeft nog geen Microsoft-certificaat. Zonder die twee vraagt je computer één keer om bevestiging voordat hij een app van internet opent. Daarna opent hij meteen en werkt hij zichzelf bij. Voordat de beta afloopt, verdwijnt deze stap.",
+      "openSource": "Opensource",
+      "onlyHere": "Alleen hier en in de releases van het project gepubliceerd",
+      "signedUpdates": "Ondertekende updates"
+    },
+    "scene": {
+      "finder": "Finder",
+      "file": "Archief",
+      "edit": "Wijzig",
+      "view": "Weergave",
+      "window": "Venster",
+      "applications": "Apps",
+      "notOpened": "‘{{app}}’ is niet geopend",
+      "notOpenedText": "Apple kan niet verifiëren of ‘{{app}}’ vrij is van malware die je Mac kan beschadigen of je privacy in gevaar kan brengen.",
+      "done": "Gereed",
+      "moveToTrash": "Verplaats naar prullenmand",
+      "search": "Zoek",
+      "account": "Apple Account",
+      "general": "Algemeen",
+      "appearance": "Weergave",
+      "accessibility": "Toegankelijkheid",
+      "privacy": "Privacy en beveiliging",
+      "desktopDock": "Bureaublad en Dock",
+      "displays": "Beeldschermen",
+      "security": "Beveiliging",
+      "allowFrom": "Sta apps toe die zijn gedownload van",
+      "allowValue": "App Store en bekende ontwikkelaars",
+      "blocked": "‘{{app}}’ is geblokkeerd om je Mac te beschermen.",
+      "openAnyway": "Open toch",
+      "confirmTitle": "‘{{app}}’ openen?",
+      "confirmText": "Open het alleen als je de herkomst vertrouwt.",
+      "touchIdTitle": "Systeeminstellingen",
+      "touchIdText": "Gebruik Touch ID of voer je wachtwoord in om dit toe te staan.",
+      "password": "Wachtwoord",
+      "downloads": "Downloads",
+      "rare": "Dit bestand wordt niet vaak gedownload. Zorg ervoor dat u het vertrouwt voordat u het opent.",
+      "delete": "Verwijderen",
+      "keep": "Behouden",
+      "protectedTitle": "Uw pc is beveiligd door Windows",
+      "protectedText": "Microsoft Defender SmartScreen heeft voorkomen dat een niet-herkende app werd gestart. Als u deze app uitvoert, loopt uw pc mogelijk risico.",
+      "protectedShort": "Microsoft Defender SmartScreen heeft voorkomen dat een niet-herkende app werd gestart.",
+      "moreInfo": "Meer informatie",
+      "dontRun": "Niet uitvoeren",
+      "appLabel": "App:",
+      "publisher": "Uitgever:",
+      "unknownPublisher": "Onbekende uitgever",
+      "runAnyway": "Toch uitvoeren",
+      "activities": "Activiteiten",
+      "readingLists": "Pakketlijsten worden ingelezen... Klaar",
+      "settingUp": "agentes-chat ({{version}}) wordt ingesteld ..."
+    }
+  },
   "legal": {
     "updated": "Laatst bijgewerkt op {{date}}",
     "contents": "Op deze pagina",
@@ -13461,6 +13567,7 @@
     "downloadFor": "Downloaden voor {{system}}",
     "downloadApp": "De app downloaden",
     "otherSystems": "Andere systemen",
+    "armBuild": "{{system}} (ARM)",
     "onThePhone": "Op de telefoon",
     "onTheIphone": "Op de iPhone",
     "screen": {
@@ -13537,6 +13644,8 @@
       "helper_missing": "De testhelper is nog niet ingesteld",
       "helper_expired": "De testhelper moet worden vernieuwd",
       "apple_account_missing": "Xcode is niet ingelogd met een Apple Account",
+      "apple_team_missing": "Xcode toont nog geen team",
+      "ui_not_authorized": "De iPhone weigerde de tikken van de testhelper",
       "team_limit": "Het gratis Apple Account heeft zijn app-limiet bereikt",
       "helper_untrusted": "De iPhone vertrouwt de testhelper nog niet",
       "booting": "Wordt opgestart",
@@ -13544,7 +13653,8 @@
       "no_driverLinux": "Linux kan deze telefoon niet openen",
       "os_too_old": "Dit systeem is te oud voor de tools",
       "adb_offline": "De telefoon reageert niet",
-      "other": "Er is iets nodig op het apparaat"
+      "other": "Er is iets nodig op het apparaat",
+      "iosTooOld": "Hij draait iOS {{version}}, agents hebben iOS 17 of nieuwer nodig"
     },
     "fix": {
       "locked": "Ontgrendel hem",
@@ -13558,6 +13668,8 @@
       "helper_missing": "Open de app op de Mac",
       "helper_expired": "Open de app op de Mac",
       "apple_account_missing": "Log in bij Xcode",
+      "apple_team_missing": "Voer in Xcode één keer een app uit op de iPhone",
+      "ui_not_authorized": "Ontgrendel de iPhone",
       "team_limit": "Verwijder een zelfgemaakte app",
       "helper_untrusted": "Vertrouw hem op de iPhone",
       "booting": "Wacht tot hij is opgestart",
@@ -13811,7 +13923,8 @@
       "toolsDone": "Gedownload door de Mac",
       "toolsText": "De Mac downloadt ze, ongeveer 8 GB.",
       "accountDone": "Toegevoegd",
-      "accountText": "Voeg er een toe in Xcode op {{mac}}, gratis of betaald: Settings › Accounts.",
+      "accountText": "Voeg er een toe in Xcode op {{mac}}, gratis of betaald: Settings › Apple Accounts.",
+      "teamMissingText": "Xcode is ingelogd maar toont nog geen team. Maak in Xcode een willekeurige iOS-app, kies je team bij Signing & Capabilities en voer hem één keer uit op de iPhone.",
       "connectedDone": "{{name}} · iOS {{version}}",
       "connectedText": "Sluit de iPhone met een kabel aan op {{mac}}.",
       "trustDone": "Vertrouwd",
@@ -13822,6 +13935,22 @@
       "helperText": "De Mac bouwt en vernieuwt hem elke 7 dagen. Een gratis Apple Account in Xcode is genoeg.",
       "helperUntrustedText": "Tik op de naam van de ontwikkelaar en dan op Vertrouw.",
       "teamLimitText": "Verwijder een zelfgemaakte app van de iPhone: een gratis Apple Account staat er 3 toe.",
+      "xcodeOld": "{{name}} draait iOS {{version}} en Xcode op {{mac}} kent hooguit iOS {{sdk}}. Installeer Xcode {{major}} en voer dit daarna uit in Terminal.",
+      "xcodeOldAny": "{{name}} draait iOS {{version}}, nieuwer dan Xcode op {{mac}} kent. Installeer Xcode {{major}} en voer dit daarna uit in Terminal.",
+      "uiRefusedText": "De iPhone weigerde de tikken van de testhelper. Ontgrendel hem en voer de toegangscode in als hij erom vraagt. Blijft het gebeuren, zet dan Instellingen › Ontwikkelaar › Schakel UI-automatisering in uit en weer aan.",
+      "tooOld": "{{name}} draait iOS {{version}}, en agents hebben iOS 17 of nieuwer nodig. Werk hem bij als dat kan, of sluit een nieuwere iPhone aan.",
+      "tooOldVersion": "16 of ouder",
+      "pluggedIn": "Hij is aangesloten",
+      "stall": {
+        "xcode": "Al geïnstalleerd? Open Xcode één keer en ga akkoord met de voorwaarden, zodat {{mac}} het kan gebruiken.",
+        "tools": "De download is ongeveer 8 GB en {{mac}} moet daarvoor wakker en online blijven. Gestopt? Haal iOS op via Xcode › Settings › Components.",
+        "account": "Al ingelogd? Maak in Xcode een willekeurige iOS-app, kies je team bij Signing & Capabilities en voer hem één keer uit op de iPhone.",
+        "connected": "{{mac}} ziet nog geen iPhone. Gebruik een kabel die data doorgeeft, niet alleen stroom, ontgrendel de iPhone en tik op Vertrouw als hij erom vraagt.",
+        "trust": "Geen Vertrouw-vraag? Koppel de iPhone los, ontgrendel hem en sluit hem weer aan, tik dan op Vertrouw en voer de toegangscode in.",
+        "developerMode": "Ontwikkelaarsmodus gaat pas aan nadat de iPhone herstart. Tik op Herstart en daarna op Zet aan als hij terug is. Geen schakelaar? Koppel de iPhone los en sluit hem weer aan.",
+        "uiAutomation": "De schakelaar verschijnt als Ontwikkelaarsmodus aan staat en de iPhone herstart is. Houd hem ontgrendeld terwijl je zoekt.",
+        "helper": "{{mac}} bouwt de testhelper en start hem op de iPhone, wat de eerste keer een paar minuten duurt. Houd de iPhone ontgrendeld en aangesloten."
+      },
       "ready": "{{name}} is klaar voor agents.",
       "path": {
         "settings": "Instellingen",
@@ -14475,6 +14604,9 @@
       "membersPersonal": "Mensen"
     },
     "advanced": "Geavanceerd",
+    "tab": {
+      "account": "Profiel"
+    },
     "sectionText": {
       "account": "Je profiel en hoe de app er voor jou uitziet.",
       "notifications": "Wat je hier als melding bereikt. De inbox bewaart alles.",
@@ -14747,9 +14879,6 @@
         "jev": "Agents sturen alleen zelf stickers met Jev.",
         "jevLink": "Jev instellen"
       }
-    },
-    "tab": {
-      "account": "Profiel"
     }
   },
   "personalMode": {

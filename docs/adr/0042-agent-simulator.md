@@ -1,6 +1,6 @@
 # 0042. The agent's phone simulator: Android first, iOS on Macs
 
-- Status: Proposed. Superseded in part by ADR 0077 (2026-10-28): the Cloud's computers are no longer Daytona containers, and no computer time is metered or counted against daily minutes
+- Status: Proposed. Superseded in part by ADR 0077 (2026-10-28): the Cloud's computers are no longer Daytona containers, and no computer time is metered or counted against daily minutes. Amended 2026-11-11: real iPhones through the test helper (see "Amendment")
 - Date: 2026-10-20. Revised 2026-10-20: Android first, self-host first (an optional compose profile), Cloud next (KVM hosts only), iOS on Macs (see "Revision")
 - Extends: ADR 0025 (connected computers), ADR 0031 §5 and §13 (computer use: simulator, explorations become tests), ADR 0040 (agent browser: tools, handoff, live view)
 - Out of scope for now: real phones over USB, protected mode (ADR 0030), Cloud iOS for anything but developing and testing the customer's own app (§12)
@@ -181,6 +181,22 @@ Most of ADR 0040 is reused. The browser-only names become a **screen** with a ki
 - **Connected Macs first:** the person's own Mac running our runner (ADR 0025), with §2's driver. That is the only iOS a self-hosted install gets.
 - **Cloud iOS only for developing and testing the customer's own app.** Apple's license allows leasing only a whole Mac, for at least 24 consecutive hours, to one customer's sole use, for Permitted Developer Services, with at most 2 macOS VMs on it. So: one Mac dedicated to an organization, running our runner as a managed connected computer, with Apple told beforehand; never a shared pool billed by the minute. Agents that use iOS apps for anything else stay on the customer's own Macs.
 - Per-minute vendors (Limrun iOS about $0.08–0.10 per minute, Appetize) only for light use, as an exception to our relay (their own viewer).
+
+## Amendment (2026-11-11): real iPhones through the test helper
+
+Real iPhones a person plugs into their Mac run on WebDriverAgent (16.15.3, built and signed on that Mac, `apps/server/runner/wda.ts`), driven by our reader of Maestro's YAML (`ios-flow.ts`). An iPhone 14 Pro Max on iOS 27 with Xcode 26 showed where it broke, and an Xcode 27 Mac showed the Apple Account step stuck. What changed and why:
+
+- **No idle wait.** WDA waited up to 10 s for an idle app before every look at the screen; `shouldWaitForQuiescence` does nothing without a bundle id, and a chat or a feed is never idle. Each session now sets `waitForIdleTimeout` and `animationCoolOffTimeout` to 0. The tree leaves out the attributes our lookups never read (`excluded_attributes`).
+- **A slow look is asked again, a dead helper is started again.** One look has 20 s and a lookup polls until its own deadline. A call that times out while `/status` still answers is slow (`HelperSlow`): WDA answers `/status` on a queue of its own, beside the main queue that serves the rest. One that gets no answer drops the helper (`HelperGone`), and a flow reaches the helper through a getter, so it recovers once. A helper unused for 5 s is asked `/status` before it's handed out. The flow's abort reaches each call. When xcodebuild exits, the runner logs why and keeps the reason.
+- **Code=41 in words.** "Not authorized for performing UI testing actions" is `ui_not_authorized`: the phone wants its passcode again, or UI Automation turned off and on. The helper is dropped so the next op opens a fresh test session.
+- **Locked, too old, too new.** A flow first asks `/wda/locked` and refuses with `locked`; polls then read `devicectl device info lockState` until it's unlocked. An iPhone below iOS 17 (devicectl can't drive it; usbmuxd's list says it's plugged in when devicectl doesn't) is reported `unsupported` with `os_too_old`, never left out. An iOS newer than the Mac's iPhone SDK (`hello.toolchains.xcodeSdk`) turns nothing away by itself: it renames a stuck helper failure an old Xcode explains (`device_support`, `ui_not_authorized`) to `xcode_too_old`. Like the other helper reasons it stops only what needs the helper: devicectl still installs and opens apps.
+- **A busy iPhone isn't dropped** because one Apple look missed it: devicectl failing keeps the last list, and an op under way keeps its hold.
+- **The Apple team, read from four places.** Xcode's `IDEProvisioningTeamByIdentifier` is a cache that can be empty on Xcode 26.5 and 27 while Settings › Apple Accounts shows the account. One reader (`appleLook`) tries, read-only and in order: Xcode's settings, xcodebuild's copy, Xcode's development profiles (free when they last 8 days or less), then the keychain's Apple Development identities (team = the certificate's OU). Its answer is a team, `no_team` (an account with no team yet, new reason `apple_team_missing`) or `none`. A missing team found before xcodebuild ran is looked for again every minute, not after a growing wait.
+- **Fresh within a minute.** On a Mac the runner looks at Xcode's part (version, SDK, team) every 60 s and sends `toolchains.changed` when it differs from what the server last heard; the server stores it like `hello` and tells the org. An older server drops the frame.
+- **No signing while the Mac is locked.** One report has Xcode 27 dropping the account when it signs while the keychain is locked, so a build with `-allowProvisioningUpdates` waits for the screen to be unlocked, and an op that needs the helper meanwhile says so.
+- Xcode's pane has been "Apple Accounts" since Xcode 26, and every mention says so.
+
+Left for later: iPhones over Wi-Fi through CoreDevice's tunnel, and WDA 16.18.5.
 
 ## Order
 

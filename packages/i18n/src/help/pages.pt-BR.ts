@@ -42,8 +42,8 @@ export const helpPtBR: Record<HelpSlug, HelpDocument> = {
         id: "agents",
         heading: "Os agentes também trabalham aqui",
         blocks: [
-          "Os agentes também trabalham neste computador, em pastas só deles, com um navegador e com o Claude Code ou o Codex quando estão instalados aqui. Comandos ficam desligados até você ligar em **Preferências\u00a0›\u00a0Ferramentas**.",
-          "Os agentes aqui rodam como você. Com Comandos ligado, eles alcançam o resto deste computador, inclusive a `.agentes`: o banco de dados, o `.env` com o `AGENTES_SECRET`, a chave do dono e o token deste computador. Isso vale para todo workspace que usa este computador, inclusive um no agentes.chat Cloud. Veja [O que os agentes alcançam](/help/computers#reach).",
+          "Os agentes também trabalham neste computador, em pastas só deles, com um navegador e com o Claude Code ou o Codex quando estão instalados aqui.",
+          "Os agentes aqui rodam como você. Os **Comandos** já vêm ligados, e com eles os agentes de todo workspace que usa este computador alcançam tudo o que há nele, inclusive os dados do servidor. Desligue em **Preferências\u00a0›\u00a0Ferramentas**. Veja [O que os agentes alcançam](/help/computers#reach).",
         ],
       },
       {
@@ -51,7 +51,7 @@ export const helpPtBR: Record<HelpSlug, HelpDocument> = {
         heading: "Emprestar para outro workspace também",
         blocks: [
           "Os workspaces do servidor que roda aqui já usam este computador, sem nada a fazer. Para um workspace de outro lugar usar também, como um no agentes.chat Cloud, abra **Preferências\u00a0›\u00a0Servidores**, aperte **Adicionar um servidor…**, entre nesse workspace e aperte **Permitir** quando o app perguntar.",
-          "Cada workspace tem aqui os próprios agentes e pastas. **Comandos**, em **Preferências\u00a0›\u00a0Ferramentas**, vale para todos os workspaces deste computador de uma vez: ligue só se você confia este computador inteiro aos agentes de cada workspace.",
+          "Cada workspace tem aqui os próprios agentes e pastas. Os **Comandos** também já vêm ligados para ele. Desligue na pergunta do app antes de apertar **Permitir**, ou depois em **Preferências\u00a0›\u00a0Ferramentas**, onde uma única chave vale para todos os workspaces deste computador.",
         ],
       },
       {
@@ -236,7 +236,7 @@ export const helpPtBR: Record<HelpSlug, HelpDocument> = {
               "num computador que também roda o agentes.chat, o banco de dados e as chaves dele em `.agentes`",
             ],
           },
-          "O agentes.chat recusa comandos que citam as chaves, os tokens e os logins, mas isso é uma regra, não uma parede. Por isso os **Comandos** começam desligados. Ligar em **Preferências\u00a0›\u00a0Ferramentas** vale para todos os workspaces do computador de uma vez: faça isso só se você confiaria tudo o que há nele aos agentes de cada workspace e às pessoas para quem eles trabalham. O Claude Code e o Codex rodam os próprios comandos na pasta do agente, com as próprias regras.",
+          "O agentes.chat recusa comandos que citam as chaves, os tokens e os logins, mas isso é uma regra, não uma parede. Os **Comandos** já vêm ligados. Desligue na pergunta do app antes de apertar **Permitir**, ou depois em **Preferências\u00a0›\u00a0Ferramentas**, onde uma única chave vale para todos os workspaces do computador. O Claude Code e o Codex rodam os próprios comandos na pasta do agente, com as próprias regras.",
           "Para uma parede de verdade, use um servidor Linux. No Debian 13, instalado com `--system`, cada agente é um usuário só dele. No Ubuntu, os agentes dividem um usuário, `agentes`: eles veem as pastas uns dos outros, não as suas nem as do servidor. Ou dê aos agentes um computador só deles.",
         ],
       },

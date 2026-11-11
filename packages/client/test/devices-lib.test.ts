@@ -15,6 +15,8 @@ import {
   deviceWaitEventOf,
   deviceWaitOf,
   fixText,
+  iosOf,
+  iphoneNoTeam,
   iphoneSteps,
   linkPhase,
   mayTakePhone,
@@ -275,6 +277,55 @@ describe("connecting a phone", () => {
       developerMode: "done",
       uiAutomation: "waiting",
     });
+  });
+
+  test("iPhone: a team found without its name, an account with no team, refused taps, an iOS too old", () => {
+    // A runner that tells the account apart from its team: a team is enough, an account alone is the person's step.
+    expect(iphoneSteps(computer({ toolchains: { xcode: "27.0", appleAccount: "team" } }), null).account).toBe("done");
+    const noTeam = computer({ toolchains: { xcode: "27.0", appleAccount: "no_team" } });
+    expect(iphoneSteps(noTeam, null)).toMatchObject({ account: "needs", connected: "waiting" });
+    expect(iphoneNoTeam(noTeam, null)).toBe(true);
+    expect(iphoneNoTeam(computer({ toolchains: { xcode: "27.0" } }), null)).toBe(false);
+    const mac = computer({ toolchains: { xcode: "27.0", appleTeam: "Sam Rivera (Personal Team)" } });
+    const at = (status: PhoneDevice["status"]) => iphoneSteps(mac, phone({ platform: "ios", status }));
+    const teamless = phone({ platform: "ios", status: { kind: "needs_you", reason: "apple_team_missing" } });
+    expect(iphoneSteps(mac, teamless)).toMatchObject({ account: "needs", connected: "done", uiAutomation: "waiting" });
+    expect(iphoneNoTeam(mac, teamless)).toBe(true);
+    expect(at({ kind: "needs_you", reason: "ui_not_authorized" })).toMatchObject({
+      developerMode: "done",
+      uiAutomation: "needs",
+      helper: "waiting",
+    });
+    expect(at({ kind: "needs_you", reason: "xcode_too_old" }).xcode).toBe("needs");
+    // Below iOS 17 it ends at being connected: never every step done, never a spinner.
+    expect(Object.values(at({ kind: "unsupported", reason: "os_too_old" }))).toEqual([
+      "done",
+      "done",
+      "done",
+      "needs",
+      "waiting",
+      "waiting",
+      "waiting",
+      "waiting",
+    ]);
+  });
+
+  test("the new reasons in words, and an iPhone too old names its iOS", () => {
+    expect(statusDetail(t, "en-US", { kind: "needs_you", reason: "apple_team_missing" })).toBe(
+      "Run an app on the iPhone from Xcode once",
+    );
+    expect(statusDetail(t, "en-US", { kind: "needs_you", reason: "ui_not_authorized" })).toBe("Unlock the iPhone");
+    const old = phone({ platform: "ios", osVersion: "16.7.10", status: { kind: "unsupported", reason: "os_too_old" } });
+    expect(statusDetail(t, "en-US", old.status, { ios: iosOf(old) })).toBe(
+      "It runs iOS 16.7.10, agents need iOS 17 or newer",
+    );
+    // devicectl names no version for some iPhones below iOS 17.
+    expect(statusDetail(t, "en-US", old.status, { ios: "" })).toBe(
+      "It runs iOS 16 or older, agents need iOS 17 or newer",
+    );
+    // An Android phone keeps the general line.
+    expect(iosOf(phone({ osVersion: "9" }))).toBeNull();
+    expect(statusDetail(t, "en-US", old.status)).toBe("This system is too old for the tools");
   });
 });
 

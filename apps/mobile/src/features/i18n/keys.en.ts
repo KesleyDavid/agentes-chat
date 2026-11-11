@@ -1879,6 +1879,8 @@ export const featureKeysEn = {
       helper_missing: "The test helper isn't set up yet",
       helper_expired: "The test helper needs renewing",
       apple_account_missing: "Xcode on the Mac needs an Apple Account",
+      apple_team_missing: "Xcode on the Mac shows no team yet",
+      ui_not_authorized: "This iPhone refused the test helper's taps",
       team_limit: "Remove an app you built from this iPhone",
       helper_untrusted: "Trust the test helper on this iPhone",
       booting: "Starting up",
@@ -2039,6 +2041,25 @@ export const featureKeysEn = {
         "Settings\u00a0›\u00a0General\u00a0›\u00a0VPN & Device Management. Tap the developer's name, then Trust.",
       waiting: "Waiting for {{host}} to see it",
       footer: "Your Mac does the rest, and renews the test helper every 7 days while it's on.",
+      /** An iPhone below iOS 17: the guide ends here. */
+      tooOld:
+        "This iPhone runs iOS {{version}}, and agents need iOS 17 or newer. Update it if it can, or use a newer iPhone.",
+      /** The command stays as is in every language. */
+      xcodeOld:
+        "This iPhone runs iOS {{version}}, newer than Xcode on {{host}} knows. Install Xcode {{major}} there, then run xcrun devicectl manage ddis update in Terminal.",
+      /** Xcode's names (Signing & Capabilities) stay in English. */
+      teamMissing:
+        "Xcode is signed in but shows no team yet. In Xcode, make any iOS app, pick your team under Signing & Capabilities and run it on this iPhone once.",
+      uiRefused:
+        "This iPhone refused the test helper's taps. Unlock it and enter its passcode if it asks. If it keeps happening, turn Settings\u00a0›\u00a0Developer\u00a0›\u00a0Enable UI Automation off and on.",
+      /** A button on step 1: the person says it's plugged in, and the guide says what to check. */
+      pluggedIn: "It's plugged in",
+      /** Under a step that sat unchanged for a while: what most likely holds it, and one way out. */
+      stall: {
+        plug: "{{host}} doesn't see this iPhone yet. Use a cable that carries data, not only power, keep this iPhone unlocked and tap Trust if it asks.",
+        devmode:
+          "Developer Mode turns on only after this iPhone restarts. Tap Restart, then Turn On once it's back. No switch there? Unplug this iPhone and plug it in again.",
+      },
     },
     /**
      * Notifications about devices, in the inbox. `{{names}}`: the agent, drawn bold. No "your": device names are

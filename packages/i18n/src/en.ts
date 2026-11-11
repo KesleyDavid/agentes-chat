@@ -1495,6 +1495,119 @@ export const en = {
     moveDown: "Move down",
     restoreOrder: "Restore default order",
   },
+  /** Installing the desktop app the first time (ADR 0036 §10): the steps under every download and the `/download` page. */
+  install: {
+    frames: "How to install on {{system}}",
+    step: "Step {{n}}",
+    previous: "Previous step",
+    next: "Next step",
+    fullGuide: "Full step by step",
+    copied: "Copied. Paste it in the terminal.",
+    mac: {
+      why: "<b>The app is in beta.</b> So the first time, your Mac asks you to confirm:",
+      drag: "Drag agentes.chat to Applications.",
+      dragLong: "Open the downloaded file and drag agentes.chat to Applications.",
+      blocked: "Open the app and click Done.",
+      blockedSub: "Don't click Move to Trash.",
+      settings: "In Settings\u00a0›\u00a0Privacy & Security, click Open Anyway.",
+      settingsLong:
+        "Right after, open System Settings\u00a0›\u00a0Privacy & Security, scroll to Security and click Open Anyway.",
+      settingsSub:
+        "The button shows there only after you try to open the app (step 2), and goes away after about an hour. Not there? Open the app again and come back.",
+      settingsShort: "It shows only right after step 2.",
+      openSettings: "Open Privacy & Security",
+      confirm: "Confirm with Touch ID or your password.",
+      confirmLong: "Click Open Anyway again and confirm with Touch ID or your Mac's password.",
+      done: "Done: from now on it opens straight away.",
+      stuckTitle: "Still no button, or your Mac says the app is damaged?",
+      stuckText: "Paste this in Terminal and open the app again:",
+    },
+    windows: {
+      why: "<b>The app is in beta.</b> So the first time, Windows asks you to confirm:",
+      keep: "If your browser asks, choose Keep.",
+      more: "Open the installer and click More info.",
+      moreLong: "Open the installer. If Windows protected your PC shows up, click More info.",
+      run: "Click Run anyway.",
+      runLong: "Click Run anyway and follow the installer.",
+      done: "Done: from now on it opens straight away.",
+    },
+    linux: {
+      why: "For Ubuntu, Debian and similar systems (x64). Linux doesn't ask for anything extra:",
+      apt: "Install the .deb with a double-click, or from the terminal.",
+      aptLong: "Double-click the downloaded file and click Install, or paste this in the terminal:",
+      open: "Open agentes.chat from your apps.",
+    },
+    page: {
+      docTitle: "Download the app · agentes.chat",
+      title: "Download the agentes.chat app",
+      beta: "Beta",
+      text: "Your workspace in a window of its own, with your system's notifications. With one click, agents work on this computer, in folders of their own.",
+      open: "Open agentes.chat",
+      version: "Version {{version}}",
+      versionSize: "Version {{version}} · {{size}}",
+      soon: "There's no version for {{system}} yet.",
+      useArm: "Computer with an ARM chip? Get the ARM version",
+      useX64: "Get the x64 version",
+      unavailable: "The app can't be downloaded from here right now. Try again in a moment.",
+      installOn: "Install on {{system}}",
+      system: "System",
+      whyTitle: "Why does my computer ask to confirm?",
+      whyText:
+        "agentes.chat is in beta: the Mac version isn't notarized by Apple yet, and the Windows installer doesn't carry a Microsoft certificate yet. Without them, your computer asks once before it opens an app downloaded from the internet. After that, it opens straight away and updates itself. Before the beta ends, this step goes away.",
+      openSource: "Open source",
+      onlyHere: "Published only here and in the project's releases",
+      signedUpdates: "Signed updates",
+    },
+    /** The system's own words in the drawings: as the system shows them in this language. */
+    scene: {
+      finder: "Finder",
+      file: "File",
+      edit: "Edit",
+      view: "View",
+      window: "Window",
+      applications: "Applications",
+      notOpened: "“{{app}}” Not Opened",
+      notOpenedText:
+        "Apple could not verify “{{app}}” is free of malware that may harm your Mac or compromise your privacy.",
+      done: "Done",
+      moveToTrash: "Move to Trash",
+      search: "Search",
+      account: "Apple Account",
+      general: "General",
+      appearance: "Appearance",
+      accessibility: "Accessibility",
+      privacy: "Privacy & Security",
+      desktopDock: "Desktop & Dock",
+      displays: "Displays",
+      security: "Security",
+      allowFrom: "Allow applications from",
+      allowValue: "App Store & Known Developers",
+      blocked: "“{{app}}” was blocked to protect your Mac.",
+      openAnyway: "Open Anyway",
+      confirmTitle: "Open “{{app}}”?",
+      confirmText: "Open it only if you trust where it came from.",
+      touchIdTitle: "System Settings",
+      touchIdText: "Use Touch ID or enter your password to allow this.",
+      password: "Password",
+      downloads: "Downloads",
+      rare: "This file isn't commonly downloaded. Make sure you trust it before you open it.",
+      delete: "Delete",
+      keep: "Keep",
+      protectedTitle: "Windows protected your PC",
+      protectedText:
+        "Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk.",
+      protectedShort: "Microsoft Defender SmartScreen prevented an unrecognized app from starting.",
+      moreInfo: "More info",
+      dontRun: "Don't run",
+      appLabel: "App:",
+      publisher: "Publisher:",
+      unknownPublisher: "Unknown publisher",
+      runAnyway: "Run anyway",
+      activities: "Activities",
+      readingLists: "Reading package lists... Done",
+      settingUp: "Setting up agentes-chat ({{version}}) ...",
+    },
+  },
   legal: {
     updated: "Last updated {{date}}",
     contents: "On this page",
@@ -13337,6 +13450,8 @@ export const en = {
     downloadFor: "Download for {{system}}",
     downloadApp: "Download the app",
     otherSystems: "Other systems",
+    /** A build for computers with an ARM chip: "Windows (ARM)". */
+    armBuild: "{{system}} (ARM)",
     onThePhone: "On the phone",
     onTheIphone: "On the iPhone",
     /** A phone's screen live on its page: watching it, taking control of it, and why it can't show. */
@@ -13415,6 +13530,8 @@ export const en = {
       helper_missing: "The test helper isn't set up yet",
       helper_expired: "The test helper needs renewing",
       apple_account_missing: "Xcode isn't signed in to an Apple Account",
+      apple_team_missing: "Xcode shows no team yet",
+      ui_not_authorized: "The iPhone refused the test helper's taps",
       team_limit: "The free Apple Account reached its app limit",
       helper_untrusted: "The iPhone doesn't trust the test helper yet",
       booting: "Starting",
@@ -13423,6 +13540,8 @@ export const en = {
       os_too_old: "This system is too old for the tools",
       adb_offline: "The phone isn't answering",
       other: "It needs something on the device",
+      /** An iPhone below iOS 17. */
+      iosTooOld: "It runs iOS {{version}}, agents need iOS 17 or newer",
     },
     /** What to do about each reason, as the action. */
     fix: {
@@ -13437,6 +13556,8 @@ export const en = {
       helper_missing: "Open the app on the Mac",
       helper_expired: "Open the app on the Mac",
       apple_account_missing: "Sign in to Xcode",
+      apple_team_missing: "Run an app on the iPhone from Xcode once",
+      ui_not_authorized: "Unlock the iPhone",
       team_limit: "Remove an app you built",
       helper_untrusted: "Trust it on the iPhone",
       booting: "Wait for it to start",
@@ -13713,7 +13834,11 @@ export const en = {
       toolsDone: "Downloaded by the Mac",
       toolsText: "The Mac downloads them, about 8 GB.",
       accountDone: "Added",
-      accountText: "Add a free or paid one in Xcode on {{mac}}: Settings\u00a0›\u00a0Accounts.",
+      /** Xcode's pane names stay in English in every language: Xcode has no other. */
+      accountText: "Add a free or paid one in Xcode on {{mac}}: Settings\u00a0›\u00a0Apple Accounts.",
+      /** Xcode's names (Signing & Capabilities) stay in English. */
+      teamMissingText:
+        "Xcode is signed in but shows no team yet. In Xcode, make any iOS app, pick your team under Signing & Capabilities and run it on the iPhone once.",
       connectedDone: "{{name}} · iOS {{version}}",
       connectedText: "Plug the iPhone into {{mac}} with a cable.",
       trustDone: "Trusted",
@@ -13724,6 +13849,38 @@ export const en = {
       helperText: "Built and renewed by the Mac every 7 days. A free Apple Account in Xcode is enough.",
       helperUntrustedText: "Tap the developer's name, then Trust.",
       teamLimitText: "Remove an app you built yourself from the iPhone: a free Apple Account allows 3.",
+      /** The iPhone is on a newer iOS than the Mac's Xcode knows. A Terminal command shows under it. */
+      xcodeOld:
+        "{{name}} runs iOS {{version}} and Xcode on {{mac}} knows iOS {{sdk}} at most. Install Xcode {{major}}, then run this in Terminal.",
+      xcodeOldAny:
+        "{{name}} runs iOS {{version}}, newer than Xcode on {{mac}} knows. Install Xcode {{major}}, then run this in Terminal.",
+      uiRefusedText:
+        "The iPhone refused the test helper's taps. Unlock it and enter its passcode if it asks. If it keeps happening, turn Settings\u00a0›\u00a0Developer\u00a0›\u00a0Enable UI Automation off and on.",
+      /** An iPhone below iOS 17: the guide ends here. */
+      tooOld:
+        "{{name}} runs iOS {{version}}, and agents need iOS 17 or newer. Update it if it can, or plug in a newer iPhone.",
+      /** The version in the "too old" lines when the iPhone doesn't say which iOS it runs (always one below 17). */
+      tooOldVersion: "16 or older",
+      /** A button on "iPhone connected": the person says it's plugged in, and the guide says what to check. */
+      pluggedIn: "It's plugged in",
+      /** Under a step that sat unchanged for a while: what most likely holds it, and one way out. */
+      stall: {
+        xcode: "Installed already? Open Xcode once and agree to its terms, so {{mac}} can use it.",
+        tools:
+          "The download needs {{mac}} awake and online, about 8 GB. If it stopped, get iOS in Xcode\u00a0›\u00a0Settings\u00a0›\u00a0Components.",
+        account:
+          "Signed in already? In Xcode, make any iOS app, pick your team under Signing & Capabilities and run it on the iPhone once.",
+        connected:
+          "{{mac}} doesn't see an iPhone yet. Use a cable that carries data, not only power, unlock the iPhone and tap Trust if it asks.",
+        trust:
+          "No Trust prompt? Unplug the iPhone, unlock it and plug it in again, then tap Trust and enter its passcode.",
+        developerMode:
+          "Developer Mode turns on only after the iPhone restarts. Tap Restart, then Turn On once it's back. No switch there? Unplug the iPhone and plug it in again.",
+        uiAutomation:
+          "The switch shows once Developer Mode is on and the iPhone restarted. Keep it unlocked while you look.",
+        helper:
+          "{{mac}} builds the test helper and starts it on the iPhone, which takes a few minutes the first time. Keep the iPhone unlocked and plugged in.",
+      },
       ready: "{{name}} is ready for agents.",
       /** iOS's own names for these Settings screens, as the iPhone shows them in this language. */
       path: {

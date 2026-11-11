@@ -805,8 +805,8 @@ describe("the agents' computer", () => {
       });
     });
 
-    test("on a Mac a second question, commands, no by default", () => {
-      expect(decide(mac, { answers: { on: true } })).toEqual({ ask: "commands", yes: false });
+    test("on a Mac a second question, commands, yes by default", () => {
+      expect(decide(mac, { answers: { on: true } })).toEqual({ ask: "commands", yes: true });
       const no = plan(decide(mac, { answers: { on: true, commands: false } }));
       expect(no).toMatchObject({ state: "on", mac: true, commands: false });
       expect(no?.state === "on" && no.install.args).toContain("--no-exec");
@@ -823,8 +823,8 @@ describe("the agents' computer", () => {
       for (const installed of [true, false]) {
         expect(plan(decide(mac, { content: TOKEN, installed }))).toMatchObject({ commands: installed, kept: true });
       }
-      // On before, but nothing installed yet (the first run stopped short): still no question, commands off.
-      expect(plan(decide(mac, { content: TOKEN }))).toMatchObject({ state: "on", commands: false, kept: true });
+      // On before, but nothing installed yet (the first run stopped short): still no question, commands on.
+      expect(plan(decide(mac, { content: TOKEN }))).toMatchObject({ state: "on", commands: true, kept: true });
     });
 
     test("flags answer without asking; one given sets the computer up again", () => {

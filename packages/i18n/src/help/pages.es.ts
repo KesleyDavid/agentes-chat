@@ -43,8 +43,8 @@ export const helpEs: Partial<Record<HelpSlug, HelpDocument>> = {
         id: "agents",
         heading: "Tus agentes también trabajan aquí",
         blocks: [
-          "Tus agentes también trabajan en esta computadora, en carpetas propias, con un navegador, y con Claude Code o Codex cuando están instalados aquí. Los comandos quedan desactivados hasta que los actives en **Preferencias › Herramientas**.",
-          "Aquí los agentes se ejecutan como tú. Con los comandos activados, pueden llegar al resto de esta computadora, `.agentes` incluida: la base de datos, el `.env` con `AGENTES_SECRET`, la clave del propietario y el token de esta computadora. Eso vale para cada espacio de trabajo que usa esta computadora, incluido uno en agentes.chat Cloud. Consulta [A qué pueden llegar los agentes](/help/computers#reach).",
+          "Tus agentes también trabajan en esta computadora, en carpetas propias, con un navegador, y con Claude Code o Codex cuando están instalados aquí.",
+          "Aquí los agentes se ejecutan como tú. Los **Comandos** vienen activados, y con ellos los agentes de cada espacio de trabajo que usa esta computadora pueden llegar a todo lo que hay en ella, incluidos los datos del servidor. Desactívalos en **Preferencias\u00a0›\u00a0Herramientas**. Consulta [A qué pueden llegar los agentes](/help/computers#reach).",
         ],
       },
       {
@@ -52,7 +52,7 @@ export const helpEs: Partial<Record<HelpSlug, HelpDocument>> = {
         heading: "Préstala también a otro espacio de trabajo",
         blocks: [
           "Los espacios de trabajo del servidor que ejecutas aquí ya usan esta computadora sin que hagas nada. Para que un espacio de trabajo de otro lugar también la use, como uno en agentes.chat Cloud, abre **Preferencias\u00a0›\u00a0Servidores**, pulsa **Agregar un servidor…**, inicia sesión en ese espacio de trabajo y pulsa **Permitir** cuando la app te lo pregunte.",
-          "Cada espacio de trabajo tiene aquí sus propios agentes y carpetas. **Comandos**, en **Preferencias\u00a0›\u00a0Herramientas**, vale para todos los espacios de trabajo de esta computadora a la vez: actívalo solo si confías toda esta computadora a los agentes de cada espacio de trabajo.",
+          "Cada espacio de trabajo tiene aquí sus propios agentes y carpetas. Los **Comandos** también vienen activados para él. Desactívalos en la pregunta de la app antes de pulsar **Permitir**, o más tarde en **Preferencias\u00a0›\u00a0Herramientas**, donde un solo interruptor vale para todos los espacios de trabajo de esta computadora.",
         ],
       },
       {
@@ -239,7 +239,7 @@ export const helpEs: Partial<Record<HelpSlug, HelpDocument>> = {
               "en una computadora que también ejecuta agentes.chat, su base de datos y sus claves en `.agentes`",
             ],
           },
-          "agentes.chat rechaza los comandos que nombran sus claves, tokens e inicios de sesión, pero es una regla, no un muro. Por eso los **Comandos** empiezan desactivados. Activarlos en **Preferencias\u00a0›\u00a0Herramientas** vale para todos los espacios de trabajo de la computadora a la vez: hazlo solo si confiarías todo lo que hay en ella a los agentes de cada espacio de trabajo y a las personas para las que trabajan. Claude Code y Codex ejecutan sus propios comandos en la carpeta del agente, con sus propias reglas.",
+          "agentes.chat rechaza los comandos que nombran sus claves, tokens e inicios de sesión, pero es una regla, no un muro. Los **Comandos** vienen activados. Desactívalos en la pregunta de la app antes de pulsar **Permitir**, o más tarde en **Preferencias\u00a0›\u00a0Herramientas**, donde un solo interruptor vale para todos los espacios de trabajo de la computadora. Claude Code y Codex ejecutan sus propios comandos en la carpeta del agente, con sus propias reglas.",
           "Para un muro de verdad, usa un servidor Linux. En Debian 13, instalado con `--system`, cada agente es un usuario propio. En Ubuntu, los agentes comparten un usuario, `agentes`: ven las carpetas de los demás, no las tuyas ni las del servidor. O dales a los agentes una computadora propia.",
         ],
       },

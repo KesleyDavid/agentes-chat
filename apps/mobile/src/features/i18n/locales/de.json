@@ -1801,6 +1801,8 @@
       "helper_missing": "Die Test-App ist noch nicht eingerichtet",
       "helper_expired": "Die Test-App muss erneuert werden",
       "apple_account_missing": "Xcode auf dem Mac braucht einen Apple Account",
+      "apple_team_missing": "Xcode auf dem Mac zeigt noch kein Team",
+      "ui_not_authorized": "Dieses iPhone hat die Eingaben der Test-App abgelehnt",
       "team_limit": "Entferne eine selbst erstellte App von diesem iPhone",
       "helper_untrusted": "Vertraue der Test-App auf diesem iPhone",
       "booting": "Startet gerade",
@@ -1959,7 +1961,16 @@
       "step5Hint": "Die App, die {{host}} installiert, damit Agenten auf diesem iPhone tippen und schreiben können. Sie erscheint in dieser Liste, sobald sie installiert ist.",
       "step5Text": "Einstellungen › Allgemein › VPN & Geräteverwaltung. Tippe auf den Namen des Entwicklers und dann auf Vertrauen.",
       "waiting": "Warte, bis {{host}} es erkennt",
-      "footer": "Dein Mac erledigt den Rest und erneuert die Test-App alle 7 Tage, solange er an ist."
+      "footer": "Dein Mac erledigt den Rest und erneuert die Test-App alle 7 Tage, solange er an ist.",
+      "tooOld": "Dieses iPhone läuft mit iOS {{version}}, Agenten brauchen iOS 17 oder neuer. Aktualisiere es, wenn das geht, oder nimm ein neueres iPhone.",
+      "xcodeOld": "Dieses iPhone läuft mit iOS {{version}}, neuer als Xcode auf {{host}} kennt. Installiere dort Xcode {{major}} und führe dann xcrun devicectl manage ddis update im Terminal aus.",
+      "teamMissing": "Xcode ist angemeldet, zeigt aber noch kein Team. Erstelle in Xcode eine beliebige iOS-App, wähle unter Signing & Capabilities dein Team und führe sie einmal auf diesem iPhone aus.",
+      "uiRefused": "Dieses iPhone hat die Eingaben der Test-App abgelehnt. Entsperre es und gib deinen Code ein, wenn es danach fragt. Passiert es wieder, schalte Einstellungen › Entwickler › UI-Automatisierung aktivieren aus und wieder ein.",
+      "pluggedIn": "Es ist angeschlossen",
+      "stall": {
+        "plug": "{{host}} sieht dieses iPhone noch nicht. Nimm ein Kabel, das Daten überträgt und nicht nur lädt, lass dieses iPhone entsperrt und tippe auf Vertrauen, wenn es fragt.",
+        "devmode": "Der Entwicklermodus geht erst nach einem Neustart dieses iPhones an. Tippe auf Neustart und danach auf Aktivieren. Kein Schalter da? Zieh dieses iPhone ab und schließ es wieder an."
+      }
     },
     "notice": {
       "kind": "Geräte",

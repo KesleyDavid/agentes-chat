@@ -43,8 +43,8 @@ export const helpIt: Partial<Record<HelpSlug, HelpDocument>> = {
         id: "agents",
         heading: "Anche i tuoi agenti lavorano qui",
         blocks: [
-          "I tuoi agenti lavorano anche su questo computer, in cartelle tutte loro, con un browser, e con Claude Code o Codex se sono installati qui. I comandi restano spenti finché non li attivi in **Preferenze › Strumenti**.",
-          "Qui gli agenti girano come te. Con i comandi attivi possono raggiungere il resto di questo computer, `.agentes` compresa: il database, `.env` con `AGENTES_SECRET`, la chiave del proprietario e il token di questo computer. Vale per ogni spazio di lavoro che usa questo computer, anche uno su agentes.chat Cloud. Vedi [Cosa possono raggiungere gli agenti](/help/computers#reach).",
+          "I tuoi agenti lavorano anche su questo computer, in cartelle tutte loro, con un browser, e con Claude Code o Codex se sono installati qui.",
+          "Qui gli agenti girano come te. I **Comandi** sono attivi fin dall’inizio, e con loro gli agenti di ogni spazio di lavoro che usa questo computer possono raggiungere tutto ciò che contiene, anche i dati del server. Disattivali in **Preferenze\u00a0›\u00a0Strumenti**. Vedi [Cosa possono raggiungere gli agenti](/help/computers#reach).",
         ],
       },
       {
@@ -52,7 +52,7 @@ export const helpIt: Partial<Record<HelpSlug, HelpDocument>> = {
         heading: "Prestalo anche a un altro spazio di lavoro",
         blocks: [
           "Gli spazi di lavoro del server che fai girare qui usano questo computer da soli. Per farlo usare anche a uno spazio di lavoro altrove, come uno su agentes.chat Cloud, apri **Preferenze › Server**, premi **Aggiungi un server…**, accedi a quello spazio di lavoro e premi **Consenti** quando l’app lo chiede.",
-          "Ogni spazio di lavoro ha qui i suoi agenti e le sue cartelle. **Comandi** in **Preferenze › Strumenti** vale per tutti gli spazi di lavoro su questo computer insieme: attivalo solo se affideresti tutto questo computer agli agenti di ogni spazio di lavoro.",
+          "Ogni spazio di lavoro ha qui i suoi agenti e le sue cartelle. Anche per lui i **Comandi** sono attivi fin dall’inizio. Disattivali nella domanda dell’app prima di premere **Consenti**, o più tardi in **Preferenze\u00a0›\u00a0Strumenti**, dove un solo interruttore vale per tutti gli spazi di lavoro su questo computer.",
         ],
       },
       {
@@ -237,7 +237,7 @@ export const helpIt: Partial<Record<HelpSlug, HelpDocument>> = {
               "su un computer che fa girare anche agentes.chat, il suo database e le sue chiavi in `.agentes`",
             ],
           },
-          "agentes.chat rifiuta i comandi che nominano le sue chiavi, i token e gli accessi salvati, ma è una regola, non un muro. Per questo i **Comandi** partono disattivati. Attivarli in **Preferenze › Strumenti** vale per tutti gli spazi di lavoro sul computer insieme: fallo solo se affideresti tutto ciò che c’è sopra agli agenti di ogni spazio di lavoro, e alle persone per cui lavorano. Claude Code e Codex eseguono i propri comandi nella cartella dell’agente, con le proprie regole.",
+          "agentes.chat rifiuta i comandi che nominano le sue chiavi, i token e gli accessi salvati, ma è una regola, non un muro. I **Comandi** sono attivi fin dall’inizio. Disattivali nella domanda dell’app prima di premere **Consenti**, o più tardi in **Preferenze\u00a0›\u00a0Strumenti**, dove un solo interruttore vale per tutti gli spazi di lavoro sul computer. Claude Code e Codex eseguono i propri comandi nella cartella dell’agente, con le proprie regole.",
           "Per un vero muro, usa un server Linux. Su Debian 13, installato con `--system`, ogni agente è un utente a sé. Su Ubuntu, gli agenti condividono un solo utente, `agentes`: vedono le cartelle degli altri, non le tue né quelle del server. Oppure dai agli agenti un computer tutto loro.",
         ],
       },

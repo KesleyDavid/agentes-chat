@@ -1892,6 +1892,8 @@
       "helper_missing": "La app de pruebas aún no está configurada",
       "helper_expired": "Hay que renovar la app de pruebas",
       "apple_account_missing": "Xcode en la Mac necesita una Apple Account",
+      "apple_team_missing": "Xcode en la Mac aún no muestra un equipo",
+      "ui_not_authorized": "Este iPhone rechazó los toques de la app de pruebas",
       "team_limit": "Elimina de este iPhone una app que creaste",
       "helper_untrusted": "Confía en la app de pruebas en este iPhone",
       "booting": "Iniciándose",
@@ -2051,7 +2053,16 @@
       "step5Hint": "La app que {{host}} instala para que los agentes toquen y escriban en este iPhone. Aparece en esta lista una vez instalada.",
       "step5Text": "Configuración › General › VPN y administración de dispositivos. Toca el nombre del desarrollador y luego Confiar.",
       "waiting": "Esperando a que {{host}} lo detecte",
-      "footer": "Tu Mac hace el resto y renueva la app de pruebas cada 7 días mientras esté encendida."
+      "footer": "Tu Mac hace el resto y renueva la app de pruebas cada 7 días mientras esté encendida.",
+      "tooOld": "Este iPhone usa iOS {{version}}, y los agentes necesitan iOS 17 o posterior. Actualízalo si se puede, o usa un iPhone más nuevo.",
+      "xcodeOld": "Este iPhone usa iOS {{version}}, más nuevo de lo que conoce Xcode en {{host}}. Instala allí Xcode {{major}} y luego ejecuta xcrun devicectl manage ddis update en Terminal.",
+      "teamMissing": "Xcode tiene la sesión iniciada pero aún no muestra un equipo. En Xcode, crea cualquier app de iOS, elige tu equipo en Signing & Capabilities y ejecútala una vez en este iPhone.",
+      "uiRefused": "Este iPhone rechazó los toques de la app de pruebas. Desbloquéalo y escribe tu código si lo pide. Si vuelve a pasar, desactiva y activa Configuración › Desarrollador › Activar automatización de la IU.",
+      "pluggedIn": "Ya está conectado",
+      "stall": {
+        "plug": "{{host}} aún no ve este iPhone. Usa un cable que transmita datos, no solo carga, mantén este iPhone desbloqueado y toca Confiar si lo pide.",
+        "devmode": "El Modo de desarrollador solo se activa después de reiniciar este iPhone. Toca Reiniciar y luego Activar cuando vuelva. ¿No ves el interruptor? Desconecta este iPhone y vuelve a conectarlo."
+      }
     },
     "notice": {
       "kind": "Dispositivos",

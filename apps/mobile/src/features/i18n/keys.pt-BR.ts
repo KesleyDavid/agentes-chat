@@ -1830,6 +1830,8 @@ export const featureKeysPtBR = {
       helper_missing: "O app de testes ainda não está instalado",
       helper_expired: "O app de testes precisa ser renovado",
       apple_account_missing: "O Xcode no Mac precisa de uma Conta Apple",
+      apple_team_missing: "O Xcode no Mac ainda não mostra um time",
+      ui_not_authorized: "Este iPhone recusou os toques do app de testes",
       team_limit: "Remova deste iPhone um app que você criou",
       helper_untrusted: "Confie no app de testes neste iPhone",
       booting: "Iniciando",
@@ -1988,6 +1990,20 @@ export const featureKeysPtBR = {
         "Ajustes\u00a0›\u00a0Geral\u00a0›\u00a0VPN e Gerenciamento de Dispositivos. Toque no nome do desenvolvedor e em Confiar.",
       waiting: "Esperando o {{host}} ver o iPhone",
       footer: "Seu Mac faz o resto e renova o app de testes a cada 7 dias enquanto estiver ligado.",
+      tooOld:
+        "Este iPhone usa o iOS {{version}}, e os agentes precisam do iOS 17 ou mais novo. Atualize se ele aceitar, ou use um iPhone mais novo.",
+      xcodeOld:
+        "Este iPhone usa o iOS {{version}}, mais novo do que o Xcode no {{host}} conhece. Instale lá o Xcode {{major}} e rode xcrun devicectl manage ddis update no Terminal.",
+      teamMissing:
+        "O Xcode está conectado, mas ainda não mostra um time. No Xcode, crie qualquer app de iOS, escolha seu time em Signing & Capabilities e rode neste iPhone uma vez.",
+      uiRefused:
+        "Este iPhone recusou os toques do app de testes. Desbloqueie e digite seu código se ele pedir. Se continuar, desligue e ligue Ajustes\u00a0›\u00a0Desenvolvedor\u00a0›\u00a0Ativar Automação da IU.",
+      pluggedIn: "Já está ligado",
+      stall: {
+        plug: "O {{host}} ainda não vê este iPhone. Use um cabo que passe dados, não só carga, deixe este iPhone desbloqueado e toque em Confiar se ele pedir.",
+        devmode:
+          "O Modo de Desenvolvedor só liga depois que este iPhone reinicia. Toque em Reiniciar e em Ativar quando ele voltar. Não tem a opção? Desconecte este iPhone e ligue de novo.",
+      },
     },
     notice: {
       kind: "Dispositivos",

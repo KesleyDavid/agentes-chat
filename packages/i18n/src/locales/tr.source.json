@@ -3440,6 +3440,288 @@
   "contextMenu.restoreOrder": {
     "value": "Restore default order"
   },
+  "install.frames": {
+    "value": "How to install on {{system}}"
+  },
+  "install.step": {
+    "value": "Step {{n}}"
+  },
+  "install.previous": {
+    "value": "Previous step"
+  },
+  "install.next": {
+    "value": "Next step"
+  },
+  "install.fullGuide": {
+    "value": "Full step by step"
+  },
+  "install.copied": {
+    "value": "Copied. Paste it in the terminal."
+  },
+  "install.mac.why": {
+    "value": "<b>The app is in beta.</b> So the first time, your Mac asks you to confirm:"
+  },
+  "install.mac.drag": {
+    "value": "Drag agentes.chat to Applications."
+  },
+  "install.mac.dragLong": {
+    "value": "Open the downloaded file and drag agentes.chat to Applications."
+  },
+  "install.mac.blocked": {
+    "value": "Open the app and click Done."
+  },
+  "install.mac.blockedSub": {
+    "value": "Don't click Move to Trash."
+  },
+  "install.mac.settings": {
+    "value": "In Settings › Privacy & Security, click Open Anyway."
+  },
+  "install.mac.settingsLong": {
+    "value": "Right after, open System Settings › Privacy & Security, scroll to Security and click Open Anyway."
+  },
+  "install.mac.settingsSub": {
+    "value": "The button shows there only after you try to open the app (step 2), and goes away after about an hour. Not there? Open the app again and come back."
+  },
+  "install.mac.settingsShort": {
+    "value": "It shows only right after step 2."
+  },
+  "install.mac.openSettings": {
+    "value": "Open Privacy & Security"
+  },
+  "install.mac.confirm": {
+    "value": "Confirm with Touch ID or your password."
+  },
+  "install.mac.confirmLong": {
+    "value": "Click Open Anyway again and confirm with Touch ID or your Mac's password."
+  },
+  "install.mac.done": {
+    "value": "Done: from now on it opens straight away."
+  },
+  "install.mac.stuckTitle": {
+    "value": "Still no button, or your Mac says the app is damaged?"
+  },
+  "install.mac.stuckText": {
+    "value": "Paste this in Terminal and open the app again:"
+  },
+  "install.windows.why": {
+    "value": "<b>The app is in beta.</b> So the first time, Windows asks you to confirm:"
+  },
+  "install.windows.keep": {
+    "value": "If your browser asks, choose Keep."
+  },
+  "install.windows.more": {
+    "value": "Open the installer and click More info."
+  },
+  "install.windows.moreLong": {
+    "value": "Open the installer. If Windows protected your PC shows up, click More info."
+  },
+  "install.windows.run": {
+    "value": "Click Run anyway."
+  },
+  "install.windows.runLong": {
+    "value": "Click Run anyway and follow the installer."
+  },
+  "install.windows.done": {
+    "value": "Done: from now on it opens straight away."
+  },
+  "install.linux.why": {
+    "value": "For Ubuntu, Debian and similar systems (x64). Linux doesn't ask for anything extra:"
+  },
+  "install.linux.apt": {
+    "value": "Install the .deb with a double-click, or from the terminal."
+  },
+  "install.linux.aptLong": {
+    "value": "Double-click the downloaded file and click Install, or paste this in the terminal:"
+  },
+  "install.linux.open": {
+    "value": "Open agentes.chat from your apps."
+  },
+  "install.page.docTitle": {
+    "value": "Download the app · agentes.chat"
+  },
+  "install.page.title": {
+    "value": "Download the agentes.chat app"
+  },
+  "install.page.beta": {
+    "value": "Beta"
+  },
+  "install.page.text": {
+    "value": "Your workspace in a window of its own, with your system's notifications. With one click, agents work on this computer, in folders of their own."
+  },
+  "install.page.open": {
+    "value": "Open agentes.chat"
+  },
+  "install.page.version": {
+    "value": "Version {{version}}"
+  },
+  "install.page.versionSize": {
+    "value": "Version {{version}} · {{size}}"
+  },
+  "install.page.soon": {
+    "value": "There's no version for {{system}} yet."
+  },
+  "install.page.useArm": {
+    "value": "Computer with an ARM chip? Get the ARM version"
+  },
+  "install.page.useX64": {
+    "value": "Get the x64 version"
+  },
+  "install.page.unavailable": {
+    "value": "The app can't be downloaded from here right now. Try again in a moment."
+  },
+  "install.page.installOn": {
+    "value": "Install on {{system}}"
+  },
+  "install.page.system": {
+    "value": "System"
+  },
+  "install.page.whyTitle": {
+    "value": "Why does my computer ask to confirm?"
+  },
+  "install.page.whyText": {
+    "value": "agentes.chat is in beta: the Mac version isn't notarized by Apple yet, and the Windows installer doesn't carry a Microsoft certificate yet. Without them, your computer asks once before it opens an app downloaded from the internet. After that, it opens straight away and updates itself. Before the beta ends, this step goes away."
+  },
+  "install.page.openSource": {
+    "value": "Open source"
+  },
+  "install.page.onlyHere": {
+    "value": "Published only here and in the project's releases"
+  },
+  "install.page.signedUpdates": {
+    "value": "Signed updates"
+  },
+  "install.scene.finder": {
+    "value": "Finder"
+  },
+  "install.scene.file": {
+    "value": "File"
+  },
+  "install.scene.edit": {
+    "value": "Edit"
+  },
+  "install.scene.view": {
+    "value": "View"
+  },
+  "install.scene.window": {
+    "value": "Window"
+  },
+  "install.scene.applications": {
+    "value": "Applications"
+  },
+  "install.scene.notOpened": {
+    "value": "“{{app}}” Not Opened"
+  },
+  "install.scene.notOpenedText": {
+    "value": "Apple could not verify “{{app}}” is free of malware that may harm your Mac or compromise your privacy."
+  },
+  "install.scene.done": {
+    "value": "Done"
+  },
+  "install.scene.moveToTrash": {
+    "value": "Move to Trash"
+  },
+  "install.scene.search": {
+    "value": "Search"
+  },
+  "install.scene.account": {
+    "value": "Apple Account"
+  },
+  "install.scene.general": {
+    "value": "General"
+  },
+  "install.scene.appearance": {
+    "value": "Appearance"
+  },
+  "install.scene.accessibility": {
+    "value": "Accessibility"
+  },
+  "install.scene.privacy": {
+    "value": "Privacy & Security"
+  },
+  "install.scene.desktopDock": {
+    "value": "Desktop & Dock"
+  },
+  "install.scene.displays": {
+    "value": "Displays"
+  },
+  "install.scene.security": {
+    "value": "Security"
+  },
+  "install.scene.allowFrom": {
+    "value": "Allow applications from"
+  },
+  "install.scene.allowValue": {
+    "value": "App Store & Known Developers"
+  },
+  "install.scene.blocked": {
+    "value": "“{{app}}” was blocked to protect your Mac."
+  },
+  "install.scene.openAnyway": {
+    "value": "Open Anyway"
+  },
+  "install.scene.confirmTitle": {
+    "value": "Open “{{app}}”?"
+  },
+  "install.scene.confirmText": {
+    "value": "Open it only if you trust where it came from."
+  },
+  "install.scene.touchIdTitle": {
+    "value": "System Settings"
+  },
+  "install.scene.touchIdText": {
+    "value": "Use Touch ID or enter your password to allow this."
+  },
+  "install.scene.password": {
+    "value": "Password"
+  },
+  "install.scene.downloads": {
+    "value": "Downloads"
+  },
+  "install.scene.rare": {
+    "value": "This file isn't commonly downloaded. Make sure you trust it before you open it."
+  },
+  "install.scene.delete": {
+    "value": "Delete"
+  },
+  "install.scene.keep": {
+    "value": "Keep"
+  },
+  "install.scene.protectedTitle": {
+    "value": "Windows protected your PC"
+  },
+  "install.scene.protectedText": {
+    "value": "Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk."
+  },
+  "install.scene.protectedShort": {
+    "value": "Microsoft Defender SmartScreen prevented an unrecognized app from starting."
+  },
+  "install.scene.moreInfo": {
+    "value": "More info"
+  },
+  "install.scene.dontRun": {
+    "value": "Don't run"
+  },
+  "install.scene.appLabel": {
+    "value": "App:"
+  },
+  "install.scene.publisher": {
+    "value": "Publisher:"
+  },
+  "install.scene.unknownPublisher": {
+    "value": "Unknown publisher"
+  },
+  "install.scene.runAnyway": {
+    "value": "Run anyway"
+  },
+  "install.scene.activities": {
+    "value": "Activities"
+  },
+  "install.scene.readingLists": {
+    "value": "Reading package lists... Done"
+  },
+  "install.scene.settingUp": {
+    "value": "Setting up agentes-chat ({{version}}) ..."
+  },
   "legal.updated": {
     "value": "Last updated {{date}}"
   },
@@ -32529,6 +32811,9 @@
   "devices.otherSystems": {
     "value": "Other systems"
   },
+  "devices.armBuild": {
+    "value": "{{system}} (ARM)"
+  },
   "devices.onThePhone": {
     "value": "On the phone"
   },
@@ -32730,6 +33015,12 @@
   "devices.reason.apple_account_missing": {
     "value": "Xcode isn't signed in to an Apple Account"
   },
+  "devices.reason.apple_team_missing": {
+    "value": "Xcode shows no team yet"
+  },
+  "devices.reason.ui_not_authorized": {
+    "value": "The iPhone refused the test helper's taps"
+  },
   "devices.reason.team_limit": {
     "value": "The free Apple Account reached its app limit"
   },
@@ -32753,6 +33044,9 @@
   },
   "devices.reason.other": {
     "value": "It needs something on the device"
+  },
+  "devices.reason.iosTooOld": {
+    "value": "It runs iOS {{version}}, agents need iOS 17 or newer"
   },
   "devices.fix.locked": {
     "value": "Unlock it"
@@ -32786,6 +33080,12 @@
   },
   "devices.fix.apple_account_missing": {
     "value": "Sign in to Xcode"
+  },
+  "devices.fix.apple_team_missing": {
+    "value": "Run an app on the iPhone from Xcode once"
+  },
+  "devices.fix.ui_not_authorized": {
+    "value": "Unlock the iPhone"
   },
   "devices.fix.team_limit": {
     "value": "Remove an app you built"
@@ -33433,7 +33733,10 @@
     "value": "Added"
   },
   "devices.iphone.accountText": {
-    "value": "Add a free or paid one in Xcode on {{mac}}: Settings › Accounts."
+    "value": "Add a free or paid one in Xcode on {{mac}}: Settings › Apple Accounts."
+  },
+  "devices.iphone.teamMissingText": {
+    "value": "Xcode is signed in but shows no team yet. In Xcode, make any iOS app, pick your team under Signing & Capabilities and run it on the iPhone once."
   },
   "devices.iphone.connectedDone": {
     "value": "{{name}} · iOS {{version}}"
@@ -33464,6 +33767,48 @@
   },
   "devices.iphone.teamLimitText": {
     "value": "Remove an app you built yourself from the iPhone: a free Apple Account allows 3."
+  },
+  "devices.iphone.xcodeOld": {
+    "value": "{{name}} runs iOS {{version}} and Xcode on {{mac}} knows iOS {{sdk}} at most. Install Xcode {{major}}, then run this in Terminal."
+  },
+  "devices.iphone.xcodeOldAny": {
+    "value": "{{name}} runs iOS {{version}}, newer than Xcode on {{mac}} knows. Install Xcode {{major}}, then run this in Terminal."
+  },
+  "devices.iphone.uiRefusedText": {
+    "value": "The iPhone refused the test helper's taps. Unlock it and enter its passcode if it asks. If it keeps happening, turn Settings › Developer › Enable UI Automation off and on."
+  },
+  "devices.iphone.tooOld": {
+    "value": "{{name}} runs iOS {{version}}, and agents need iOS 17 or newer. Update it if it can, or plug in a newer iPhone."
+  },
+  "devices.iphone.tooOldVersion": {
+    "value": "16 or older"
+  },
+  "devices.iphone.pluggedIn": {
+    "value": "It's plugged in"
+  },
+  "devices.iphone.stall.xcode": {
+    "value": "Installed already? Open Xcode once and agree to its terms, so {{mac}} can use it."
+  },
+  "devices.iphone.stall.tools": {
+    "value": "The download needs {{mac}} awake and online, about 8 GB. If it stopped, get iOS in Xcode › Settings › Components."
+  },
+  "devices.iphone.stall.account": {
+    "value": "Signed in already? In Xcode, make any iOS app, pick your team under Signing & Capabilities and run it on the iPhone once."
+  },
+  "devices.iphone.stall.connected": {
+    "value": "{{mac}} doesn't see an iPhone yet. Use a cable that carries data, not only power, unlock the iPhone and tap Trust if it asks."
+  },
+  "devices.iphone.stall.trust": {
+    "value": "No Trust prompt? Unplug the iPhone, unlock it and plug it in again, then tap Trust and enter its passcode."
+  },
+  "devices.iphone.stall.developerMode": {
+    "value": "Developer Mode turns on only after the iPhone restarts. Tap Restart, then Turn On once it's back. No switch there? Unplug the iPhone and plug it in again."
+  },
+  "devices.iphone.stall.uiAutomation": {
+    "value": "The switch shows once Developer Mode is on and the iPhone restarted. Keep it unlocked while you look."
+  },
+  "devices.iphone.stall.helper": {
+    "value": "{{mac}} builds the test helper and starts it on the iPhone, which takes a few minutes the first time. Keep the iPhone unlocked and plugged in."
   },
   "devices.iphone.ready": {
     "value": "{{name}} is ready for agents."
@@ -35066,6 +35411,9 @@
   },
   "settings.advanced": {
     "value": "Advanced"
+  },
+  "settings.tab.account": {
+    "value": "Profile"
   },
   "settings.sectionText.account": {
     "value": "Your profile and how the app looks for you."
@@ -43299,9 +43647,6 @@
   },
   "feedback.another": {
     "value": "Send another"
-  },
-  "settings.tab.account": {
-    "value": "Profile"
   },
   "feedback.offer.group": {
     "value": "Report about the app"

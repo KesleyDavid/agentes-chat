@@ -11,7 +11,6 @@
 
 use std::collections::BTreeMap;
 use std::fs;
-use std::io::Read;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
@@ -92,7 +91,8 @@ pub(crate) fn valid_id(id: &str) -> bool {
 
 fn new_id() -> String {
     let mut bytes = [0u8; 8];
-    let filled = fs::File::open("/dev/urandom").and_then(|mut f| f.read_exact(&mut bytes)).is_ok();
+    // The system's random source, on Windows too (`/dev/urandom` exists only on a Mac and Linux).
+    let filled = getrandom::fill(&mut bytes).is_ok();
     if !filled {
         let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
         let mixed = nanos ^ ((std::process::id() as u128) << 64);

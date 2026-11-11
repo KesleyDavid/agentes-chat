@@ -279,7 +279,11 @@
       "portrait.options.hair.undercut",
       "portrait.options.hair.mullet",
       "devices.android.drivers.samsung",
-      "onboarding.flow.area.options.marketing"
+      "onboarding.flow.area.options.marketing",
+      "install.page.beta",
+      "install.scene.finder",
+      "install.scene.downloads",
+      "devices.armBuild"
     ],
     "es": [
       "devices.iphone.path.general",
@@ -513,7 +517,11 @@
       "portrait.options.hair.undercut",
       "portrait.options.hair.mullet",
       "devices.android.drivers.samsung",
-      "onboarding.flow.area.options.marketing"
+      "onboarding.flow.area.options.marketing",
+      "install.page.beta",
+      "install.scene.finder",
+      "install.scene.general",
+      "devices.armBuild"
     ],
     "fr": [
       "calendar.moreRuns",
@@ -913,7 +921,12 @@
       "portrait.options.hair.undercut",
       "portrait.options.hair.dreads",
       "devices.android.drivers.samsung",
-      "onboarding.flow.area.options.marketing"
+      "onboarding.flow.area.options.marketing",
+      "install.scene.finder",
+      "install.scene.applications",
+      "install.page.version",
+      "install.page.versionSize",
+      "devices.armBuild"
     ],
     "de": [
       "devices.iphone.steps.account",
@@ -1332,7 +1345,17 @@
       "portrait.options.hair.dreads",
       "agentPage.work.brain.v2.computer",
       "devices.android.drivers.samsung",
-      "onboarding.flow.area.options.marketing"
+      "onboarding.flow.area.options.marketing",
+      "install.page.beta",
+      "install.page.version",
+      "install.page.versionSize",
+      "install.page.system",
+      "install.scene.finder",
+      "install.scene.displays",
+      "install.scene.account",
+      "install.scene.appLabel",
+      "install.scene.downloads",
+      "devices.armBuild"
     ],
     "it": [
       "calendar.moreRuns",
@@ -1673,7 +1696,11 @@
       "portrait.options.hair.mullet",
       "agentPage.work.brain.v2.computer",
       "devices.android.drivers.samsung",
-      "onboarding.flow.area.options.marketing"
+      "onboarding.flow.area.options.marketing",
+      "install.page.beta",
+      "install.scene.finder",
+      "install.scene.password",
+      "devices.armBuild"
     ],
     "nl": [
       "calendar.moreRuns",
@@ -2238,7 +2265,13 @@
       "portrait.options.hair.dreads",
       "agentPage.work.brain.v2.computer",
       "devices.android.drivers.samsung",
-      "onboarding.flow.area.options.marketing"
+      "onboarding.flow.area.options.marketing",
+      "install.page.beta",
+      "install.scene.finder",
+      "install.scene.account",
+      "install.scene.appLabel",
+      "install.scene.downloads",
+      "devices.armBuild"
     ],
     "ja": [
       "devices.system.android",
@@ -2391,7 +2424,10 @@
       "openOnPhone.googlePlay",
       "arrival.beta.word",
       "feedback.mark",
-      "devices.android.drivers.samsung"
+      "devices.android.drivers.samsung",
+      "install.page.beta",
+      "install.scene.finder",
+      "devices.armBuild"
     ],
     "ko": [
       "devices.system.android",
@@ -2539,7 +2575,10 @@
       "openOnPhone.appStore",
       "openOnPhone.googlePlay",
       "arrival.beta.word",
-      "feedback.mark"
+      "feedback.mark",
+      "install.page.beta",
+      "install.scene.finder",
+      "devices.armBuild"
     ],
     "zh-Hans": [
       "devices.system.android",
@@ -2679,7 +2718,9 @@
       "openOnPhone.appStore",
       "openOnPhone.googlePlay",
       "arrival.beta.word",
-      "feedback.mark"
+      "feedback.mark",
+      "install.page.beta",
+      "devices.armBuild"
     ],
     "id": [
       "devices.cpus",
@@ -2960,7 +3001,12 @@
       "portrait.options.hair.undercut",
       "portrait.options.hair.mullet",
       "devices.android.drivers.samsung",
-      "onboarding.flow.area.options.marketing"
+      "onboarding.flow.area.options.marketing",
+      "install.page.beta",
+      "install.scene.finder",
+      "install.scene.edit",
+      "install.scene.desktopDock",
+      "devices.armBuild"
     ],
     "tr": [
       "devices.cpus",
@@ -3134,7 +3180,10 @@
       "portrait.options.hair.fade",
       "portrait.options.hair.undercut",
       "portrait.options.hair.mullet",
-      "devices.android.drivers.samsung"
+      "devices.android.drivers.samsung",
+      "install.page.beta",
+      "install.scene.finder",
+      "devices.armBuild"
     ],
     "pl": [
       "devices.cpus",
@@ -3407,7 +3456,11 @@
       "portrait.options.hair.undercut",
       "portrait.options.hair.mullet",
       "devices.android.drivers.samsung",
-      "onboarding.flow.area.options.marketing"
+      "onboarding.flow.area.options.marketing",
+      "install.page.beta",
+      "install.page.system",
+      "install.scene.finder",
+      "devices.armBuild"
     ],
     "ru": [
       "devices.system.android",
@@ -3546,7 +3599,10 @@
       "openOnPhone.googlePlay",
       "arrival.beta.word",
       "feedback.mark",
-      "devices.android.drivers.samsung"
+      "devices.android.drivers.samsung",
+      "install.page.beta",
+      "install.scene.finder",
+      "devices.armBuild"
     ]
   },
   "mobile-base": {
