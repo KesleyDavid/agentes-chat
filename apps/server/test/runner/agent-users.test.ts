@@ -314,7 +314,7 @@ test("the launcher: the agent's slice, its own temporary folders, its user, abso
   const launcher = systemLauncher(user, true, false, false);
   const p = launcher.prefix;
   for (const systemd of [true, false])
-    expect(systemLauncher(user, systemd, false).env.PATH.split(":")).not.toContain(env.AGENTES_SHARED_BIN);
+    expect((systemLauncher(user, systemd, false).env.PATH ?? "").split(":")).not.toContain(env.AGENTES_SHARED_BIN);
   expect(p.slice(0, 8)).toEqual([
     "/usr/bin/systemd-run",
     "--quiet",

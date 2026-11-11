@@ -157,8 +157,8 @@ async function ownsOrganization(h: ReturnType<typeof http>, token: string, login
   if (res.status === 404) return false;
   if (res.status === 403) return null;
   if (!res.ok) throw new ValidationError(`GitHub didn't say who owns ${login} (${res.status})`);
-  const { state, role } = (await res.json().catch(() => ({}))) as { state?: unknown; role?: unknown };
-  return state === "active" && role === "admin";
+  const { state: membership, role } = (await res.json().catch(() => ({}))) as { state?: unknown; role?: unknown };
+  return membership === "active" && role === "admin";
 }
 
 /** GitHub's clock and ours may disagree by this much (and its `created_at` drops the milliseconds). */

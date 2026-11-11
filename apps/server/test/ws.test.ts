@@ -7,6 +7,7 @@ import {
   createRealtime,
   currentSubscriptions,
   parseClientFrame,
+  type BrowserSocketData,
   type SocketData,
 } from "../src/realtime/ws";
 import {
@@ -318,15 +319,18 @@ test("a removal that lands while two subscribes to the channel are being checked
   );
   expect(refused).toBeUndefined();
   const frames: Record<string, unknown>[] = [];
+  let readyState = 1;
   const socket = {
     data,
-    readyState: 1,
+    get readyState() {
+      return readyState;
+    },
     send(text: string) {
       frames.push(JSON.parse(text) as Record<string, unknown>);
       return 1;
     },
     close() {
-      this.readyState = 3;
+      readyState = 3;
     },
   } as unknown as Parameters<typeof realtime.websocket.open>[0];
   const until = async (done: () => boolean) => {
@@ -352,8 +356,9 @@ test("a removal that lands while two subscribes to the channel are being checked
     await Promise.all(pending);
 
     expect(frames.filter((f) => f.channelId === channelId)).toEqual([{ type: "error", code: "forbidden", channelId }]);
-    expect(data?.subscriptions.has(channelId)).toBe(false);
-    expect(data?.pending.has(channelId)).toBe(false);
+    const browser = data as BrowserSocketData | undefined;
+    expect(browser?.subscriptions.has(channelId)).toBe(false);
+    expect(browser?.pending.has(channelId)).toBe(false);
     const posted = await owner(`/api/app/organizations/${orgId}/channels/${channelId}/messages`, {
       json: { body: "after the removal" },
     });
