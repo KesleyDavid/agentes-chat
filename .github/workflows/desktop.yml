@@ -55,7 +55,7 @@ jobs:
       ref: ${{ steps.version.outputs.ref }}
     steps:
       # main only takes pull requests; the release's deploy key is the one push the ruleset lets through.
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
@@ -140,7 +140,7 @@ jobs:
     runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.version.outputs.ref }}
 
@@ -160,7 +160,7 @@ jobs:
           test -s native/web/index.html
           du -sh native/server native/web native/licenses/npm
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: desktop-server
           path: |
@@ -182,7 +182,7 @@ jobs:
       BIN_DIR: apps/desktop/src-tauri/binaries
       VERSION: ${{ needs.version.outputs.version }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.version.outputs.ref }}
 
@@ -281,7 +281,7 @@ jobs:
           lipo -info "$BIN_DIR/agent-browser-universal-apple-darwin"
 
       # The server's files (the `server` job), among the app's resources (tauri.native.conf.json).
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: desktop-server
           path: apps/desktop/src-tauri/native
@@ -308,7 +308,7 @@ jobs:
 
       - name: Build the app (universal, signed, notarized)
         if: ${{ steps.signing.outputs.apple == 'true' }}
-        uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -326,7 +326,7 @@ jobs:
       # no hardened runtime, which with an ad-hoc signature keeps WebKit's content process from starting.
       - name: Build the app (universal, ad-hoc signed)
         if: ${{ steps.signing.outputs.apple != 'true' }}
-        uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
@@ -390,7 +390,7 @@ jobs:
           cp "$TGZ.sig" "out/agentes_${VERSION}_universal.app.tar.gz.sig"
           ls -l out
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: desktop-macos
           path: out/*
@@ -420,7 +420,7 @@ jobs:
       BIN_DIR: apps/desktop/src-tauri/binaries
       VERSION: ${{ needs.version.outputs.version }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.version.outputs.ref }}
 
@@ -459,7 +459,7 @@ jobs:
           "$OUT" --version
 
       # The server's files (the `server` job), among the app's resources (tauri.native.conf.json).
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: desktop-server
           path: apps/desktop/src-tauri/native
@@ -490,7 +490,7 @@ jobs:
 
       # Unsigned for now: SmartScreen asks once ("More info › Run anyway") until a code-signing certificate.
       - name: Build the app (NSIS)
-        uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
@@ -527,7 +527,7 @@ jobs:
           (cd out && sha256sum "$NAME" > "$NAME.sha256")
           ls -l out
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: desktop-windows-${{ matrix.arch }}
           path: out/*
@@ -559,7 +559,7 @@ jobs:
       BIN_DIR: apps/desktop/src-tauri/binaries
       VERSION: ${{ needs.version.outputs.version }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.version.outputs.ref }}
 
@@ -604,7 +604,7 @@ jobs:
           chmod +x "$OUT"
 
       # The server's files (the `server` job), among the app's resources (tauri.native.conf.json).
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: desktop-server
           path: apps/desktop/src-tauri/native
@@ -628,7 +628,7 @@ jobs:
           bun run tauri icon app-icon.png
 
       - name: Build the app (AppImage, deb)
-        uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
@@ -664,7 +664,7 @@ jobs:
             grep -q -- "$f\$" deb.txt || { echo "::error::$f is not in the deb"; exit 1; }
           done
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: desktop-linux-${{ matrix.arch }}
           path: out/*
@@ -701,7 +701,7 @@ jobs:
           look first
           look cloud
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: desktop-linux-look-${{ matrix.arch }}
@@ -719,12 +719,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.version.outputs.ref }}
 
       # Only the builds' files: the server's files and the Linux screenshots are artifacts too.
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: out
           pattern: desktop-{macos,windows-x64,windows-arm64,linux-x64,linux-arm64}
