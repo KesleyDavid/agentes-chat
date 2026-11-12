@@ -95,8 +95,9 @@ once you say yes, or started with `systemctl` when it's stopped) and the Compose
 the Docker Desktop, OrbStack or Colima it finds, started when it isn't running, or Colima with its
 `docker` command and Compose installed with Homebrew (Homebrew first when it's missing), each once
 you say yes (`--yes` doesn't ask); and a pinned Bun (in `.runtime`) to run the setup with. Downloads are HTTPS, and the
-pinned ones are checked against the SHA-256 in the script before anything runs them. Without root
-and without access to Docker, it runs itself again with `sudo`, and a download cut short runs
+pinned ones are checked against the SHA-256 in the script before anything runs them. Without root,
+it runs itself again with `sudo` before anything else when it has no access to Docker, or for
+`--computer yes` on Linux (the agents' computer needs root there), and a download cut short runs
 nothing. To read it before it runs:
 
 ```sh
@@ -355,7 +356,7 @@ A failure names the check, what happened and the fix:
 | `port` | Another program uses the app's port, or 80 and 443 for a public domain | `HOST_PORT=3001` in `.env`, or stop that program. |
 | `app.config` | The app refused a value in `.env` | The values `error` names. |
 | `app.health`, `tailscale.timeout` | Something didn't answer in time (`--timeout`, 300 s by default) | `docker compose logs agentes`, or `tailscale`. |
-| `computer` | `--computer yes` on a machine that can't be the agents' computer: sign-up is open, a provisioner gives workspaces their computers, no root or no systemd on Linux, or it's already connected as a computer. Or one of the first two was turned on after a yes, and agentes.chat won't start with the token | What `fix` says, or `--computer no`. |
+| `computer` | `--computer yes` on a machine that can't be the agents' computer, said before Docker or any question: sign-up is open, a provisioner gives workspaces their computers, no root or no systemd on Linux, or it's already connected as a computer. Or one of the first two was turned on after a yes, and agentes.chat won't start with the token | What `fix` says, or `--computer no`. |
 | `computer.install`, `computer.off`, `computer.token` | The agents' computer didn't install or wasn't accepted (agentes.chat itself is up, and the result still has `url` and `appLink`) | What `fix` says, then the same command again. Its log shows its state: `journalctl -u agentes-runner` on Linux, `~/.agentes-runner/runner.log` on a Mac. On any computer you connected, `agentes-runner doctor` lists what it gives agents (connections, agent apps, toolchains, phones) and what needs you, and waits there until each is fixed. |
 
 </details>
@@ -1377,7 +1378,7 @@ address the app is published on (`BIND_ADDRESS` and `HOST_PORT`), and waits for 
 up again when agentes.chat brings a newer version. Answering no leaves `HOST_COMPUTER_TOKEN=` empty,
 so the setup doesn't ask again; `--computer yes` on a later run turns it on, and `--computer no`
 after a yes empties the token, removes `host-computer-token` and prints the command that removes the
-service. It's skipped, saying why, while sign-up is open (`ALLOW_SIGNUP=true`) or a provisioner gives
+service. It's skipped, saying why and what to do instead, while sign-up is open (`ALLOW_SIGNUP=true`) or a provisioner gives
 every workspace its computer (`MACHINE_PROVISIONING=external`), since the server won't start with the
 token then; on Linux without root or systemd; inside the image; and on a machine already connected as
 a computer, whose connection stays as it is.

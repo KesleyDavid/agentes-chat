@@ -13,6 +13,7 @@ import { createFakeHost, type FakeHost, type HereOptions, type Scenario } from "
 import { type AppLocale, createDesktopI18n } from "../src/i18n";
 import { ToastProvider } from "../src/ui/Toast";
 import { FirstRun } from "../src/windows/FirstRun";
+import { until } from "./until";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -79,10 +80,7 @@ function screenOf(el: HTMLElement, opened: string[], tailscale: string[], host: 
       expect({ name, found: !!target }).toEqual({ name, found: true });
       await act(async () => target?.click());
     },
-    until: async (ready: () => unknown) => {
-      for (let i = 0; i < 100 && !ready(); i++) await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
-      expect(Boolean(ready())).toBe(true);
-    },
+    until,
   };
 }
 

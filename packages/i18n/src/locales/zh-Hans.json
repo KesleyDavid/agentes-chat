@@ -1398,7 +1398,10 @@
       "why": "适用于 Ubuntu、Debian 及类似系统（x64）。Linux 不需要额外确认：",
       "apt": "双击 .deb 文件安装，或在终端中安装。",
       "aptLong": "双击下载的文件并点击“安装”，或把这段粘贴到终端中：",
-      "open": "从你的应用中打开 agentes.chat。"
+      "open": "从你的应用中打开 agentes.chat。",
+      "otherTitle": "使用 Arch、Fedora 或其他不支持 .deb 的系统？",
+      "otherText": "下载 AppImage：它可在任何发行版上运行，并会自动更新。然后在保存它的文件夹中，将以下内容粘贴到终端：",
+      "appImage": "下载 AppImage"
     },
     "page": {
       "docTitle": "下载应用 · agentes.chat",

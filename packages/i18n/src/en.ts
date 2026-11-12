@@ -1536,6 +1536,11 @@ export const en = {
       apt: "Install the .deb with a double-click, or from the terminal.",
       aptLong: "Double-click the downloaded file and click Install, or paste this in the terminal:",
       open: "Open agentes.chat from your apps.",
+      /** Under the steps: the AppImage, for a distribution without .deb packages. */
+      otherTitle: "On Arch, Fedora or another system that doesn't take a .deb?",
+      otherText:
+        "Download the AppImage: it runs on any distribution and updates itself. Then paste this in the terminal, in the folder you saved it to:",
+      appImage: "Download the AppImage",
     },
     page: {
       docTitle: "Download the app · agentes.chat",

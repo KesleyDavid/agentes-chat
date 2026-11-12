@@ -4563,6 +4563,8 @@ export interface DesktopRelease {
   minVersion?: string | null;
   /** Bytes, when the server knows it. */
   size?: number | null;
+  /** Linux only: the AppImage, for a distribution that takes no deb (it runs as it is and updates itself). */
+  appImage?: { url: string; sha256: string } | null;
 }
 
 /** A computer brain that runs on a connected machine. */

@@ -359,7 +359,8 @@ jobs:
           paths=()
           if [ "$SHARED" = true ] || [ "$MOBILE" = true ]; then paths+=(apps/mobile/test); fi
           if [ "$SHARED" = true ] || [ "$DESKTOP" = true ]; then paths+=(apps/desktop/test); fi
-          bun test "${paths[@]}" 2>&1 | tee -a test.log
+          # Shared runners render the apps' windows far slower than a laptop: the web new-event step's limit, not bun's 5 s.
+          bun test --timeout 20000 "${paths[@]}" 2>&1 | tee -a test.log
       - *keep-test-errors
       - name: Upload logs
         if: always()

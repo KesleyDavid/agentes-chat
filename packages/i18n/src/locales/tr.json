@@ -1437,7 +1437,10 @@
       "why": "Ubuntu, Debian ve benzeri sistemler için (x64). Linux fazladan bir şey sormaz:",
       "apt": ".deb dosyasını çift tıklayarak ya da terminalden kurun.",
       "aptLong": "İndirilen dosyaya çift tıklayıp Yükle'ye tıklayın ya da bunu terminale yapıştırın:",
-      "open": "agentes.chat'i uygulamalarınızdan açın."
+      "open": "agentes.chat'i uygulamalarınızdan açın.",
+      "otherTitle": "Arch, Fedora veya .deb kabul etmeyen başka bir sistem mi kullanıyorsunuz?",
+      "otherText": "AppImage'ı indirin: her dağıtımda çalışır ve kendini günceller. Ardından bunu, kaydettiğiniz klasörde terminale yapıştırın:",
+      "appImage": "AppImage'ı indir"
     },
     "page": {
       "docTitle": "Uygulamayı indirin · agentes.chat",

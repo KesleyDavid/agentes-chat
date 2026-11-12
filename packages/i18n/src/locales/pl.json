@@ -1518,7 +1518,10 @@
       "why": "Dla Ubuntu, Debiana i podobnych systemów (x64). Linux o nic więcej nie pyta:",
       "apt": "Zainstaluj plik .deb dwukrotnym kliknięciem albo z terminala.",
       "aptLong": "Kliknij dwukrotnie pobrany plik i kliknij Zainstaluj albo wklej to w terminalu:",
-      "open": "Otwórz agentes.chat z listy aplikacji."
+      "open": "Otwórz agentes.chat z listy aplikacji.",
+      "otherTitle": "Używasz Archa, Fedory lub innego systemu, który nie obsługuje .deb?",
+      "otherText": "Pobierz AppImage: działa w każdej dystrybucji i sam się aktualizuje. Potem wklej to w terminalu, w folderze, w którym go zapisano:",
+      "appImage": "Pobierz AppImage"
     },
     "page": {
       "docTitle": "Pobierz aplikację · agentes.chat",

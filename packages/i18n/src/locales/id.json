@@ -1398,7 +1398,10 @@
       "why": "Untuk Ubuntu, Debian, dan sistem serupa (x64). Linux tidak meminta apa pun tambahan:",
       "apt": "Pasang .deb dengan klik dua kali, atau dari terminal.",
       "aptLong": "Klik dua kali file yang diunduh lalu klik Pasang, atau tempel ini di terminal:",
-      "open": "Buka agentes.chat dari daftar aplikasimu."
+      "open": "Buka agentes.chat dari daftar aplikasimu.",
+      "otherTitle": "Pakai Arch, Fedora, atau sistem lain yang tidak menerima .deb?",
+      "otherText": "Unduh AppImage: berjalan di distribusi apa pun dan memperbarui dirinya sendiri. Lalu tempel ini di terminal, di folder tempat Anda menyimpannya:",
+      "appImage": "Unduh AppImage"
     },
     "page": {
       "docTitle": "Unduh aplikasinya · agentes.chat",

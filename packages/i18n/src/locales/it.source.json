@@ -3536,6 +3536,15 @@
   "install.linux.open": {
     "value": "Open agentes.chat from your apps."
   },
+  "install.linux.otherTitle": {
+    "value": "On Arch, Fedora or another system that doesn't take a .deb?"
+  },
+  "install.linux.otherText": {
+    "value": "Download the AppImage: it runs on any distribution and updates itself. Then paste this in the terminal, in the folder you saved it to:"
+  },
+  "install.linux.appImage": {
+    "value": "Download the AppImage"
+  },
   "install.page.docTitle": {
     "value": "Download the app · agentes.chat"
   },

@@ -26,13 +26,9 @@ import { createDesktopI18n } from "../src/i18n";
 import { ToastProvider } from "../src/ui/Toast";
 import { WindowView } from "../src/WindowView";
 import { General } from "../src/windows/prefs/General";
+import { until } from "./until";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-async function until(ready: () => unknown) {
-  for (let i = 0; i < 250 && !ready(); i++) await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
-  expect(Boolean(ready())).toBe(true);
-}
 
 async function mount(
   window: "prefs" | "welcome",

@@ -36,12 +36,16 @@ main() {
 
   # Refusals below go to stderr, drawn for stdout until the options say where the rest goes.
   t_init 1
-  PLAN=0 YES=0 DIR='' DIR_FLAG='' OUT=1
+  PLAN=0 YES=0 DIR='' DIR_FLAG='' OUT=1 COMPUTER='' prev=''
   n=$#
   while [ "$n" -gt 0 ]; do
     arg=$1
     shift
     n=$((n - 1))
+    # The setup's --computer, read here too: yes needs root on Linux (below). The last one given wins, as there.
+    case $prev in --computer) COMPUTER=$arg ;; esac
+    case $arg in --computer=*) COMPUTER=${arg#--computer=} ;; esac
+    prev=$arg
     case $arg in
       --plan | --dry-run) PLAN=1 ;;
       --yes | -y) YES=1 ;;
@@ -151,14 +155,21 @@ main() {
     trap 'rm -rf "$WORK"' EXIT
   fi
 
-  # Linux without root and without access to Docker runs this again as root before drawing
-  # anything, so the root run is the one that shows the logo. --plan runs nothing again: it draws first.
-  DOCKER_VERSION='' NEEDS_ROOT=0
+  # Linux without root runs this again as root before drawing anything, so the root run is the one that shows
+  # the logo: without access to Docker, and for --computer yes, whose users and service the setup makes as root
+  # only. --plan runs nothing again: it draws first.
+  DOCKER_VERSION='' ROOT_WHY='' ROOT_FIX=''
   if [ "$OS" = Linux ]; then
     if command -v docker >/dev/null 2>&1; then DOCKER_VERSION=$(docker_version) || DOCKER_VERSION=''; fi
-    if [ -z "$DOCKER_VERSION" ] && [ "$IS_ROOT" = 0 ]; then NEEDS_ROOT=1; fi
+    if [ "$IS_ROOT" = 0 ] && [ -z "$DOCKER_VERSION" ]; then
+      ROOT_WHY="Docker needs root here"
+      ROOT_FIX="Run this as root, or install Docker yourself ($DOCKER_DOCS) and add your user to the docker group."
+    elif [ "$IS_ROOT" = 0 ] && [ "$COMPUTER" = yes ]; then
+      ROOT_WHY="Making this machine your agents' computer (--computer yes) needs root"
+      ROOT_FIX="Run this as root, or leave out --computer yes and connect a computer later in Settings › Devices."
+    fi
   fi
-  if [ "$NEEDS_ROOT" = 1 ] && [ "$PLAN" = 0 ]; then as_root "$@"; fi
+  if [ -n "$ROOT_WHY" ] && [ "$PLAN" = 0 ]; then as_root "$@"; fi
 
   if [ "$PLAN" = 1 ]; then t_intro "install plan (--plan: nothing runs)"; else t_intro install; fi
   if [ "$IS_ROOT" = 1 ]; then t_step "$PLATFORM, as root"; else t_step "$PLATFORM"; fi
@@ -167,7 +178,7 @@ main() {
   else
     t_step "No terminal: the setup takes its defaults and the options given"
   fi
-  if [ "$NEEDS_ROOT" = 1 ]; then as_root "$@"; fi
+  if [ -n "$ROOT_WHY" ]; then as_root "$@"; fi
 
   if [ "$OS" = Linux ]; then
     linux_docker
@@ -236,7 +247,8 @@ Usage: curl -fsSL https://agentes.chat/install | sh -s -- [options] [setup optio
   -h, --help
 
 Every other option goes to the setup, like --network local or --email skip (the setup's own
---help lists them). The guide: $GUIDE
+--help lists them). On Linux, --computer yes (this machine as your agents' computer) needs root:
+without it, this runs itself again with sudo. The guide: $GUIDE
 
 AGENTES_INSTALL_SETUP=<file> runs that build of the setup instead of the published one."
 }
@@ -535,20 +547,20 @@ compose_version() {
   case $version in [0-9]*.[0-9]*) printf '%s' "$version" ;; esac
 }
 
-# Installing Docker needs root: the same install again, as root. Under curl | sh, $0 is the shell
-# and there is no file to run again, so it downloads the published installer.
+# Docker, or the agents' computer, needs root (ROOT_WHY, and ROOT_FIX without sudo): the same install again, as
+# root. Under curl | sh, $0 is the shell and there is no file to run again, so it downloads the published installer.
 as_root() {
-  command -v sudo >/dev/null 2>&1 ||
-    die "Docker needs root here, and this computer has no sudo." \
-      "Run this as root, or install Docker yourself ($DOCKER_DOCS) and add your user to the docker group."
+  command -v sudo >/dev/null 2>&1 || die "$ROOT_WHY, and this computer has no sudo." "$ROOT_FIX"
   script=$0
   if is_installer "$script"; then
-    t_info "Docker needs root here: running this installer again as root"
+    t_info "$ROOT_WHY: running this installer again as root"
   else
     script=$WORK/install.sh
-    t_info "Docker needs root here: downloading this installer to run it again as root"
+    t_info "$ROOT_WHY: downloading this installer to run it again as root"
     fetch "$INSTALL_URL" "$script" "Downloading this installer"
   fi
+  # An install this user has keeps its folder: as root, the default folder is another one.
+  if [ -z "$DIR_FLAG" ] && [ -f "${HOME:-}/agentes/.env" ]; then DIR_FLAG=$HOME/agentes; fi
   if [ -n "$DIR_FLAG" ]; then set -- --dir "$DIR_FLAG" "$@"; fi
   if [ "$YES" = 1 ]; then set -- --yes "$@"; fi
   t_shell "sudo sh $script $*"
