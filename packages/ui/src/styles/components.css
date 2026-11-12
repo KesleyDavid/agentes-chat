@@ -6921,8 +6921,19 @@ html:not([data-pointer]) .ac-react:focus-visible {
   min-height: var(--control-h-sm);
   padding: calc((var(--control-h-sm) - 22px) / 2) var(--space-2);
 }
+/* The placeholder is always one line (Composer drops its tip when the box is narrow): what's still too long ends in
+   "…" instead of wrapping into a second line that makes the empty box taller. */
 .ac-composer textarea::placeholder {
   color: var(--faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Chrome draws that "…" only when the field itself has it, on one line it doesn't wrap (empty, so nothing typed). */
+.ac-composer textarea:placeholder-shown {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 /* Context pills: a line of their own over the text's row. */
 .ac-composer__pills {

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { atRule, builtCss, declarations, topLevel } from "./built-css";
+import { builtCss, declarations, topLevel } from "./built-css";
 
-test("what ships gives the emoji popover one scroll, the menu's two lines one length, and a phone's placeholder its …", async () => {
+test("what ships gives the emoji popover one scroll, the menu's two lines one length, and the composer's placeholder one line ending in …", async () => {
   const css = await builtCss();
   const last = (sheet: string, selector: string, property: string) =>
     declarations(sheet, selector)
@@ -23,8 +23,9 @@ test("what ships gives the emoji popover one scroll, the menu's two lines one le
   expect(last(shipped, ".ac-menu__reactions", "border-bottom")).toBeUndefined();
   expect(last(shipped, ".ac-menu__reactions", "background")).toContain("calc(100% - 16px) 1px no-repeat");
 
-  // Chrome ends a textarea's placeholder in "…" only when the textarea has the ellipsis too.
-  const phone = atRule(css, "@media (max-width: 640px)");
-  expect(last(phone, ".ac-composer textarea::placeholder", "text-overflow")).toBe("ellipsis");
-  expect(last(phone, ".ac-composer textarea:placeholder-shown", "text-overflow")).toBe("ellipsis");
+  // At every width (a task's side panel is narrow too). Chrome ends a textarea's placeholder in "…" only when the
+  // textarea has the ellipsis too.
+  expect(last(shipped, ".ac-composer textarea::placeholder", "white-space")).toBe("nowrap");
+  expect(last(shipped, ".ac-composer textarea::placeholder", "text-overflow")).toBe("ellipsis");
+  expect(last(shipped, ".ac-composer textarea:placeholder-shown", "text-overflow")).toBe("ellipsis");
 });

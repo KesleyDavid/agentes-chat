@@ -25,7 +25,7 @@ main() {
 
   # The setup this installer hands over to, the Bun it runs on, and the Compose plugin it installs
   # when Docker has none (or one older than the 2.23.1 the compose file needs).
-  SETUP_VERSION=0.1.0
+  SETUP_VERSION=0.1.1
   BUN_VERSION=1.4.4
   COMPOSE_VERSION=5.5.1
   MIN_COMPOSE=2.23.1

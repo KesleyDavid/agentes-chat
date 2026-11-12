@@ -8674,7 +8674,6 @@
     "more": "Meer acties voor {{title}}",
     "open": "Thread openen",
     "read": "De thread lezen",
-    "details": "Details bekijken",
     "pick": "{{title}} selecteren",
     "pickShort": "Selecteren",
     "unpick": "Uit selectie halen",
@@ -8849,28 +8848,6 @@
       "blockedText_other": "{{names}} zitten niet in #{{channel}}. Context gaat alleen naar plekken waar iedereen die de thread leest, het al kon lezen.",
       "someone": "Iemand",
       "someAgent": "Een agent"
-    },
-    "panel": {
-      "label": "Details van {{title}}",
-      "close": "Details sluiten",
-      "archivedTitle": "Gearchiveerd · alleen lezen",
-      "archived": "Uit lijsten en zoekresultaten. Haal uit het archief om te antwoorden.",
-      "closedTitle": "Gesloten",
-      "closed": "In {{where}} is het één regel. Hij gaat vanzelf weer open als iemand antwoordt.",
-      "origin": "Herkomst",
-      "fromRange_one": "{{count}} bericht uit {{where}}",
-      "fromRange_other": "{{count}} berichten uit {{where}}",
-      "fromMessage": "Bericht van {{name}} in {{where}}",
-      "seeInChannel": "Bekijken in het kanaal",
-      "movedHint": "Uit het kanaal gehaald, met daar een melding",
-      "peopleTitle": "Deelnemers",
-      "people_one": "Deelnemers · {{count}}",
-      "people_other": "Deelnemers · {{count}}",
-      "agent": "agent",
-      "person": "persoon",
-      "created": "Gemaakt",
-      "createdBy": "{{when}} · door {{name}}",
-      "lives": "Staat in"
     }
   },
   "filters": {

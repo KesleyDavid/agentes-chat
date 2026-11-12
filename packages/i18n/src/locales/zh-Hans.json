@@ -8351,7 +8351,6 @@
     "more": "{{title}} 的更多操作",
     "open": "打开话题",
     "read": "阅读话题",
-    "details": "查看详情",
     "pick": "选择 {{title}}",
     "pickShort": "选择",
     "unpick": "取消选择",
@@ -8505,26 +8504,6 @@
       "blockedText_other": "{{names}} 不在 #{{channel}} 中。上下文只能放在所有阅读话题的人本来就能看到的地方。",
       "someone": "某人",
       "someAgent": "一个智能体"
-    },
-    "panel": {
-      "label": "{{title}} 的详情",
-      "close": "关闭详情",
-      "archivedTitle": "已归档 · 只读",
-      "archived": "不在列表和搜索中显示。取消归档后才能回复。",
-      "closedTitle": "已关闭",
-      "closed": "在{{where}}中显示为一行。有人回复时会自动重新打开。",
-      "origin": "来源",
-      "fromRange_other": "来自{{where}}的 {{count}} 条消息",
-      "fromMessage": "{{name}} 在{{where}}中的消息",
-      "seeInChannel": "在频道中查看",
-      "movedHint": "已移出频道，并在那里留下了提示",
-      "peopleTitle": "参与者",
-      "people_other": "参与者 · {{count}}",
-      "agent": "智能体",
-      "person": "成员",
-      "created": "创建时间",
-      "createdBy": "{{when}} · 由 {{name}} 创建",
-      "lives": "所在位置"
     }
   },
   "filters": {

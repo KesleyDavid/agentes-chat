@@ -20936,9 +20936,6 @@
   "threads.read": {
     "value": "Read the thread"
   },
-  "threads.details": {
-    "value": "See details"
-  },
   "threads.pick": {
     "value": "Select {{title}}"
   },
@@ -21373,66 +21370,6 @@
   },
   "threads.adjust.someAgent": {
     "value": "An agent"
-  },
-  "threads.panel.label": {
-    "value": "Details of {{title}}"
-  },
-  "threads.panel.close": {
-    "value": "Close details"
-  },
-  "threads.panel.archivedTitle": {
-    "value": "Archived · read only"
-  },
-  "threads.panel.archived": {
-    "value": "Out of lists and search. Unarchive to reply."
-  },
-  "threads.panel.closedTitle": {
-    "value": "Closed"
-  },
-  "threads.panel.closed": {
-    "value": "In {{where}} it is one line. It reopens by itself when someone replies."
-  },
-  "threads.panel.origin": {
-    "value": "Origin"
-  },
-  "threads.panel.fromRange": {
-    "value": {
-      "one": "{{count}} message from {{where}}",
-      "other": "{{count}} messages from {{where}}"
-    }
-  },
-  "threads.panel.fromMessage": {
-    "value": "Message from {{name}} in {{where}}"
-  },
-  "threads.panel.seeInChannel": {
-    "value": "See in the channel"
-  },
-  "threads.panel.movedHint": {
-    "value": "Taken out of the channel, with a notice left there"
-  },
-  "threads.panel.peopleTitle": {
-    "value": "Participants"
-  },
-  "threads.panel.people": {
-    "value": {
-      "one": "Participants · {{count}}",
-      "other": "Participants · {{count}}"
-    }
-  },
-  "threads.panel.agent": {
-    "value": "agent"
-  },
-  "threads.panel.person": {
-    "value": "person"
-  },
-  "threads.panel.created": {
-    "value": "Created"
-  },
-  "threads.panel.createdBy": {
-    "value": "{{when}} · by {{name}}"
-  },
-  "threads.panel.lives": {
-    "value": "Lives in"
   },
   "filters.clear": {
     "value": "Clear {{name}}"

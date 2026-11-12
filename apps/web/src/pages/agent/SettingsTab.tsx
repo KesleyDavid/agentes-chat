@@ -312,7 +312,6 @@ export function SettingsTab({
                     <div className="agp-field">
                       <Field label={t("agentPage.fields.group")} id="agp-group">
                         <Select
-                          className="newag__sel"
                           value={draft.group}
                           onValueChange={(v) => set("group", v)}
                           options={[

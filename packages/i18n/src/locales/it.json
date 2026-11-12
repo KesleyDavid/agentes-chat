@@ -8941,7 +8941,6 @@
     "more": "Altre azioni per {{title}}",
     "open": "Apri thread",
     "read": "Leggi il thread",
-    "details": "Vedi dettagli",
     "pick": "Seleziona {{title}}",
     "pickShort": "Seleziona",
     "unpick": "Togli dalla selezione",
@@ -9137,30 +9136,6 @@
       "blockedText_other": "{{names}} non sono in #{{channel}}. Il contesto va solo dove tutti quelli che leggono il thread potevano già leggere.",
       "someone": "Qualcuno",
       "someAgent": "Un agente"
-    },
-    "panel": {
-      "label": "Dettagli di {{title}}",
-      "close": "Chiudi dettagli",
-      "archivedTitle": "Archiviato · sola lettura",
-      "archived": "Fuori da elenchi e ricerca. Ripristinalo per rispondere.",
-      "closedTitle": "Chiuso",
-      "closed": "In {{where}} è una sola riga. Si riapre da solo quando qualcuno risponde.",
-      "origin": "Origine",
-      "fromRange_one": "{{count}} messaggio da {{where}}",
-      "fromRange_many": "{{count}} messaggi da {{where}}",
-      "fromRange_other": "{{count}} messaggi da {{where}}",
-      "fromMessage": "Messaggio di {{name}} in {{where}}",
-      "seeInChannel": "Vedi nel canale",
-      "movedHint": "Tolto dal canale, con un avviso lasciato lì",
-      "peopleTitle": "Partecipanti",
-      "people_one": "Partecipanti · {{count}}",
-      "people_many": "Partecipanti · {{count}}",
-      "people_other": "Partecipanti · {{count}}",
-      "agent": "agente",
-      "person": "persona",
-      "created": "Creato",
-      "createdBy": "{{when}} · da {{name}}",
-      "lives": "Si trova in"
     }
   },
   "filters": {

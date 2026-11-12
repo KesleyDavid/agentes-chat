@@ -8925,7 +8925,6 @@
     "more": "Plus d'actions pour {{title}}",
     "open": "Ouvrir le fil",
     "read": "Lire le fil",
-    "details": "Voir les détails",
     "pick": "Sélectionner {{title}}",
     "pickShort": "Sélectionner",
     "unpick": "Retirer de la sélection",
@@ -9121,30 +9120,6 @@
       "blockedText_other": "{{names}} ne sont pas dans #{{channel}}. Le contexte ne va que là où tous ceux qui lisent le fil pouvaient déjà lire.",
       "someone": "Quelqu'un",
       "someAgent": "Un agent"
-    },
-    "panel": {
-      "label": "Détails de {{title}}",
-      "close": "Fermer les détails",
-      "archivedTitle": "Archivé · lecture seule",
-      "archived": "Hors des listes et de la recherche. Désarchivez pour répondre.",
-      "closedTitle": "Fermé",
-      "closed": "Dans {{where}}, c'est une ligne. Il se rouvre tout seul quand quelqu'un répond.",
-      "origin": "Origine",
-      "fromRange_one": "{{count}} message de {{where}}",
-      "fromRange_many": "{{count}} messages de {{where}}",
-      "fromRange_other": "{{count}} messages de {{where}}",
-      "fromMessage": "Message de {{name}} dans {{where}}",
-      "seeInChannel": "Voir dans le canal",
-      "movedHint": "Sorti du canal, avec un avis laissé sur place",
-      "peopleTitle": "Participants",
-      "people_one": "Participants · {{count}}",
-      "people_many": "Participants · {{count}}",
-      "people_other": "Participants · {{count}}",
-      "agent": "agent",
-      "person": "personne",
-      "created": "Créé",
-      "createdBy": "{{when}} · par {{name}}",
-      "lives": "Se trouve dans"
     }
   },
   "filters": {

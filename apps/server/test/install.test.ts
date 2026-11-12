@@ -372,10 +372,10 @@ describe("install.sh", () => {
     expect(run.out).toContain("◇  Docker 26.1.5\n◇  Compose 2.26.1\n");
     expect(run.out).not.toContain("$ ");
     expect(run.out).toEndWith(
-      `\n◇  The setup, in ${dir}:\n     ${run.bin}/bun x --bun @agenteschat/setup@0.1.0 --network local\n\n`,
+      `\n◇  The setup, in ${dir}:\n     ${run.bin}/bun x --bun @agenteschat/setup@0.1.1 --network local\n\n`,
     );
     // The setup draws in the installer's frame: no logo or badge of its own.
-    expect(run.calls).toContain("bun x --bun @agenteschat/setup@0.1.0 --network local");
+    expect(run.calls).toContain("bun x --bun @agenteschat/setup@0.1.1 --network local");
     expect(run.calls).toContain("frame 1 stdin none");
   });
 
@@ -385,7 +385,7 @@ describe("install.sh", () => {
     const run = await plan(machine, ["--dir", dir], { real: true, tty: true });
     expect(run.code).toBe(0);
     expect(plain(run.out)).toContain(
-      `◇  The setup, in ${dir}:\n│    ${run.bin}/bun x --bun @agenteschat/setup@0.1.0\n│\n`,
+      `◇  The setup, in ${dir}:\n│    ${run.bin}/bun x --bun @agenteschat/setup@0.1.1\n│\n`,
     );
     expect(run.calls.find((call) => call.startsWith("frame "))).toMatch(/^frame 1 stdin \/dev\/(pts\/\d+|ttys\d+)$/);
   });
@@ -432,7 +432,7 @@ describe("install.sh", () => {
     expect(run.out).toContain("$ mv <tmp>/bun-linux-x64-baseline/bun /opt/agentes/.runtime/bun");
     expect(run.out).toContain("$ cd /opt/agentes");
     expect(run.out).toContain(
-      "$ /opt/agentes/.runtime/bun x --bun @agenteschat/setup@0.1.0 --network local </dev/null",
+      "$ /opt/agentes/.runtime/bun x --bun @agenteschat/setup@0.1.1 --network local </dev/null",
     );
     expect(run.changes).toEqual([]);
   });
@@ -532,7 +532,7 @@ describe("install.sh", () => {
     ]) {
       expect(run.code).toBe(0);
       expect(run.out).not.toContain("sudo");
-      expect(run.out).toContain("@agenteschat/setup@0.1.0 --computer ");
+      expect(run.out).toContain("@agenteschat/setup@0.1.1 --computer ");
     }
   });
 
@@ -551,7 +551,7 @@ describe("install.sh", () => {
     expect(run.out).toContain("◇  Docker 28.5.1");
     expect(run.out).toContain(`◇  Bun 1.4.4 (${run.bin}/bun)`);
     expect(run.out).toContain(`$ cd ${run.home}/agentes`);
-    expect(run.out).toContain(`$ ${run.bin}/bun x --bun @agenteschat/setup@0.1.0 --network local </dev/null`);
+    expect(run.out).toContain(`$ ${run.bin}/bun x --bun @agenteschat/setup@0.1.1 --network local </dev/null`);
     expect(run.out).not.toContain("--native");
     expect(run.out).not.toContain("Compose");
     expect(run.changes).toEqual([]);
@@ -631,7 +631,7 @@ describe("install.sh", () => {
     ];
     for (const run of runs) {
       const line = `${run.out}${run.err}`.split("\n").find((l) => l.includes("@agenteschat/setup@"));
-      const args = line?.split("@agenteschat/setup@0.1.0")[1]?.replace("</dev/null", "").trim().split(" ");
+      const args = line?.split("@agenteschat/setup@0.1.1")[1]?.replace("</dev/null", "").trim().split(" ");
       expect(args).toBeDefined();
       expect(parseOptions((args ?? []).filter(Boolean), {})).not.toHaveProperty("error");
     }
@@ -671,7 +671,7 @@ describe("install.sh", () => {
       piped: text,
     });
     expect(piped.code).toBe(0);
-    expect(piped.out).toContain("@agenteschat/setup@0.1.0 --email skip </dev/null");
+    expect(piped.out).toContain("@agenteschat/setup@0.1.1 --email skip </dev/null");
   });
 
   test("a local build of the setup, and --json output kept off stdout", async () => {

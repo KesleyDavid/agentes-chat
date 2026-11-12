@@ -19,28 +19,32 @@ const box = () => (
   />
 );
 
+/** A box `width` px wide, its text 8px a character. */
+function sized(width: number) {
+  const pen = spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+    () => ({ font: "", measureText: (text: string) => ({ width: text.length * 8 }) }) as never,
+  );
+  const was = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
+  Object.defineProperty(HTMLElement.prototype, "clientWidth", { configurable: true, get: () => width });
+  return () => {
+    pen.mockRestore();
+    if (was) Object.defineProperty(HTMLElement.prototype, "clientWidth", was);
+  };
+}
+
 describe("the composer's placeholder", () => {
-  test("whole on a computer; on a phone, what goes there without the tip after its ·", () => {
-    const narrow = (phone: boolean) =>
-      spyOn(window, "matchMedia").mockImplementation(
-        (query: string) =>
-          ({
-            matches: phone && query === "(max-width: 640px)",
-            media: query,
-            addEventListener() {},
-            removeEventListener() {},
-          }) as unknown as MediaQueryList,
-      );
-    const wide = narrow(false);
+  test("whole when it fits on one line; in a narrow box (a phone, a task's panel), without the tip after its ·", () => {
+    // 50 characters: 400px of text.
+    const wide = sized(600);
     render(box());
     expect(screen.getByRole("textbox").getAttribute("placeholder")).toBe(
       "Mensagem para #geral · use @ para chamar um agente",
     );
     cleanup();
-    wide.mockRestore();
-    const phone = narrow(true);
+    wide();
+    const narrow = sized(300);
     render(box());
     expect(screen.getByRole("textbox").getAttribute("placeholder")).toBe("Mensagem para #geral");
-    phone.mockRestore();
+    narrow();
   });
 });

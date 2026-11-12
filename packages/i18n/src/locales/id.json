@@ -8355,7 +8355,6 @@
     "more": "Tindakan lain untuk {{title}}",
     "open": "Buka utas",
     "read": "Baca utasnya",
-    "details": "Lihat detail",
     "pick": "Pilih {{title}}",
     "pickShort": "Pilih",
     "unpick": "Hapus dari pilihan",
@@ -8509,26 +8508,6 @@
       "blockedText_other": "{{names}} tidak ada di #{{channel}}. Konteks hanya bisa dipindah ke tempat yang semua pembaca utasnya sudah bisa membacanya.",
       "someone": "Seseorang",
       "someAgent": "Sebuah agen"
-    },
-    "panel": {
-      "label": "Detail {{title}}",
-      "close": "Tutup detail",
-      "archivedTitle": "Diarsipkan · hanya baca",
-      "archived": "Keluar dari daftar dan pencarian. Batalkan arsip untuk membalas.",
-      "closedTitle": "Ditutup",
-      "closed": "Di {{where}} utas ini tampil sebagai satu baris. Utas ini terbuka lagi dengan sendirinya saat seseorang membalas.",
-      "origin": "Asal",
-      "fromRange_other": "{{count}} pesan dari {{where}}",
-      "fromMessage": "Pesan dari {{name}} di {{where}}",
-      "seeInChannel": "Lihat di kanal",
-      "movedHint": "Dikeluarkan dari kanal, dengan pemberitahuan yang ditinggalkan di sana",
-      "peopleTitle": "Peserta",
-      "people_other": "Peserta · {{count}}",
-      "agent": "agen",
-      "person": "orang",
-      "created": "Dibuat",
-      "createdBy": "{{when}} · oleh {{name}}",
-      "lives": "Berada di"
     }
   },
   "filters": {

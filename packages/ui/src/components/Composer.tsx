@@ -24,7 +24,6 @@ import {
   insertText,
   type TextEdit,
 } from "../format";
-import { useMatchMedia } from "../hooks/useMatchMedia";
 import { Icon, type IconName } from "../icons/Icon";
 import { selectionRect } from "../selection-rect";
 import { Button } from "./Button";
@@ -434,6 +433,40 @@ export function mentionQuery(text: string, caret: number): { start: number; quer
 }
 
 /**
+ * The placeholder on one line, whatever the box's width (a phone, a task's side panel): the tip after its " · " goes
+ * when all of it doesn't fit, and what's left ends in "…" (CSS) if even that doesn't. Measured, not guessed from the
+ * window, because a focused field never ends it in "…" (the browser drops the ellipsis while editing).
+ */
+function useOneLinePlaceholder(ref: RefObject<HTMLTextAreaElement | null>, placeholder: string | undefined) {
+  const [fits, setFits] = useState(true);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || !placeholder?.includes(" · ")) return;
+    const pen = document.createElement("canvas").getContext("2d");
+    if (!pen) return;
+    let live = true;
+    const measure = () => {
+      // Hidden (a closed panel): it keeps the last answer.
+      if (!live || !el.clientWidth) return;
+      const s = getComputedStyle(el);
+      pen.font = `${s.fontStyle} ${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
+      const room = el.clientWidth - Number.parseFloat(s.paddingLeft) - Number.parseFloat(s.paddingRight);
+      setFits(pen.measureText(placeholder).width + 2 <= room);
+    };
+    measure();
+    // The web font may land after the first measure, a little wider than the fallback.
+    void document.fonts?.ready.then(measure);
+    const watch = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    watch?.observe(el);
+    return () => {
+      live = false;
+      watch?.disconnect();
+    };
+  }, [ref, placeholder]);
+  return fits ? placeholder : placeholder?.split(" · ")[0];
+}
+
+/**
  * The chat message box, one row: attach and emoji, the text, the microphone and send (primary, icon only). The row
  * grows with the text, its buttons staying at the bottom. Formatting floats over selected text. Focus on the whole box.
  */
@@ -473,11 +506,8 @@ export function Composer({
 }: ComposerProps) {
   const locked = useLocked();
   const disabled = off || locked;
-  // On a phone a long placeholder doesn't fit, and a focused field never ends it in "…" (the browser drops the ellipsis
-  // while editing): it says what goes there, without the tip after its " · ".
-  const phone = useMatchMedia("(max-width: 640px)");
-  const shownPlaceholder = phone ? placeholder?.split(" · ")[0] : placeholder;
   const ref = useRef<HTMLTextAreaElement>(null);
+  const shownPlaceholder = useOneLinePlaceholder(ref, placeholder);
   const wave = useRef<HTMLCanvasElement>(null);
   const rec = useVoiceRecorder(voice, wave);
   const recording = rec.active;

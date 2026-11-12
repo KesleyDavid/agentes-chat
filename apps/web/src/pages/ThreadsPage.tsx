@@ -1,16 +1,14 @@
 import type { ThreadActor, ThreadInfo } from "@agenteschat/client";
 import { useChannels, useMissionList, useThreadList } from "@agenteschat/client";
-import { formatFullDate, relativeTime } from "@agenteschat/client/lib/format";
+import { relativeTime } from "@agenteschat/client/lib/format";
 import { previewBody } from "@agenteschat/client/lib/message-body";
 import { can } from "@agenteschat/client/lib/permissions";
-import { threadMessageCount, threadStatus, threadTitle } from "@agenteschat/client/lib/threads";
+import { threadStatus, threadTitle } from "@agenteschat/client/lib/threads";
 import {
   AvatarStack,
   Button,
   Checkbox,
   cx,
-  DetailsDialog,
-  DetailsSection,
   EmptyState,
   FilterBar,
   FilterChip,
@@ -37,9 +35,12 @@ import { NewMissionDialog } from "@/components/missions/MissionDialogs";
 import { MissionsTab } from "@/components/missions/MissionList";
 import { useOrg } from "@/components/org-context";
 import { SelectionBar } from "@/components/SelectionBar";
+import { SidePanel } from "@/components/SidePanel";
 import { ThreadStatusChip, useThreadControls } from "@/components/threads/ThreadBits";
 import { useRightHandLook } from "@/hooks/useRightHandLook";
 import { useOpenParam } from "@/lib/open-param";
+import { useToast } from "@/lib/toast";
+import { ThreadPage } from "./ThreadPage";
 import { THREAD_TABS, type ThreadsTab } from "./thread-tabs";
 import "./threads.css";
 
@@ -47,7 +48,7 @@ import "./threads.css";
  * Threads: the subjects that left the channels and DMs. Tabs, search
  * and filters, rows grouped by channel (DMs together) with the tag, people
  * and time in fixed columns, hover actions, ⋯, multi-select with the
- * floating bar, and the details panel. No unread counts (reads are per
+ * floating bar, and the thread itself in the panel beside the list. No unread counts (reads are per
  * channel) and no counts on the tabs (the API doesn't give them).
  */
 
@@ -68,7 +69,7 @@ export function ThreadsPage({ initialTab, initialChannel }: { initialTab?: Threa
   const [agent, setAgent] = useState<string[]>([]);
   const [needsYou, setNeedsYou] = useState(false);
   const [mine, setMine] = useState(false);
-  // The thread whose details are open, in the URL (`?open=…`).
+  // The thread open in the panel beside the list, in the URL (`?open=…`).
   const [openId, setOpenId] = useOpenParam();
   const [picked, setPicked] = useState<Set<string>>(() => new Set());
   const [newMission, setNewMission] = useState(false);
@@ -100,7 +101,7 @@ export function ThreadsPage({ initialTab, initialChannel }: { initialTab?: Threa
   const missionCounts = useMissionList(org.id, { status: "open", limit: 1 }).data?.counts;
   const threads = useMemo(() => list.data?.pages.flatMap((p) => p.threads) ?? [], [list.data]);
   const controls = useThreadControls();
-  const open = threads.find((x) => x.id === openId) ?? null;
+  const toast = useToast();
   const selected = threads.filter((x) => picked.has(x.id));
   const filtered = Boolean(channel.length || agent.length || needsYou || mine || query);
   const clearFilters = () => {
@@ -362,13 +363,19 @@ export function ThreadsPage({ initialTab, initialChannel }: { initialTab?: Threa
           </SelectionBar>
         )}
       </div>
-      {open && (
-        <ThreadDetails
-          thread={open}
-          onClose={() => setOpenId(null)}
-          onGo={() => go(open)}
-          onAction={(action) => controls.request([open], action)}
-        />
+      {openId && (
+        // The thread itself, as a channel opens one beside its conversation: no details to go through first.
+        <SidePanel label={t("threads.side.label")} onClose={() => setOpenId(null)}>
+          <ThreadPage
+            key={openId}
+            threadId={openId}
+            onClose={() => setOpenId(null)}
+            onGone={() => {
+              setOpenId(null);
+              toast.show(t("threads.view.notFoundTitle"));
+            }}
+          />
+        </SidePanel>
       )}
       {controls.dialog}
       {newMission && (
@@ -441,7 +448,7 @@ function ThreadRow({
       </button>
     ) : null;
   return (
-    // biome-ignore lint/a11y: a mouse shortcut to the details; the title button is the keyboard way
+    // biome-ignore lint/a11y: a mouse shortcut to the thread; the title button is the keyboard way
     <article
       className={cx("thread-row", open && "is-open", picked && "is-picked")}
       aria-label={title}
@@ -464,7 +471,7 @@ function ThreadRow({
         />
       </span>
       <div className="thread-row__title">
-        <button type="button" className="thread-row__name" aria-haspopup="dialog" onClick={onOpen}>
+        <button type="button" className="thread-row__name" onClick={onOpen}>
           {title}
         </button>
         {thread.mission ? (
@@ -517,9 +524,6 @@ function ThreadRow({
             <MenuItem icon="external" onSelect={onGo}>
               {thread.state === "archived" ? t("threads.read") : t("threads.open")}
             </MenuItem>
-            <MenuItem icon="layers" onSelect={onOpen}>
-              {t("threads.details")}
-            </MenuItem>
             {quickActions(thread).length > 0 && <MenuSeparator />}
             {quickActions(thread).map((a) => (
               <MenuItem
@@ -567,136 +571,6 @@ function byPlace(threads: ThreadInfo[]) {
 }
 
 const lastActor = (a: ThreadActor) => ({ type: a.type, id: a.id ?? "" });
-
-/** The details (the shared details dialog; full screen on a phone): state, actions, origin, participants, facts. */
-function ThreadDetails({
-  thread,
-  onClose,
-  onGo,
-  onAction,
-}: {
-  thread: ThreadInfo;
-  onClose: () => void;
-  onGo: () => void;
-  onAction: (action: RowAction) => void;
-}) {
-  const { t, i18n } = useTranslation();
-  const { org } = useOrg();
-  const navigate = useNavigate();
-  const actors = useActors();
-  const title = threadTitle(thread);
-  const people = actorsOf(thread);
-  const where = thread.channelKind === "dm" ? t("threads.dm") : `#${thread.channelName}`;
-  const ctx = thread.context;
-  const creator = thread.createdBy
-    ? actors.name({ type: "person", id: thread.createdBy })
-    : actors.name(lastActor(thread.rootAuthor));
-  const toChannel = () =>
-    void navigate({
-      to: "/org/$orgId/c/$channelId",
-      params: { orgId: org.id, channelId: ctx?.channelId ?? thread.channelId },
-      search: { m: ctx && !ctx.moved ? ctx.firstMessageId : thread.id },
-    });
-  return (
-    <DetailsDialog
-      open
-      onOpenChange={(o) => !o && onClose()}
-      closeLabel={t("threads.panel.close")}
-      className="thread-details"
-      eyebrow={
-        thread.mission && thread.state === "open" ? (
-          <MissionStatusChip
-            status={missionSummaryStatusKey(thread.mission, thread.working)}
-            agentId={thread.mission.agentId}
-          />
-        ) : (
-          <ThreadStatusChip thread={thread} />
-        )
-      }
-      title={title}
-      subtitle={
-        <>
-          <span>{where}</span>
-          <span aria-hidden="true">·</span>
-          <span>{t("threads.messages", { count: threadMessageCount(thread) })}</span>
-          <span aria-hidden="true">·</span>
-          <span>{relativeTime(t, i18n.language, thread.lastActivityAt)}</span>
-        </>
-      }
-      page={{ label: thread.state === "archived" ? t("threads.read") : t("threads.open"), onOpen: onGo }}
-    >
-      {thread.state === "archived" && (
-        <div className="thread-banner ac-iconline">
-          <Icon name="lock" size={16} />
-          <div>
-            <b>{t("threads.panel.archivedTitle")}</b>
-            <small>{t("threads.panel.archived")}</small>
-          </div>
-        </div>
-      )}
-      {thread.state === "closed" && (
-        <div className="thread-banner ac-iconline">
-          <Icon name="refresh" size={16} />
-          <div>
-            <b>{t("threads.panel.closedTitle")}</b>
-            <small>{t("threads.panel.closed", { where })}</small>
-          </div>
-        </div>
-      )}
-      <div className="thread-details__actions">
-        <Button size="sm" variant={thread.state === "archived" ? "default" : "primary"} icon="external" onClick={onGo}>
-          {thread.state === "archived" ? t("threads.read") : t("threads.open")}
-        </Button>
-        {quickActions(thread)
-          .slice(0, 1)
-          .map((a) => (
-            <Button key={a} size="sm" icon={ACTION_ICON[a]} onClick={() => onAction(a)}>
-              {t(`threads.actions.${a}`)}
-            </Button>
-          ))}
-      </div>
-      <DetailsSection title={t("threads.panel.origin")}>
-        <button type="button" className="thread-where" onClick={toChannel}>
-          <span className="thread-where__icon" aria-hidden="true">
-            <Icon name={ctx ? "layers" : "message"} size={14} />
-          </span>
-          <span className="thread-where__text">
-            <b>
-              {ctx
-                ? t("threads.panel.fromRange", { count: ctx.count, where })
-                : t("threads.panel.fromMessage", { name: actors.name(lastActor(thread.rootAuthor)), where })}
-            </b>
-            <small>{ctx?.moved ? t("threads.panel.movedHint") : t("threads.panel.seeInChannel")}</small>
-          </span>
-          <Icon name="chevronRight" size={16} />
-        </button>
-      </DetailsSection>
-      <DetailsSection title={t("threads.panel.peopleTitle")} count={people.length}>
-        <ul className="thread-people">
-          {people.map((p) => (
-            <li key={`${p.type}:${p.id}`}>
-              <ActorAvatar actor={p} name={actors.name(p)} size="sm" />
-              <span>
-                {actors.name(p)}
-                <small> · {p.type === "agent" ? t("threads.panel.agent") : t("threads.panel.person")}</small>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </DetailsSection>
-      <DetailsSection>
-        <dl className="thread-facts">
-          <dt>{t("threads.panel.created")}</dt>
-          <dd>
-            {t("threads.panel.createdBy", { when: formatFullDate(i18n.language, thread.createdAt), name: creator })}
-          </dd>
-          <dt>{t("threads.panel.lives")}</dt>
-          <dd>{where}</dd>
-        </dl>
-      </DetailsSection>
-    </DetailsDialog>
-  );
-}
 
 function ThreadsEmpty({
   tab,

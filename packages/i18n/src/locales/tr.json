@@ -8573,7 +8573,6 @@
     "more": "{{title}} için diğer eylemler",
     "open": "İleti dizisini aç",
     "read": "İleti dizisini oku",
-    "details": "Ayrıntıları gör",
     "pick": "{{title}} seç",
     "pickShort": "Seç",
     "unpick": "Seçimden çıkar",
@@ -8748,28 +8747,6 @@
       "blockedText_other": "{{names}} #{{channel}} kanalında değil. Bağlam yalnızca ileti dizisini okuyan herkesin zaten okuyabildiği yere gider.",
       "someone": "Biri",
       "someAgent": "Bir ajan"
-    },
-    "panel": {
-      "label": "{{title}} ayrıntıları",
-      "close": "Ayrıntıları kapat",
-      "archivedTitle": "Arşivlendi · salt okunur",
-      "archived": "Listelerin ve aramanın dışında. Yanıtlamak için arşivden çıkarın.",
-      "closedTitle": "Kapalı",
-      "closed": "{{where}} içinde tek satır olarak görünür. Biri yanıtladığında kendiliğinden yeniden açılır.",
-      "origin": "Kaynak",
-      "fromRange_one": "{{where}} içinden {{count}} mesaj",
-      "fromRange_other": "{{where}} içinden {{count}} mesaj",
-      "fromMessage": "{{where}} içinde {{name}} kişisinden mesaj",
-      "seeInChannel": "Kanalda gör",
-      "movedHint": "Kanaldan çıkarıldı, orada bir uyarı bırakıldı",
-      "peopleTitle": "Katılımcılar",
-      "people_one": "Katılımcılar · {{count}}",
-      "people_other": "Katılımcılar · {{count}}",
-      "agent": "ajan",
-      "person": "kişi",
-      "created": "Oluşturuldu",
-      "createdBy": "{{when}} · {{name}} tarafından",
-      "lives": "Bulunduğu yer"
     }
   },
   "filters": {

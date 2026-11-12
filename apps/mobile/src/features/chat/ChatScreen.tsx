@@ -1641,7 +1641,8 @@ function Chat({
 
   const placeholder = isThread
     ? rootTask
-      ? t("issues.commentPlaceholder")
+      ? // One line on the phone: the tip after "·" in the web's placeholder doesn't fit.
+        t("issues.comment")
       : t("mobile.chat.reply")
     : dm
       ? // One line on the phone: the right hand's "nada muda sem você" doesn't fit beside its name.

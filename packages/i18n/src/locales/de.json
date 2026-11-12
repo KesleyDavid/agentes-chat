@@ -8628,7 +8628,6 @@
     "more": "Weitere Aktionen für {{title}}",
     "open": "Thread öffnen",
     "read": "Thread lesen",
-    "details": "Details ansehen",
     "pick": "{{title}} auswählen",
     "pickShort": "Auswählen",
     "unpick": "Aus der Auswahl entfernen",
@@ -8803,28 +8802,6 @@
       "blockedText_other": "{{names}} sind nicht in #{{channel}}. Kontext geht nur dorthin, wo alle, die den Thread lesen, ihn schon lesen konnten.",
       "someone": "Jemand",
       "someAgent": "Ein Agent"
-    },
-    "panel": {
-      "label": "Details zu {{title}}",
-      "close": "Details schließen",
-      "archivedTitle": "Archiviert · nur lesen",
-      "archived": "Nicht mehr in Listen und Suche. Hol ihn aus dem Archiv, um zu antworten.",
-      "closedTitle": "Geschlossen",
-      "closed": "In {{where}} ist er eine Zeile. Er öffnet sich von selbst wieder, wenn jemand antwortet.",
-      "origin": "Herkunft",
-      "fromRange_one": "{{count}} Nachricht aus {{where}}",
-      "fromRange_other": "{{count}} Nachrichten aus {{where}}",
-      "fromMessage": "Nachricht von {{name}} in {{where}}",
-      "seeInChannel": "Im Kanal ansehen",
-      "movedHint": "Aus dem Kanal herausgelöst, dort blieb ein Hinweis",
-      "peopleTitle": "Beteiligte",
-      "people_one": "Beteiligte · {{count}}",
-      "people_other": "Beteiligte · {{count}}",
-      "agent": "Agent",
-      "person": "Person",
-      "created": "Erstellt",
-      "createdBy": "{{when}} · von {{name}}",
-      "lives": "Liegt in"
     }
   },
   "filters": {

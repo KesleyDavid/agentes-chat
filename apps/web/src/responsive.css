@@ -283,20 +283,6 @@
     padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
   }
 }
-/* Phones: a long composer placeholder ends in "…" instead of wrapping into a half-hidden second line. */
-@media (max-width: 640px) {
-  .ac-composer textarea::placeholder {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  /* Chrome draws that "…" only when the field itself has it, on one line it doesn't wrap (empty, so nothing typed). */
-  .ac-composer textarea:placeholder-shown {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
 /* Agent page: one column below the desktop (the public card's cards; the overview is one column already). */
 @media (max-width: 1100px) {
   .agp-cols {
