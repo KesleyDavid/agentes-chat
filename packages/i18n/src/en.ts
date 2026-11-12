@@ -1847,7 +1847,7 @@ export const en = {
     drive: "Drive",
     members: "Members",
     channels: "Channels",
-    /** The channels' section in a personal workspace's sidebar (ADR 0159): only once there is one to show. */
+    /** The channels' section in a personal workspace's sidebar (ADR 0159). */
     channelsPersonal: "Group conversations",
     agents: "Agents",
     directMessages: "Direct messages",

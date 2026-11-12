@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
 import { earlyAccessRequests, socialRefusalText, socialReturnText } from "@/features/auth/human-check";
-import { authClient } from "@/lib/auth";
+import { authClient, signInWithBrowser } from "@/lib/auth";
 import { writeValue } from "@/lib/storage";
 import { Button } from "../Button";
 import { useTheme } from "../theme";
@@ -77,7 +77,7 @@ export function SocialButtons({
     rememberSignIn(provider);
     try {
       // A refusal comes back to the app too, so the browser sheet closes on it.
-      const res = await authClient().signIn.social({
+      const res = await signInWithBrowser({
         ...requests.browser(provider, callbackURL),
         errorCallbackURL: "/",
       });

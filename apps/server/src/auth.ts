@@ -52,6 +52,7 @@ import { desktopSignIn, FRESH_SIGN_IN_MS } from "./desktop-sign-in";
 import { humanCheckRefusal } from "./http/human-check";
 import type { Logger } from "./logger";
 import { ownerSignIn } from "./owner-claim";
+import { phoneBrowserSignIn, phoneFlowStarted } from "./phone-browser-sign-in";
 
 /**
  * Sign-in for people, built on Better Auth (ADR 0006):
@@ -134,6 +135,7 @@ export function createAuth(deps: {
     plugins: [
       expo(),
       phoneSignIn,
+      phoneBrowserSignIn(),
       desktopSignIn(),
       ownerSignIn({ db, config, log, mint: (adapter, userId) => mintSignIn(adapter, `${FOR_USER}${userId}`) }),
     ],
@@ -275,6 +277,8 @@ export function createAuth(deps: {
         // The app's window asks every 2 s while the browser signs in.
         "/desktop/redeem": { window: 60, max: 40 },
         "/desktop/handoff": { window: 60, max: 10 },
+        // The phone app trades once per sign-in through the browser.
+        "/phone/redeem": { window: 60, max: 10 },
         "/owner-claim": { window: 60, max: 10 },
         "/owner-key": { window: 60, max: 10 },
       },
@@ -301,7 +305,10 @@ export function createAuth(deps: {
           const target =
             (ctx.query as { authorizationURL?: unknown } | undefined)?.authorizationURL ??
             (ctx.request ? new URL(ctx.request.url).searchParams.get("authorizationURL") : undefined);
-          if (!expoProxyAllowed(target, authorizations, ctx.context.baseURL)) {
+          if (
+            !expoProxyAllowed(target, authorizations, ctx.context.baseURL) ||
+            !(await phoneFlowStarted(ctx.context, target))
+          ) {
             throw new APIError("BAD_REQUEST", { message: "Invalid authorizationURL" });
           }
         }
@@ -504,8 +511,10 @@ export async function deletionProof(
 /**
  * The Expo plugin's `/expo-authorization-proxy` (the phone app's social sign-in, ADR 0035) redirects to any
  * https address and signs that address's `state` into the visitor's state cookie: an open redirect, and a way
- * to plant someone else's sign-in on a victim. It only goes on to a configured provider's own authorization
- * endpoint, for our client id and our callback, so the provider sends the person nowhere but back here.
+ * to move someone else's sign-in into the visitor's browser. It only goes on to a configured provider's own
+ * authorization endpoint, for our client id and our callback, so the provider sends the person nowhere but back
+ * here (`expoProxyAllowed`), and only with the state of a sign-in a phone app started, which leaves no session in
+ * the browser (`phoneFlowStarted`, phone-browser-sign-in.ts).
  */
 const EXPO_PROXY_PATH = "/expo-authorization-proxy";
 
@@ -533,7 +542,11 @@ function socialAuthorizations(config: Config, appleClientId: string | null): Soc
 }
 
 /** Whether the proxy may go on to `target` (`EXPO_PROXY_PATH`). `authBaseURL`: Better Auth's, with its path. */
-export function expoProxyAllowed(target: unknown, allowed: SocialAuthorization[], authBaseURL: string): boolean {
+export function expoProxyAllowed(
+  target: unknown,
+  allowed: SocialAuthorization[],
+  authBaseURL: string,
+): target is string {
   if (typeof target !== "string" || target.includes("#")) return false;
   let url: URL;
   try {

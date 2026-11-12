@@ -516,13 +516,14 @@ export function Sidebar() {
     : [];
   const groupsClosed = groupIds.every((id) => !sections.isOpen(id, groupsOpen));
   // The channels the sidebar lists. A personal workspace (ADR 0159) leaves out #general while no one else is in it
-  // (unless it is open or something new waits there), and shows its group conversations only once there is one.
+  // (unless it is open or something new waits there). With none to list, its group conversations show only for who
+  // may create one: the section then holds a "New group conversation" row, the way to the first.
   const quietGeneral = (c: Channel) =>
     c.name === "general" && !looksUnread(c) && !c.mentionCount && !pathname.endsWith(`/c/${c.id}`);
   const listedChannels = (channels.data ?? []).filter(
     (c) => !dmChannels.has(c.id) && !(personal && alone && quietGeneral(c)),
   );
-  const channelsShown = !personal || listedChannels.length > 0;
+  const channelsShown = !personal || listedChannels.length > 0 || newChannelItem.length > 0;
   // A tool's link keeps the browser's menu, from the mouse and the keyboard alike.
   const spaceEvent = (e: { target: EventTarget }) => !(e.target instanceof Element && e.target.closest("a[href]"));
   const sidebarMenu = entityMenu(() => [
@@ -1476,6 +1477,14 @@ function SidebarChannels({
         {pinnedChannels.map((c) => row(c, true))}
         {pinnedChannels.length > 0 && (loose.length > 0 || shown.length > 0) && <hr className="sidebar__pins-end" />}
         {loose.map((c) => row(c))}
+        {/* A personal workspace with no group conversation yet (ADR 0159): a row to create the first; after it, the
+            header's + does. */}
+        {isPersonal(org) && mayCreate && !loading && all.length === 0 && (
+          <button type="button" className="sidebar__item sidebar__new-channel" onClick={() => onNewChannel(null)}>
+            <Icon name="plus" className="sidebar__channel-icon" />
+            <span className="sidebar__item-label">{t("shell.sidebarMenu.newChannelPersonal")}</span>
+          </button>
+        )}
         {others.length > 0 && (
           <Menu
             label={t(modeKey(org, "shell.otherChannels"))}

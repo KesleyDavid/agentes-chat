@@ -56,3 +56,15 @@ We want a phone app with the same identity and behavior as the web. Today all cl
 - The CSRF change widens `/api/app` to non-browser clients carrying a valid session. Sessions from the app show up in the session list and can be revoked.
 - The app has two drawing paths for the sky (Canvas on the web, a shader in the app), held together by a test.
 - `apps/mobile` brings React Native into the workspace install. CI installs it but tests only its pure logic. Builds run on EAS.
+
+## Addendum (2026-11-11): a browser sign-in is tied to the app that started it
+
+Adds to decision 3. The browser that runs a provider's page is not the app: it starts at a link (the Expo plugin's proxy) that anyone can be sent, and it ends at a link back into the app that any app registered for the scheme can take. So a sign-in through the browser now needs both ends.
+
+- The app makes a random verifier, keeps it, and starts the sign-in with its challenge (the verifier's SHA-256, base64url) in the request's `additionalData`. It is stored with the sign-in's state on the server.
+- The proxy goes on only with the state of a pending sign-in whose way back is a link into the app (`phoneFlowStarted` in `apps/server/src/phone-browser-sign-in.ts`), on top of the provider, client id and callback it already checked. A sign-in started on the web is never moved into another browser this way.
+- The callback of a sign-in that goes back to the app sets no cookie in the browser: a session the app asked for is the app's alone.
+- With a challenge, the link back carries a one-time code (5 minutes) in place of the session, in the `cookie` parameter the Expo client already reads, so the app keeps it and sends it with its next request. `POST /api/auth/phone/redeem { verifier }` trades the code and the verifier for the session the callback made. The code is spent on its first try. The code alone (what another app that takes the link sees) signs in nobody, and neither does the verifier alone (what someone holds who started a sign-in and sent another person its link).
+- The app asks for the trade after every browser sign-in. A server from before this answers 404 and has already sent the session in the link, so a new app signs in on an old server as before.
+
+**Apps from before the challenge.** They send none and expect the session in the link, so the server still sends it there while `LEGACY_PHONE_SIGN_IN` (same file) is `true`. Their browser gets no session either. What stays as it was for them: the link back carries the session, so another app on the same phone that takes the `agenteschat://` scheme could read it. Setting the constant to `false` retires them: the proxy refuses a sign-in without a challenge and no link carries a session; a person on an old build then updates the app or signs in another way. Apple's native sign-in on iOS never goes through the browser and is unchanged.

@@ -103,14 +103,14 @@ export const FILE_JOIN_REQUEST_JOB = "join_request.file";
 
 /** A code typed right proves the address this long, to ask with it (the code's own rules: `email-codes.ts`). */
 const JOIN_CODE_VERIFIED_MS = 30 * 60_000;
-/**
- * Per workspace and mailbox, `CODE_LIMITS`: after them no new code goes out and none is checked. Per mailbox across
- * workspaces: codes a day. The whole server: codes an hour.
- */
-const JOIN_CODE_LIMITS = { ...CODE_LIMITS, mailboxDay: 20, serverHour: 500 };
-
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
+/**
+ * Codes one sender (`JoinCodeInput.from`) may ask for one mailbox in a day, across workspaces. Counted per sender,
+ * never per mailbox alone or for the whole server: a count everyone shares is one a stranger can use up, and then
+ * the mailbox's owner gets no code on any link.
+ */
+const CODES_PER_SENDER = { limit: 20, windowMs: DAY_MS };
 /** New requests through one link an hour (ADR 0068): enough for a team arriving, not for a flood. */
 const REQUESTS_PER_LINK = { limit: 20, windowMs: HOUR_MS };
 const group = (orgId: string) => `join_requests:${orgId}`;
@@ -216,26 +216,20 @@ const codeRow = (orgId: string, email: string) => and(eq(codes.orgId, orgId), eq
 // codes ever queue behind it.
 const lockCodes = (tx: Executor) => tx.execute(sql`select pg_advisory_xact_lock(hashtext('join-codes'))`);
 
-/** The counts every code limit reads, from the events of the last day. */
+/** The counts a workspace's code limits read for a mailbox, from the events of the last day. */
 async function codeCounts(tx: Executor, orgId: string, mailbox: string, now: Date) {
   const hourAgo = new Date(now.getTime() - HOUR_MS);
   const dayAgo = new Date(now.getTime() - DAY_MS);
-  const here = eq(codeEvents.orgId, orgId);
   const sent = eq(codeEvents.kind, "sent");
   const [mine] = await tx
     .select({
-      hour: sql<number>`count(*) filter (where ${and(here, sent, gt(codeEvents.at, hourAgo))})::int`,
-      day: sql<number>`count(*) filter (where ${and(here, sent)})::int`,
-      wrong: sql<number>`count(*) filter (where ${and(here, eq(codeEvents.kind, "wrong"))})::int`,
-      mailboxDay: sql<number>`count(*) filter (where ${sent})::int`,
+      hour: sql<number>`count(*) filter (where ${and(sent, gt(codeEvents.at, hourAgo))})::int`,
+      day: sql<number>`count(*) filter (where ${sent})::int`,
+      wrong: sql<number>`count(*) filter (where ${eq(codeEvents.kind, "wrong")})::int`,
     })
     .from(codeEvents)
-    .where(and(eq(codeEvents.mailbox, mailbox), gt(codeEvents.at, dayAgo)));
-  const [all] = await tx
-    .select({ n: sql<number>`count(*)::int` })
-    .from(codeEvents)
-    .where(and(sent, gt(codeEvents.at, hourAgo)));
-  return { hour: 0, day: 0, wrong: 0, mailboxDay: 0, ...mine, serverHour: all?.n ?? 0 };
+    .where(and(eq(codeEvents.orgId, orgId), eq(codeEvents.mailbox, mailbox), gt(codeEvents.at, dayAgo)));
+  return { hour: 0, day: 0, wrong: 0, ...mine };
 }
 
 export interface JoinCodeInput {
@@ -246,6 +240,8 @@ export interface JoinCodeInput {
   email?: string;
   /** The page's language (`requestLocale`), for the email. */
   locale?: string | null;
+  /** Who asks, as the routes' limits name them (`requestLimitIp`): `CODES_PER_SENDER` counts by it. */
+  from?: string;
 }
 
 /** The address a code is for, and the email's language. */
@@ -264,8 +260,9 @@ async function codeAddress(db: Executor, input: JoinCodeInput) {
 /**
  * Emails a code that proves the address asking through a link (ADR 0072). Every address gets one alike, a member's,
  * a waiting or a denied one too, since only its mailbox reads it. A new code replaces one still waiting to be
- * typed, never one already typed right. Every limit is counted in the database (`JOIN_CODE_LIMITS`, and 60 s
- * between two codes for one workspace and address), so a restart resets none.
+ * typed, never one already typed right. A workspace's limits for a mailbox are counted in the database
+ * (`CODE_LIMITS`, and 60 s between two codes for one workspace and address), so a restart resets none; across
+ * workspaces only the sender's own asks count (`CODES_PER_SENDER`), so nobody else's use up a mailbox's codes.
  */
 export async function sendJoinCode(deps: Deps, publicUrl: string, input: JoinCodeInput, now = new Date()) {
   const found = await openLink(deps.db, input.token, now);
@@ -278,10 +275,12 @@ export async function sendJoinCode(deps: Deps, publicUrl: string, input: JoinCod
     const wait = codeWaitMs(row?.sentAt, now);
     if (wait > 0) throw codeWait("join", wait);
     const n = await codeCounts(tx, orgId, mailbox, now);
-    const limits = JOIN_CODE_LIMITS;
-    if (n.hour >= limits.hour || n.day >= limits.day || n.wrong >= limits.wrongDay || n.mailboxDay >= limits.mailboxDay)
+    if (n.hour >= CODE_LIMITS.hour || n.day >= CODE_LIMITS.day || n.wrong >= CODE_LIMITS.wrongDay)
       throw codeLimit("join");
-    if (n.serverHour >= limits.serverHour) throw new TooManyError("Too many requests. Try again later.");
+    if (input.from) {
+      const spent = await deps.rateLimiter?.consume(`join-code:from:${input.from}:${mailbox}`, CODES_PER_SENDER);
+      if (spent && !spent.allowed) throw codeLimit("join");
+    }
     const code = newCode();
     const waiting = {
       codeHash: codeHash(orgId, email, code),
@@ -331,7 +330,7 @@ async function tryCode(
   const [row] = await tx.select().from(codes).where(codeRow(orgId, email));
   if (row?.verifiedHash === hash) return row.verifiedUntil && row.verifiedUntil > now ? "verified" : "expired";
   const mailbox = sha256(mailboxOf(email));
-  if ((await codeCounts(tx, orgId, mailbox, now)).wrong >= JOIN_CODE_LIMITS.wrongDay) return "tries";
+  if ((await codeCounts(tx, orgId, mailbox, now)).wrong >= CODE_LIMITS.wrongDay) return "tries";
   const wrong = () => tx.insert(codeEvents).values({ orgId, mailbox, kind: "wrong", at: now });
   const verdict = codeVerdict(row && { hash: row.codeHash, tries: row.tries, expiresAt: row.expiresAt }, hash, now);
   if (verdict === "none") {

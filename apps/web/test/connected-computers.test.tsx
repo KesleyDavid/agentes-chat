@@ -436,8 +436,8 @@ describe("Configurações → Dispositivos (self-host)", () => {
 
   const WINDOWS_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0";
   const IPHONE_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148";
-  /** Another computer's flow, on a browser on `ua`, with builds for Mac and Linux only. */
-  const computerFlow = async (ua: string, api = createFakeApi(seedState())) => {
+  /** Another computer's flow, on a browser on `ua`, with builds for Mac and Linux only (or `builds`). */
+  const computerFlow = async (ua: string, api = createFakeApi(seedState()), builds = ["darwin", "linux"]) => {
     fakeMachinesOf.get(api)?.setRelease(
       {
         version: "0.6.0",
@@ -445,7 +445,7 @@ describe("Configurações → Dispositivos (self-host)", () => {
         sha256: "",
         publishedAt: "2026-11-10T12:00:00.000Z",
       },
-      ["darwin", "linux"],
+      builds,
     );
     asBrowserOn(ua);
     const app = await renderApp(`/org/${ORG_ID}/settings/devices`, { api });
@@ -520,6 +520,33 @@ describe("Configurações → Dispositivos (self-host)", () => {
       ["Downloaden voor WindowsBinnenkort", true],
       ["Downloaden voor Linux", false],
     ]);
+  });
+
+  test("download: an ARM build is offered once it has a release; Windows on ARM takes x64 until then", async () => {
+    // A Linux on ARM with its build out: its own button, and the others in the menu.
+    const linuxArm = "Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0";
+    const dialog = await computerFlow(linuxArm, createFakeApi(seedState()), ["darwin", "linux", "linux-arm64"]);
+    expect(within(dialog).getByRole("link", { name: "Baixar para Linux (ARM)" })).toBeTruthy();
+    const menu = await openMenu(within(dialog).getByRole("button", { name: "Outros sistemas" }));
+    // No Windows on ARM release yet: not listed; Windows itself says Em breve.
+    expect(menuItems(menu)).toEqual([
+      ["Baixar para macOS", false],
+      ["Baixar para WindowsEm breve", true],
+      ["Baixar para Linux", false],
+    ]);
+  });
+
+  test("download: a Windows on ARM (as its browser reports the chip) gets the x64 build while ARM64 has none", async () => {
+    Object.defineProperty(navigator, "userAgentData", {
+      configurable: true,
+      value: { getHighEntropyValues: async () => ({ architecture: "arm" }) },
+    });
+    try {
+      const dialog = await computerFlow(WINDOWS_UA, createFakeApi(seedState()), ["darwin", "windows"]);
+      expect(within(dialog).getByRole("link", { name: "Baixar para Windows" })).toBeTruthy();
+    } finally {
+      Reflect.deleteProperty(navigator, "userAgentData");
+    }
   });
 
   test("a row: its state and whose it is; it opens the computer's page", async () => {

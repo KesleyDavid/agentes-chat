@@ -33,3 +33,18 @@ With ADR 0068, whoever holds an invitation link types a name and an address and 
 - Limits in memory: every restart and every replica would reset them.
 - A second token after the check: the code itself is the proof, and one tries counter covers checking and asking.
 - A link to click instead of a code: the page is already open, and mail scanners open every link.
+
+## Addendum (2026-11-11): no count that everyone shares
+
+Two of the limits in point 4 counted every request, whoever sent it and through whichever workspace: 20 codes a day per mailbox, and 500 code emails an hour for the whole server. A count everyone shares is one anyone can use up: codes asked for someone else's address through other workspaces left that person without a code on every link for a day, and enough requests left the whole server without codes for an hour.
+
+Both are gone. In their place, one sender (the IP address the other limits use, a /64 for IPv6) may ask at most 20 codes a day for one mailbox across workspaces (`join.code_limit`), counted in memory like the other per-IP limits. What bounds the emails now:
+
+- Per workspace and mailbox, in the database: 5 codes an hour and 10 a day, as before. Someone can still use up an address's codes for one workspace, as the consequences above say, and never for another.
+- Per sender: 10 codes an hour in all, and 20 a day for one mailbox.
+- Per link: 40 codes an hour.
+- The bot check, on a server that has one.
+
+One sender can send a mailbox no more than before. Many senders together can send more than 20 a day to one mailbox, each through workspaces of their own: that is the price of nobody being able to lock an address out, and it takes an IP address and a passed bot check for every 20 emails.
+
+Not chosen: keeping the shared counts and adding the per-sender one before them. The lockout would stay for anyone with a few IP addresses.

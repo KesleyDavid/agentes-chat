@@ -338,7 +338,7 @@ export type Browser = ReturnType<typeof browser>;
 export const GOOGLE_ENV = { GOOGLE_CLIENT_ID: "google-client", GOOGLE_CLIENT_SECRET: "google-secret" };
 
 /** Google's token endpoint answering an ID token for `email`, which Google verified or not. Nothing else is reached. */
-function fakeGoogle(email: string, verified: boolean): typeof fetch {
+export function fakeGoogle(email: string, verified = true): typeof fetch {
   const part = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
   const claims = { iss: "https://accounts.google.com", aud: GOOGLE_ENV.GOOGLE_CLIENT_ID, sub: `g-${email}`, email };
   const idToken = `${part({ alg: "RS256", kid: "k" })}.${part({ ...claims, email_verified: verified, name: "Ana" })}.sig`;

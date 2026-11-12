@@ -327,7 +327,7 @@ fn window_title(title: &str) -> &str {
     }
 }
 
-/// Tells the page the zoom (`--app-zoom`: its title bar stays 40pt and level with the window's buttons) and
+/// Tells the page the zoom (`--app-zoom`: its title bar stays 48pt and level with the window's buttons) and
 /// whether the window is full screen (no room kept for the buttons then), and puts the buttons back in the
 /// bar's middle (a resize or full screen lays them out anew). AppKit is touched on the main thread.
 pub fn fit_page(app: &AppHandle) {
@@ -582,7 +582,7 @@ thread_local! {
 
 /// The site's title bar (apps/web desktop.css), in points.
 #[cfg(target_os = "macos")]
-const TITLE_BAR: f64 = 40.0;
+const TITLE_BAR: f64 = 48.0;
 /// The close button's left edge, in points.
 #[cfg(target_os = "macos")]
 const LIGHTS_LEFT: f64 = 16.0;
@@ -590,7 +590,7 @@ const LIGHTS_LEFT: f64 = 16.0;
 /// The window's close, minimize and zoom buttons in the middle of the site's title bar, as Electron places
 /// them (`WindowButtonsProxy`): the title bar's container as tall as the bar, each button centred in it.
 /// `traffic_light_position` only makes the container taller, and macOS 26 keeps the buttons at its top (their
-/// middle at ~15pt on macOS 27, under the bar's icons at 20pt).
+/// middle at ~15pt on macOS 27, under the bar's icons at 24pt).
 #[cfg(target_os = "macos")]
 fn place_lights(window: &tauri::Window) {
     use crate::notch::native::{CGPoint, CGRect};

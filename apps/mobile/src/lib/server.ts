@@ -1,14 +1,16 @@
+import { randomUUID } from "expo-crypto";
 import { useSyncExternalStore } from "react";
 import { API_URL, APP_VARIANT, STORAGE_PREFIX } from "@/config";
 import {
+  claimedPrefixes,
   currentServer,
+  perServerName,
   prefixesFrom,
   savedServer,
   serverListFrom,
-  serverSlug,
   serverToReturn,
-  sessionPrefix,
   withoutServer,
+  withPrefix,
   withServer,
 } from "./server-choice";
 import { readValueSync, STORED, writeValue, writeValueSync } from "./storage";
@@ -54,25 +56,30 @@ export async function setServer(next: string) {
 
 // ── Sessions per server (ADR 0154) ──────────────────────────────────────────────
 
-const rawPrefixes = readValueSync(PREFIXES);
-const prefixes = prefixesFrom(rawPrefixes, server, STORAGE_PREFIX);
-// The first launch that keeps sessions per server: the server used until now keeps the old prefix.
-if (rawPrefixes === null) writeValueSync(PREFIXES, JSON.stringify(prefixes));
+let signedIn = serverListFrom(readValueSync(SIGNED_IN));
 
-/** Where a server's session (cookie and cached session) is stored. */
-export const prefixOf = (target: string) => sessionPrefix(prefixes, target, STORAGE_PREFIX);
+const rawPrefixes = readValueSync(PREFIXES);
+let prefixes = claimedPrefixes(prefixesFrom(rawPrefixes, server, STORAGE_PREFIX), signedIn, STORAGE_PREFIX);
+if (JSON.stringify(prefixes) !== rawPrefixes) writeValueSync(PREFIXES, JSON.stringify(prefixes));
 
 /**
- * The name a per-server value is remembered under: the old one for the server the app used before sessions were kept
- * per server, so its remembered workspace stays; its own for any other.
+ * Where a server's session (cookie and cached session) is stored. A server met for the first time gets a random
+ * prefix (`withPrefix`), saved as its own before anything is stored under it.
  */
-export const perServer = (name: string, target: string) =>
-  prefixOf(target) === STORAGE_PREFIX ? name : `${name}.${serverSlug(target)}`;
+export function prefixOf(target: string): string {
+  const saved = prefixes[target];
+  if (saved) return saved;
+  prefixes = withPrefix(prefixes, target, STORAGE_PREFIX, randomUUID);
+  writeValueSync(PREFIXES, JSON.stringify(prefixes));
+  return prefixes[target] ?? "";
+}
+
+/** The name a per-server value is remembered under (`perServerName`). */
+export const perServer = (name: string, target: string) => perServerName(name, prefixOf(target), STORAGE_PREFIX);
 
 /** The remembered workspace on a server. */
 export const orgValueName = (target: string) => perServer(STORED.org, target);
 
-let signedIn = serverListFrom(readValueSync(SIGNED_IN));
 const signedInListeners = new Set<() => void>();
 
 /** The servers this phone is signed in to, in the order they were added. */

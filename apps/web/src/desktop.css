@@ -1,14 +1,14 @@
 /*
  * agentes for Mac (ADR 0036): the site in the app's window. `html[data-desktop]` is set
  * by main.tsx when the app loaded it. The window has no title bar of its own: its three buttons float over
- * the top-left corner (main_window.rs puts them in the middle of these 40px).
+ * the top-left corner (main_window.rs puts them in the middle of these 48px).
  */
 :root {
   /*
-   * The app sets --app-zoom with ⌘+/⌘− (main_window.rs `fit_page`): the bar stays 40pt and the room for the
-   * window's buttons stays theirs, which don't zoom.
+   * The app sets --app-zoom with ⌘+/⌘− (main_window.rs `fit_page`): the bar stays 48pt and the room for the
+   * window's buttons stays theirs, which don't zoom. 48: the ⌘K field (32) with 8 over it and 8 under it.
    */
-  --titlebar-h: calc(40px / var(--app-zoom, 1));
+  --titlebar-h: calc(48px / var(--app-zoom, 1));
   /* The window's close, minimize and zoom buttons. */
   --titlebar-lights: calc(78px / var(--app-zoom, 1));
 }
@@ -35,10 +35,15 @@ html[data-desktop="linux"] {
   -webkit-user-select: none;
 }
 /* With the work as a sheet on the sidebar's paper (layout.css `.shell__work`), the bar and that paper are one
-   surface: no hairline under the bar. A narrow window keeps it, its work being flat under the bar. */
+   surface: no hairline under the bar. A narrow window keeps it, its work being flat under the bar. The bar is the
+   sheet's room on top, so the sheet's own 8px there goes: the ⌘K field stands 8px under the window's edge and 8px
+   over the sheet, as far from both. */
 @media (min-width: 761px) {
   html[data-desktop] .titlebar {
     border-bottom: 0;
+  }
+  html[data-desktop] .shell__work {
+    padding-top: 0;
   }
 }
 /* The workspace's sky over the sidebar's width, its hairline included: one sky with the header below. */

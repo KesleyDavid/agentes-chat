@@ -581,9 +581,11 @@ jobs:
   #
   # Each platform builds on its own native runner (Bun under QEMU emulation is slow and fragile) and
   # pushes by digest only; publish then stitches the digests into one tag per image.
+  # test-web stays out of the images' gate: it covers the desktop and phone apps and screen tests, which
+  # still run and turn the run red. Product decision: a UI test's failure doesn't hold back the server image.
   build:
     name: Image (${{ matrix.slug }})
-    needs: [changes, check, test-backend, test-web, secrets, compose]
+    needs: [changes, check, test-backend, secrets, compose]
     if: >-
       github.event_name == 'push' && needs.changes.outputs.image == 'true' &&
       (github.ref_type == 'tag' || !github.event.repository.private) &&
@@ -670,6 +672,9 @@ jobs:
   publish:
     name: Publish the images
     needs: build
+    # Without its own condition a job is skipped when any job earlier in its chain was, and on main the
+    # jobs a push doesn't touch are skipped, so the images were built and never tagged.
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 10
     permissions:

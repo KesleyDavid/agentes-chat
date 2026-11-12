@@ -394,10 +394,8 @@ export function inviteRoutes(deps: AppDeps) {
     }),
     async (c) => {
       const { token } = c.req.valid("param");
-      const ip = await adapters.rateLimiter.consume(
-        `join-code:ip:${requestLimitIp(c.req.raw.headers, config.TRUSTED_PROXIES)}`,
-        CODES_PER_IP,
-      );
+      const from = requestLimitIp(c.req.raw.headers, config.TRUSTED_PROXIES);
+      const ip = await adapters.rateLimiter.consume(`join-code:ip:${from}`, CODES_PER_IP);
       if (!ip.allowed) return apiError(c, 429, "join.rate_limited", TOO_MANY);
       // Before the link's count, so refused bots don't spend what everyone asking through it shares.
       const refused = await humanCheckRefusal(
@@ -413,10 +411,11 @@ export function inviteRoutes(deps: AppDeps) {
       const { email } = c.req.valid("json");
       const user = await sessionUser(deps.auth, c.req.raw.headers);
       if (!user && !email) return apiError(c, 400, "invalid_request", "Your email is needed");
-      const sent = await sendJoinCode(events, config.PUBLIC_URL, {
+      const sent = await sendJoinCode({ ...events, rateLimiter: adapters.rateLimiter }, config.PUBLIC_URL, {
         token,
         user,
         email,
+        from,
         locale: requestLocale(c.req.header("accept-language")),
       });
       deps.wakeWorkers?.();

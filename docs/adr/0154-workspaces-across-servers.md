@@ -68,3 +68,12 @@ One list of workspaces, grouped by server, in both apps; switching keeps every s
 - The phone keeps a session per server and asks each one for its workspaces; the desktop asks each one every minute.
 - Another account on the same server isn't supported yet.
 - Self-hosted Android pushes still share the relay's cap per phone across all of its servers (ADR 0152).
+
+## Addendum (2026-11-11): a session's prefix is random and has one owner
+
+Replaces how a server's `storagePrefix` is chosen in decision 2. A prefix made from the server's address (a 32-bit hash) could be matched by another address, and the app would then send the first server's session to the second.
+
+- A server the phone meets for the first time gets a random prefix, saved with its address before anything is stored under it. The saved list is the record of who owns each prefix: a prefix has one owner, and a second address saved with the same one is dropped and gets its own.
+- What is kept per server (the remembered workspace, the chats snapshot, the outboxes) is named after the server's prefix, not its address.
+- Installs from before this keep their sessions: at launch, each server the phone is signed in to that has no saved prefix keeps the one made from its address, now saved as its own. Where two such servers share one, the first signed in to keeps it and the other signs in again.
+- `authedFetch` sends a server's cookie only to addresses on that server's origin.

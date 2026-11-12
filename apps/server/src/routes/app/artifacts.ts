@@ -35,7 +35,7 @@ import {
   withPersonFacts,
 } from "@agenteschat/engine";
 import { createRoute, z } from "@hono/zod-openapi";
-import { createMiddleware } from "hono/factory";
+import { bodyLimit } from "hono/body-limit";
 import { rangedResponse } from "../../http/byte-range";
 import { apiError, errorResponse } from "../../http/errors";
 import {
@@ -275,14 +275,13 @@ export function artifactRoutes(deps: AppDeps) {
   const { db } = deps;
   const app = createAppRouter(deps);
   app.use("/organizations/*", requireSession(deps.auth));
-  // Uploads: refuse what is too large before reading the body.
-  const sizeGuard = createMiddleware(async (c, next) => {
-    const length = Number(c.req.header("content-length") ?? "0");
-    if (length > ARTIFACT_LIMITS.fileBytes + MULTIPART_SLACK_BYTES) {
+  // Uploads: the bytes are counted as they arrive, so a request that states no length is held to the same size.
+  const sizeGuard = bodyLimit({
+    maxSize: ARTIFACT_LIMITS.fileBytes + MULTIPART_SLACK_BYTES,
+    onError: (c) => {
       const maxMb = ARTIFACT_LIMITS.fileBytes / 1024 / 1024;
       return apiError(c, 413, "artifact.file_too_large", `The file is too large (max ${maxMb} MB)`, { maxMb });
-    }
-    return next();
+    },
   });
   app.use("/organizations/:orgId/artifacts/files", sizeGuard);
   app.use("/organizations/:orgId/artifacts/:artifactId/files", sizeGuard);

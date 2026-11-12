@@ -12986,6 +12986,16 @@ html:not([data-pointer]) .sidebar__bell:focus-visible {
 .sidebar__new-agent:hover .sidebar__new-agent-face {
   color: var(--ink);
 }
+/* "New group conversation", the only row of a personal workspace's group conversations while there is none
+   (ADR 0159): quiet, as the other rows that create. */
+.sidebar__new-channel {
+  width: 100%;
+  color: var(--muted);
+}
+.sidebar__new-channel:hover,
+.sidebar__new-channel:focus-visible {
+  color: var(--ink);
+}
 /* Go to… in a personal workspace's More (ADR 0159): its ⌘K quiet at the line's end. */
 .sidebar__goto-keys {
   display: inline-flex;

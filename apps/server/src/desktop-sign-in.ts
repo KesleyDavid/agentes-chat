@@ -37,7 +37,7 @@ const REQUEST_TTL_MS = 10 * 60_000;
 /** How recent a sign-in must be to hand it over to the app, or to add a password (`signedInLately`). */
 export const FRESH_SIGN_IN_MS = 10 * 60_000;
 /** 32 random bytes and their SHA-256, both base64url (43 characters): challenge, verifier and request id. */
-const KEY = /^[A-Za-z0-9_-]{43}$/;
+export const KEY = /^[A-Za-z0-9_-]{43}$/;
 /** Unambiguous code alphabet (no I/O/0/1) for the match the person reads off both screens. */
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 8;

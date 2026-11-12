@@ -173,42 +173,83 @@ describe("the limits, all counted in the database", () => {
     await sendAt(24 * 60 + 1);
   });
 
-  test("a mailbox gets 20 a day across workspaces, its +tags and Gmail's dots counted as one", async () => {
+  test("one sender gets 20 a day for a mailbox across workspaces, +tags and Gmail's dots as one", async () => {
     const token = await start();
     const tokens = [token];
     for (const name of ["Beta", "Gama"]) {
       const { organization } = await createOrganization(fx().db, fx().owner.id, { name });
       tokens.push((await inviteLink(fx().db, SECRET, fx().owner.id, organization.id, NOW)).token);
     }
+    const from = "203.0.113.7";
     const addresses = ["ab+x@gmail.com", "a.b@gmail.com"];
     for (const [i, address] of addresses.entries()) {
       for (let n = 0; n < 10; n++) {
         const minutes = n < 5 ? n : 61 + n;
-        await sendJoinCode(deps(), PUBLIC, { token: tokens[i] ?? "", user: null, email: address }, at(minutes * MIN));
+        await sendJoinCode(
+          deps(),
+          PUBLIC,
+          { token: tokens[i] ?? "", user: null, email: address, from },
+          at(minutes * MIN),
+        );
       }
     }
     await expect(
-      sendJoinCode(deps(), PUBLIC, { token: tokens[2] ?? "", user: null, email: "AB@googlemail.com" }, at(80 * MIN)),
+      sendJoinCode(
+        deps(),
+        PUBLIC,
+        { token: tokens[2] ?? "", user: null, email: "AB@googlemail.com", from },
+        at(80 * MIN),
+      ),
     ).rejects.toMatchObject({ code: "join.code_limit" });
-    await sendJoinCode(deps(), PUBLIC, { token: tokens[2] ?? "", user: null, email: "abc@gmail.com" }, at(80 * MIN));
+    await sendJoinCode(
+      deps(),
+      PUBLIC,
+      { token: tokens[2] ?? "", user: null, email: "abc@gmail.com", from },
+      at(80 * MIN),
+    );
     expect(mailboxOf(" A.B+news@GoogleMail.com")).toBe("ab@gmail.com");
     expect(mailboxOf("a.b+x@acme.com")).toBe("a.b@acme.com");
   });
 
-  test("500 code emails an hour on the server, whoever they go to", async () => {
+  test("codes others asked for an address elsewhere never use up its owner's", async () => {
     const token = await start();
+    for (const [i, name] of ["Beta", "Gama", "Delta"].entries()) {
+      const { organization } = await createOrganization(fx().db, fx().owner.id, { name });
+      const theirs = (await inviteLink(fx().db, SECRET, fx().owner.id, organization.id, NOW)).token;
+      for (let n = 0; n < 10; n++) {
+        const minutes = n < 5 ? n : 61 + n;
+        await sendJoinCode(
+          deps(),
+          PUBLIC,
+          { token: theirs, user: null, email: "lia@example.com", from: `198.51.100.${i}` },
+          at(minutes * MIN),
+        );
+      }
+    }
+    await sendJoinCode(
+      deps(),
+      PUBLIC,
+      { token, user: null, email: "lia@example.com", from: "203.0.113.7" },
+      at(90 * MIN),
+    );
+    expect((await codeEmails()).at(-1)?.to).toEqual(["lia@example.com"]);
+    expect(await codeEmails()).toHaveLength(31);
+  });
+
+  test("a busy hour of codes on the server refuses nobody else", async () => {
+    const token = await start();
+    const { organization } = await createOrganization(fx().db, fx().owner.id, { name: "Beta" });
     await fx()
       .db.insert(schema.organizationJoinCodeEvents)
       .values(
         Array.from({ length: 500 }, (_, i) => ({
-          orgId: fx().org.id,
+          orgId: organization.id,
           mailbox: `m${i}`,
           kind: "sent" as const,
           at: NOW,
         })),
       );
-    await expect(send(token, "felipe@example.com", at(MIN))).rejects.toMatchObject({ code: "rate_limited" });
-    await send(token, "felipe@example.com", at(61 * MIN));
+    expect(await send(token, "felipe@example.com", at(MIN))).toMatch(/^\d{6}$/);
   });
 
   test("after 10 wrong tries in a day no new code goes out, and one typed right before still works", async () => {
@@ -247,26 +288,22 @@ describe("the limits, all counted in the database", () => {
     expect(await check(token, "felipe@example.com", right, at(2 * MIN))).toEqual({ verified: true });
   });
 
-  test("a deleted workspace keeps its counts, so making and deleting workspaces resets no mailbox's cap", async () => {
+  test("a deleted workspace's codes are forgotten after a day, like any other", async () => {
     const token = await start();
     const mia = await person("u_mia", "mia@example.com", true);
-    const made: string[] = [];
-    for (const name of ["Um", "Dois", "Tres", "Quatro"]) {
-      const { organization } = await createOrganization(fx().db, mia.id, { name });
-      made.push(organization.id);
-      const { token: theirs } = await inviteLink(fx().db, SECRET, mia.id, organization.id, NOW);
-      for (let m = 0; m < 5; m++)
-        await sendJoinCode(deps(), PUBLIC, { token: theirs, user: null, email: "victim@example.com" }, at(m * MIN));
-    }
-    // Her account goes, and with it her workspaces, for good once their date passes.
+    const { organization } = await createOrganization(fx().db, mia.id, { name: "Um" });
+    const { token: theirs } = await inviteLink(fx().db, SECRET, mia.id, organization.id, NOW);
+    for (let m = 0; m < 5; m++)
+      await sendJoinCode(deps(), PUBLIC, { token: theirs, user: null, email: "lia@example.com" }, at(m * MIN));
+    // Her account goes, and with it her workspace, for good once its date passes.
     await deleteAccount(fx().db, mia.id);
     await fx()
       .db.update(schema.organizations)
       .set({ deletionDueAt: new Date(Date.now() - MIN) })
-      .where(inArray(schema.organizations.id, made));
-    for (const orgId of made) expect(await purgeWorkspace({ db: fx().db }, orgId)).toBe(true);
-    await expect(send(token, "victim@example.com", at(10 * MIN))).rejects.toMatchObject({ code: "join.code_limit" });
-    await pruneJoinRequests(deps(), at(DAY + 10 * MIN));
+      .where(inArray(schema.organizations.id, [organization.id]));
+    expect(await purgeWorkspace({ db: fx().db }, organization.id)).toBe(true);
+    await send(token, "lia@example.com", at(10 * MIN));
+    await pruneJoinRequests(deps(), at(DAY + 11 * MIN));
     expect(await fx().db.select().from(schema.organizationJoinCodeEvents)).toEqual([]);
   });
 

@@ -1826,7 +1826,18 @@ describe("the dialog's size (computer.css)", () => {
     expect(app?.split("}")[0]).toContain("--cmp-bar: var(--titlebar-h)");
     expect(app?.split("}")[0]).toContain("top: calc(50% + var(--titlebar-h) / 2)");
     const desktop = await Bun.file(new URL("../src/desktop.css", import.meta.url).pathname).text();
-    expect(desktop).toContain("--titlebar-h: calc(40px / var(--app-zoom, 1))");
+    expect(desktop).toContain("--titlebar-h: calc(48px / var(--app-zoom, 1))");
+  });
+
+  test("the desktop app: the ⌘K field stands midway between the window's edge and the work's sheet", async () => {
+    const desktop = await Bun.file(new URL("../src/desktop.css", import.meta.url).pathname).text();
+    const layout = await Bun.file(new URL("../src/layout.css", import.meta.url).pathname).text();
+    // A 32px field centred in the 48px bar: 8px over it and 8px under it, the sheet starting right under the bar.
+    expect(desktop).toContain("--titlebar-h: calc(48px / var(--app-zoom, 1))");
+    expect(desktop.split("\n.titlebar__search {")[1]?.split("}")[0]).toContain("height: var(--control-h-sm)");
+    expect(layout.split("\n.shell__work {")[1]?.split("}")[0]).toContain("padding: 8px 8px 8px 0");
+    const wide = desktop.split("@media (min-width: 761px) {\n  html[data-desktop] .titlebar {")[1]?.split("\n}\n")[0];
+    expect(wide).toContain("html[data-desktop] .shell__work {\n    padding-top: 0;");
   });
 
   test("a tablet keeps room for the Keyboard button: watching or in control, one screen size", async () => {

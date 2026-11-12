@@ -5,14 +5,17 @@ import { orderedServers, unreadElsewhere, workspacesOf } from "../src/features/m
 import { newWorkspaceMade } from "../src/lib/new-workspace";
 import { readPushData } from "../src/lib/push-payload";
 import {
+  claimedPrefixes,
+  cookieTo,
+  perServerName,
   prefixesFrom,
   pushPlace,
   serverAfter,
   serverListFrom,
   serverSlug,
   serverToReturn,
-  sessionPrefix,
   withoutServer,
+  withPrefix,
   withServer,
 } from "../src/lib/server-choice";
 
@@ -25,16 +28,59 @@ describe("a session per server", () => {
   test("the server used before keeps the old prefix, so whoever was signed in stays", () => {
     expect(prefixesFrom(null, box, "agenteschat")).toEqual({ [box]: "agenteschat" });
     const kept = prefixesFrom(JSON.stringify({ [box]: "agenteschat" }), cloud, "agenteschat");
-    expect(sessionPrefix(kept, box, "agenteschat")).toBe("agenteschat");
-    // Any other server: its own, from its address, the same every time, and one storage keys can take.
-    const own = sessionPrefix(kept, cloud, "agenteschat");
-    expect(own).toBe(`agenteschat_${serverSlug(cloud)}`);
-    expect(own).toMatch(/^[A-Za-z0-9._-]+$/);
-    expect(serverSlug(cloud)).not.toBe(serverSlug(box));
-    expect(serverSlug(cloud)).toBe(serverSlug(cloud));
+    expect(kept).toEqual({ [box]: "agenteschat" });
     // Unreadable or odd values: as on the first launch, or dropped.
     expect(prefixesFrom("{", box, "agenteschat")).toEqual({ [box]: "agenteschat" });
     expect(prefixesFrom(JSON.stringify({ [box]: "a b", [cloud]: 3 }), box, "agenteschat")).toEqual({});
+  });
+
+  test("a server signed in to before prefixes were saved keeps the one made from its address, and its files", () => {
+    const kept = claimedPrefixes({ [box]: "agenteschat" }, [box, cloud], "agenteschat");
+    expect(kept).toEqual({ [box]: "agenteschat", [cloud]: `agenteschat_${serverSlug(cloud)}` });
+    expect(kept[cloud]).toMatch(/^[A-Za-z0-9._-]+$/);
+    // Saved once, it is read back as it is.
+    const read = prefixesFrom(JSON.stringify(kept), lab, "agenteschat");
+    expect(claimedPrefixes(read, [box, cloud], "agenteschat")).toEqual(kept);
+    expect(perServerName("outbox", kept[box] ?? "", "agenteschat")).toBe("outbox");
+    expect(perServerName("outbox", kept[cloud] ?? "", "agenteschat")).toBe(`outbox.${serverSlug(cloud)}`);
+    expect(perServerName("outbox", "agenteschat_0b1c2d3e-random", "agenteschat")).toBe("outbox.0b1c2d3e-random");
+  });
+
+  test("a prefix has one owner: an address made to match another server's never gets that server's session", () => {
+    // Two addresses whose 32-bit slugs are equal.
+    const mine = "https://s1pi94at.example";
+    const lookalike = "https://sm1ezng.example";
+    expect(serverSlug(lookalike)).toBe(serverSlug(mine));
+
+    // Only a server signed in to keeps a prefix made from its address: one added later has none and gets a random one.
+    const kept = claimedPrefixes({ [box]: "agenteschat" }, [mine], "agenteschat");
+    expect(kept[mine]).toBe(`agenteschat_${serverSlug(mine)}`);
+    expect(kept[lookalike]).toBeUndefined();
+    // Both signed in to already: the first keeps it, the other starts over.
+    expect(claimedPrefixes({}, [mine, lookalike], "agenteschat")).toEqual({ [mine]: kept[mine] ?? "" });
+    expect(claimedPrefixes(kept, [lookalike, mine], "agenteschat")).toEqual(kept);
+    // Met for the first time, each gets a random prefix of its own, never the one made from its address.
+    let n = 0;
+    const id = () => `id-${++n}`;
+    const first = withPrefix({ [box]: "agenteschat" }, mine, "agenteschat", id);
+    const both = withPrefix(first, lookalike, "agenteschat", id);
+    expect(both).toEqual({ [box]: "agenteschat", [mine]: "agenteschat_id-1", [lookalike]: "agenteschat_id-2" });
+    expect(Object.values(both)).not.toContain(`agenteschat_${serverSlug(mine)}`);
+    // A server that has one keeps it.
+    expect(withPrefix(both, mine, "agenteschat", id)).toEqual(both);
+    expect(withPrefix(kept, lookalike, "agenteschat", id)[lookalike]).toBe("agenteschat_id-3");
+    // Stored with two owners: the second is dropped.
+    const stored = JSON.stringify({ [mine]: "p1", [lookalike]: "p1", [cloud]: "p2" });
+    expect(prefixesFrom(stored, box, "agenteschat")).toEqual({ [mine]: "p1", [cloud]: "p2" });
+  });
+
+  test("a session's cookie goes to its own server's addresses only", () => {
+    const cookie = "better-auth.session_token=made-up";
+    expect(cookieTo(`${box}/api/app/me`, box, cookie)).toBe(cookie);
+    expect(cookieTo(`${cloud}/api/app/me`, box, cookie)).toBe("");
+    expect(cookieTo(`${box}.evil.example/api/app/me`, box, cookie)).toBe("");
+    expect(cookieTo("https://box.example.com:8443/x", "https://box.example.com", cookie)).toBe("");
+    expect(cookieTo("/api/app/me", box, cookie)).toBe("");
   });
 
   test("the servers signed in to: in the order added, each once, addresses only", () => {

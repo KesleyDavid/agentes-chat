@@ -40,7 +40,8 @@ same shape.
 - **Sidebar:** the person's face and name on top (their menu: account, settings, switch workspace, sign out), with
   notifications and collapse beside it. Agents come first, with "New agent" under them: it asks in one sentence what
   the agent should do and sends it to the right hand, which proposes the agent (the full form stays one link away).
-  Channels show as "Group conversations" only once there is one to show. "More" closes the list: Home, "Go to…" and
+  Channels show as "Group conversations": with none to show, the section holds one row, "New group conversation"
+  (for who may create one), and after the first the header's + creates the next. "More" closes the list: Home, "Go to…" and
   every tool start there (approvals show in the list while one waits); the sidebar's existing per-person choices still
   win.
 - **A family:** every workspace has `#general`, and a personal one hides it, and the people with their direct messages,

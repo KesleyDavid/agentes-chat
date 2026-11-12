@@ -15,7 +15,7 @@ import {
 } from "@agenteschat/engine";
 import { createRoute, z } from "@hono/zod-openapi";
 import type { Context } from "hono";
-import { createMiddleware } from "hono/factory";
+import { bodyLimit } from "hono/body-limit";
 import { rangedResponse } from "../../http/byte-range";
 import { apiError, errorResponse } from "../../http/errors";
 import { type AppDeps, body, createAppRouter, errors, json, OrgParams, requireSession, security } from "./context";
@@ -49,11 +49,9 @@ export function voiceRoutes(deps: AppDeps) {
   app.use("/organizations/*", requireSession(deps.auth));
   app.use(
     "/organizations/:orgId/channels/:channelId/voice",
-    createMiddleware(async (c, next) => {
-      if (Number(c.req.header("content-length") ?? "0") > VOICE_MAX_BYTES + MULTIPART_SLACK_BYTES) {
-        return apiError(c, 413, "voice.too_large", "The recording is too large");
-      }
-      return next();
+    bodyLimit({
+      maxSize: VOICE_MAX_BYTES + MULTIPART_SLACK_BYTES,
+      onError: (c) => apiError(c, 413, "voice.too_large", "The recording is too large"),
     }),
   );
   const voice = (): VoiceDeps => {

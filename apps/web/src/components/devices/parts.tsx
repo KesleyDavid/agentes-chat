@@ -159,7 +159,8 @@ export type DesktopDownload = (typeof DESKTOP_BUILDS)[number];
 
 /**
  * Each build's newest release (`data` null: none yet), and this computer's build. A Windows on ARM takes the x64 one
- * while ARM64 has no release: Windows runs it there, emulated. A failed ask leaves that build out.
+ * while ARM64 has no release: Windows runs it there, emulated. A failed ask leaves that build out, and an ARM build is
+ * listed among the others only once it has a release (its own computer still sees it, marked Em breve).
  */
 export function useDesktopDownloads() {
   const here = useDesktopHere();
@@ -181,7 +182,9 @@ export function useDesktopDownloads() {
   let found = here ? DESKTOP_BUILDS.find((b) => b.target === here.target && b.arch === here.arch) : undefined;
   if (found?.id === "windows-arm64" && soon(found)) found = DESKTOP_BUILDS[1];
   const mine = found && offered(found) ? found : undefined;
-  const others = DESKTOP_BUILDS.filter((b) => b.id !== mine?.id && offered(b));
+  const others = DESKTOP_BUILDS.filter(
+    (b) => b.id !== mine?.id && offered(b) && (!b.arm || Boolean(latest[b.id].data)),
+  );
   return { latest, href, soon, mine, others };
 }
 

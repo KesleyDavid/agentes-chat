@@ -1,5 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import { eq, schema } from "@agenteschat/db";
+import { VOICE_MAX_BYTES } from "@agenteschat/engine";
 import { type Browser, browser, createTestServer, signUp, type TestServer } from "./harness";
 
 /** Voice messages over HTTP (ADR 0100): sending, playing, expiry, the switch and the owner's provider. */
@@ -164,4 +165,22 @@ test("on agentes.chat the provider can't be chosen", async () => {
     origin,
   });
   expect((await owner("/api/app/speech-key", { origin })).status).toBe(404);
+});
+
+test("a recording past the size is refused even when the request states no length", async () => {
+  const { owner, orgId, channelId } = await start();
+  const chunk = new Uint8Array(1024 * 1024);
+  let left = VOICE_MAX_BYTES / chunk.length + 2;
+  const res = await owner(`/api/app/organizations/${orgId}/channels/${channelId}/voice`, {
+    method: "POST",
+    headers: { "content-type": "multipart/form-data; boundary=x" },
+    body: new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (left-- > 0) controller.enqueue(chunk);
+        else controller.close();
+      },
+    }),
+  });
+  expect(res.status).toBe(413);
+  expect(await errorCode(res)).toBe("voice.too_large");
 });
