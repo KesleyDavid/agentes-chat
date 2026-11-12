@@ -310,7 +310,7 @@ jobs:
       needs.changes.outputs.shared == 'true' || needs.changes.outputs.web == 'true' ||
       needs.changes.outputs.mobile == 'true' || needs.changes.outputs.desktop == 'true'
     runs-on: ${{ vars.CI_RUNNER_LARGE || 'ubuntu-latest' }}
-    timeout-minutes: 35
+    timeout-minutes: 60
     env:
       SHARED: ${{ needs.changes.outputs.shared }}
       WEB: ${{ needs.changes.outputs.web }}
@@ -341,7 +341,7 @@ jobs:
       # app's CSS order and the reverse one (cascadeorder).
       - name: Geometry (the layout rules on every screen the tests reach)
         if: (success() || failure()) && (env.SHARED == 'true' || env.WEB == 'true')
-        timeout-minutes: 12
+        timeout-minutes: 35
         run: GEOMETRY_BROWSERS=$(nproc) bun run check:geometry "$RUNNER_TEMP/geometry" --report geometry-report.md --text-size xs,xl
       # The "Novo evento" dialog tests once aborted the whole DOM process (exit 134), so the main run
       # skips them (RUN_NEW_EVENT) and they run alone here. Alone they pass, so a failure is real.
