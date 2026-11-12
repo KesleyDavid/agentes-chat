@@ -72,8 +72,8 @@ const Waiting = ({ text }: { text: string }) => (
 const logo = (mark: ReactNode) => <span className="dk-logo">{mark}</span>;
 
 /**
- * "What agents can do here": the pairing's tools as switches, on as `pairTools` starts them (Claude Code and Codex
- * only once a runner here found them); `chosen` holds the ones the person changed. Folders come later.
+ * "What agents can do here": the pairing's tools as switches, on as `pairTools` starts them (Claude Code's and Codex's
+ * rows only once a runner here found them); `chosen` holds the ones the person changed. Folders come later.
  */
 function ToolSwitches({
   chosen,

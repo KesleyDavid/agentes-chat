@@ -45,6 +45,12 @@ export function fileOf({ system, arm }: InstallBuild, release: DesktopRelease | 
   return `agentes_${v}_universal.dmg`;
 }
 
+/** What makes a downloaded AppImage run: it comes without the right to, and has no installer. */
+export function appImageCommand(url: string): string {
+  const file = decodeURIComponent(url.split("?")[0]?.split("/").pop() ?? "");
+  return `chmod +x ./${file} && ./${file}`;
+}
+
 /** What `xattr` clears on a Mac when the button never shows: the mark every browser download carries. */
 export const QUARANTINE_FIX = "xattr -dr com.apple.quarantine /Applications/agentes.chat.app";
 /** System Settings › Privacy & Security, scrolled to Security (a Mac's browser asks before it opens it). */
@@ -332,6 +338,23 @@ export function InstallSteps({ build, release }: { build: InstallBuild; release:
             <p className="ist__line">{t("install.mac.stuckTitle")}</p>
             <p className="ist__sub">{t("install.mac.stuckText")}</p>
             <CommandBlock command={QUARANTINE_FIX} copied={t("install.copied")} />
+          </div>
+        </div>
+      )}
+      {/* A distribution that takes no deb (Arch, Fedora…): the same release's AppImage, when it has one. */}
+      {system === "linux" && release?.appImage && (
+        <div className="ist__stuck ac-iconline">
+          <Icon name="question" />
+          <div>
+            <p className="ist__line">{t("install.linux.otherTitle")}</p>
+            <p className="ist__sub">{t("install.linux.otherText")}</p>
+            <Button asChild size="sm">
+              <a href={release.appImage.url} download>
+                <Icon name="download" />
+                {t("install.linux.appImage")}
+              </a>
+            </Button>
+            <CommandBlock command={appImageCommand(release.appImage.url)} copied={t("install.copied")} />
           </div>
         </div>
       )}

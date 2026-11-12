@@ -16,6 +16,7 @@ import { createFakeHost, type FakeHost } from "../src/host/fake";
 import { createDesktopI18n } from "../src/i18n";
 import { ToastProvider } from "../src/ui/Toast";
 import { Popover } from "../src/windows/Popover";
+import { until } from "./until";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -73,11 +74,6 @@ async function withMenu(
     stop();
     for (const runner of host.runners.values()) runner.stop();
   }
-}
-
-async function until(ready: () => unknown) {
-  for (let i = 0; i < 100 && !ready(); i++) await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
-  expect(Boolean(ready())).toBe(true);
 }
 
 /** Each banner on the menu: its title, the line under it (null without one) and its buttons. */

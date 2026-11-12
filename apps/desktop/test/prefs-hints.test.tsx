@@ -19,6 +19,7 @@ import { General } from "../src/windows/prefs/General";
 import { Servers } from "../src/windows/prefs/Servers";
 import { Tools } from "../src/windows/prefs/Tools";
 import { Updates } from "../src/windows/prefs/Updates";
+import { until } from "./until";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -61,11 +62,6 @@ async function pane(
     stop();
     for (const runner of host.runners.values()) runner.stop();
   }
-}
-
-async function until(ready: () => unknown) {
-  for (let i = 0; i < 150 && !ready(); i++) await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
-  expect(Boolean(ready())).toBe(true);
 }
 
 /** What an element is described by, each description in order (a hint's text is in the page while it's closed). */

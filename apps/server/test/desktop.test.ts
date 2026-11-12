@@ -168,16 +168,28 @@ test("Windows and Linux: each platform's own files, from the newest release that
   t = await createTestServer({ env: { DESKTOP_RELEASES_TOKEN: "ghp_test" }, desktopFetch: github.fetch });
   const latest = async (query: string) => {
     const res = await server().app.request(`/api/desktop/latest?${query}`);
-    return res.status === 200 ? ((await res.json()) as { version: string; url: string }) : res.status;
+    return res.status === 200
+      ? ((await res.json()) as { version: string; url: string; appImage?: { url: string; sha256: string } })
+      : res.status;
   };
-  expect(await latest("target=darwin&arch=arm64")).toMatchObject({ version: "0.4.0" });
-  expect(await latest("target=windows&arch=x86_64")).toMatchObject({
+  // Only Linux has a second download.
+  const mac = await latest("target=darwin&arch=arm64");
+  expect(mac).toMatchObject({ version: "0.4.0" });
+  expect(mac).not.toHaveProperty("appImage");
+  const windows = await latest("target=windows&arch=x86_64");
+  expect(windows).toMatchObject({
     version: "0.3.0",
     url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_x64-setup.exe",
   });
-  // A deb is what a person downloads on Linux; the AppImage updates itself.
+  expect(windows).not.toHaveProperty("appImage");
+  // A deb is the first download on Linux; the AppImage, which updates itself, is offered beside it for a
+  // distribution that takes no deb.
   expect(await latest("target=linux&arch=x64")).toMatchObject({
     url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_amd64.deb",
+    appImage: {
+      url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_amd64.AppImage",
+      sha256: SUM,
+    },
   });
   // ARM64 has builds of its own on Windows and Linux; a chip with none gets nothing.
   expect(await latest("target=windows&arch=arm64")).toMatchObject({
@@ -185,6 +197,7 @@ test("Windows and Linux: each platform's own files, from the newest release that
   });
   expect(await latest("target=linux&arch=aarch64")).toMatchObject({
     url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_arm64.deb",
+    appImage: { url: "http://localhost:3000/api/desktop/download/0.3.0/agentes_0.3.0_arm64.AppImage" },
   });
   expect(await latest("target=linux&arch=armv7")).toBe(404);
   expect(await latest("target=freebsd&arch=x64")).toBe(404);

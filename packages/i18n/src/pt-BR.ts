@@ -1466,6 +1466,10 @@ export const ptBR = {
       apt: "Instale o .deb com dois cliques, ou pelo terminal.",
       aptLong: "Clique duas vezes no arquivo baixado e em Instalar, ou cole no terminal:",
       open: "Abra o agentes.chat nos aplicativos.",
+      otherTitle: "Usa Arch, Fedora ou outro sistema que não aceita .deb?",
+      otherText:
+        "Baixe o AppImage: ele roda em qualquer distribuição e se atualiza sozinho. Depois cole isto no terminal, na pasta onde você salvou:",
+      appImage: "Baixar o AppImage",
     },
     page: {
       docTitle: "Baixar o app · agentes.chat",

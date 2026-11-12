@@ -55,7 +55,8 @@ else, while the app already pairs this computer in one click behind the system's
 6. **The phone** offers this phone, another computer through its app (the same steps and live wait, no button to
    open the app, which a phone can't do for another computer) and a server or VPS.
 7. **Open defaults, shown before Allow.** A computer paired from the app starts with commands on, the browser on, and
-   Claude Code and Codex on when found here; folders none, added later in Preferences › Folders. This overrides
+   Claude Code and Codex on, found here or not (one installed later then works, where the site would otherwise say it
+   is turned off on this computer); folders none, added later in Preferences › Folders. This overrides
    ADR 0036 §8 ("commands off") for pairing from the app; a terminal pairing was already open unless `--no-exec`. The
    card after sign-in and a pair link's confirm show these as switches under "What agents can do here", prefilled,
    so the person changes them before Allow or Connect; Claude Code and Codex rows show only once a runner here has

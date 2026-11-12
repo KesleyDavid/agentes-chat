@@ -29,6 +29,11 @@ export interface DesktopRelease {
   minVersion?: string;
   /** The Tauri updater bundle (a path too) and its signature; absent on builds made before the updater. */
   updater?: { url: string; signature: string };
+  /**
+   * Linux only: the AppImage as a download of its own (a path too), for a distribution that takes no deb (Arch,
+   * Fedora…). It runs as it is and updates itself. Absent when the release has no AppImage or no checksum of it.
+   */
+  appImage?: { url: string; sha256: string };
 }
 
 interface GitHubAsset {
@@ -60,7 +65,8 @@ export type DesktopTarget = "darwin" | "windows" | "windows-arm64" | "linux" | "
 /**
  * A build's files in a release: what a person downloads, and what the app's updater installs. Windows'
  * installer is its own updater bundle; on Linux the deb is the download (a deb updates by downloading again)
- * and the AppImage updates itself. The CI names them (.github/workflows/desktop.yml).
+ * and the AppImage updates itself, and is offered as a second download (`DesktopRelease.appImage`). The CI names
+ * them (.github/workflows/desktop.yml).
  */
 export function desktopAssets(target: DesktopTarget, version: string): { download: string; updater: string } {
   if (target === "windows" || target === "windows-arm64") {
@@ -242,6 +248,9 @@ export function createDesktopReleases(options: ReleaseSource) {
       const bundle = assets.find((a) => a.name === names.updater);
       const sigAsset = assets.find((a) => a.name === `${names.updater}.sig`);
       const signature = bundle && sigAsset ? (await text(sigAsset)).trim() : "";
+      // On Linux the updater bundle is the AppImage, which is also a download when its checksum is there.
+      const imageSum = onLinux(target) && bundle ? assets.find((a) => a.name === `${bundle.name}.sha256`) : undefined;
+      const imageSha = imageSum ? parseSha256(await text(imageSum)) : null;
       return {
         version,
         url: `/api/desktop/download/${version}/${file.name}`,
@@ -251,6 +260,9 @@ export function createDesktopReleases(options: ReleaseSource) {
         ...(minVersion ? { minVersion } : {}),
         ...(bundle && signature
           ? { updater: { url: `/api/desktop/download/${version}/${bundle.name}`, signature } }
+          : {}),
+        ...(bundle && imageSha
+          ? { appImage: { url: `/api/desktop/download/${version}/${bundle.name}`, sha256: imageSha } }
           : {}),
       };
     },
@@ -302,6 +314,10 @@ const Latest = z
     notes: z.string(),
     publishedAt: z.string(),
     minVersion: z.string().optional().openapi({ description: 'Below this the app says "Atualize para continuar".' }),
+    appImage: z
+      .object({ url: z.string(), sha256: z.string() })
+      .optional()
+      .openapi({ description: "Linux only: the AppImage, for a distribution that takes no deb. It updates itself." }),
   })
   .openapi("DesktopRelease");
 
@@ -355,8 +371,15 @@ export function registerDesktopRoutes(api: OpenAPIHono, deps: AppDeps, releases:
       const platform = desktopTarget(target, arch);
       const release = platform ? await releases.latest(platform).catch(() => null) : null;
       if (!release) return apiError(c, 404, "desktop.no_release", "No desktop build for this computer yet");
-      const { updater: _, ...latest } = release;
-      return c.json({ ...latest, url: `${base}${latest.url}` }, 200);
+      const { updater: _, appImage, ...latest } = release;
+      return c.json(
+        {
+          ...latest,
+          url: `${base}${latest.url}`,
+          ...(appImage ? { appImage: { ...appImage, url: `${base}${appImage.url}` } } : {}),
+        },
+        200,
+      );
     },
   );
 

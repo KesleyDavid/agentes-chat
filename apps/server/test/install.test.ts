@@ -491,6 +491,51 @@ describe("install.sh", () => {
     expect(noSudo.err).toContain("Docker needs root here, and this computer has no sudo.");
   });
 
+  test("--computer yes as a user other than root on Linux: the same install again with sudo before anything else, else stopped; as root and on a Mac it goes on", async () => {
+    // A user who can use Docker: only the agents' computer needs root.
+    const user: Machine = { os: "Linux", arch: "x86_64", uid: 1000, docker: "27.3.1", compose: "2.26.1" };
+    const why = "Making this machine your agents' computer (--computer yes) needs root";
+    expect((await plan(user, ["--computer", "yes", "--network", "local"])).out).toBe(
+      [
+        "agentes.chat install plan (--plan: nothing runs)",
+        "◇  Linux on x64",
+        "◇  No terminal: the setup takes its defaults and the options given",
+        `●  ${why}: running this installer again as root`,
+        `   $ sudo sh ${SCRIPT} --computer yes --network local`,
+        "",
+        "With --plan it stops here. As root, --plan shows the rest.",
+        "",
+      ].join("\n"),
+    );
+    // Run for real: sudo comes first, with nothing downloaded or written before it.
+    const real = await plan(user, ["--computer=yes"], { real: true });
+    expect(real.code).toBe(0);
+    expect(real.changes).toEqual([`sudo sh ${SCRIPT} --computer=yes`]);
+    // An install of this user's keeps its folder: as root, the default is /opt/agentes.
+    const installed = await plan(user, ["--computer", "yes"], {
+      before: '/bin/mkdir -p "$HOME/agentes" && : > "$HOME/agentes/.env"',
+    });
+    expect(installed.out).toContain(`$ sudo sh ${SCRIPT} --dir ${installed.home}/agentes --computer yes\n`);
+    const noSudo = await plan({ ...user, sudo: false }, ["--computer", "yes"], { real: true });
+    expect(noSudo.code).toBe(1);
+    expect(noSudo.err).toContain(`${why}, and this computer has no sudo.`);
+    expect(noSudo.err).toContain(
+      "Run this as root, or leave out --computer yes and connect a computer later in Settings › Devices.",
+    );
+    expect(noSudo.changes).toEqual([]);
+
+    // The last --computer given wins, as in the setup. Root, and a Mac, need no sudo for it.
+    for (const run of [
+      await plan(user, ["--computer", "yes", "--computer", "no"]),
+      await plan({ ...linuxRoot, docker: "26.1.5", compose: "2.26.1" }, ["--computer", "yes"]),
+      await plan({ ...mac, docker: "28.5.1", bun: "1.4.4" }, ["--computer", "yes"]),
+    ]) {
+      expect(run.code).toBe(0);
+      expect(run.out).not.toContain("sudo");
+      expect(run.out).toContain("@agenteschat/setup@0.1.0 --computer ");
+    }
+  });
+
   test("a user who can use Docker installs in their home, Compose in their own plugins", async () => {
     const run = await plan({ os: "Linux", arch: "x86_64", uid: 1000, docker: "27.3.1" });
     expect(run.code).toBe(0);

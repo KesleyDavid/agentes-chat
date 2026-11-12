@@ -1477,7 +1477,10 @@
       "why": "Para Ubuntu, Debian y sistemas similares (x64). Linux no pide nada más:",
       "apt": "Instala el .deb con doble clic, o desde la terminal.",
       "aptLong": "Haz doble clic en el archivo descargado y luego en Instalar, o pega esto en la terminal:",
-      "open": "Abre agentes.chat desde tus aplicaciones."
+      "open": "Abre agentes.chat desde tus aplicaciones.",
+      "otherTitle": "¿Usas Arch, Fedora u otro sistema que no acepta .deb?",
+      "otherText": "Descarga el AppImage: funciona en cualquier distribución y se actualiza solo. Luego pega esto en la terminal, en la carpeta donde lo guardaste:",
+      "appImage": "Descargar el AppImage"
     },
     "page": {
       "docTitle": "Descarga la app · agentes.chat",

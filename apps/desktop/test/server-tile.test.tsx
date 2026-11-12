@@ -14,6 +14,7 @@ import { ServerTile } from "../src/ui/here";
 import { ToastProvider } from "../src/ui/Toast";
 import { FirstRun } from "../src/windows/FirstRun";
 import { Servers } from "../src/windows/prefs/Servers";
+import { until } from "./until";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -43,8 +44,7 @@ async function servers(
         </I18nextProvider>,
       ),
     );
-    for (let i = 0; i < 50 && !ready(el); i++) await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
-    expect(Boolean(ready(el))).toBe(true);
+    await until(() => ready(el));
     await check(el, opened);
   } finally {
     await act(async () => root.unmount());

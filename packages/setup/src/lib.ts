@@ -7,8 +7,10 @@ import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { renderUnicodeCompact } from "uqr";
 
+/** The one-line installer (install.sh at the repository's root, which calls it INSTALL_URL too). */
+export const INSTALL_URL = "https://agentes.chat/install";
 /** Every instance serves its own build's compose file there; agentes.chat's follows main, so it can be ahead of `:latest`. */
-export const COMPOSE_URL = "https://agentes.chat/install/docker-compose.yml";
+export const COMPOSE_URL = `${INSTALL_URL}/docker-compose.yml`;
 /** `INSTALL_DOCS_URL` in @agenteschat/i18n, as text: this MIT package bundles none of the AGPL workspace. */
 export const GUIDE_URL = "https://agentes.chat/docs/install-on-a-server";
 export const ISSUES_URL = "https://github.com/agentes-chat/agentes-chat/issues";
@@ -848,8 +850,14 @@ export function hostTokenConflict(content: string | null): { now: string; off: s
 /**
  * Whether this machine can be its agents' computer, and the answer when nobody gives one: yes, except on
  * a Linux machine too small for agents' screens or without apt-get for their packages, which `why` says.
+ * `dir` is the folder the setup runs in, where a run as root goes on.
  */
-export function computerOffer(machine: ThisMachine, content: string | null, image: boolean): ComputerOffer {
+export function computerOffer(
+  machine: ThisMachine,
+  content: string | null,
+  image: boolean,
+  dir: string,
+): ComputerOffer {
   const no = (error: string, fix: string): ComputerOffer => ({ problem: { check: "computer", error, fix } });
   const later = "connect a computer later in Settings › Devices";
   if (image) {
@@ -873,10 +881,11 @@ export function computerOffer(machine: ThisMachine, content: string | null, imag
   }
   const mac = machine.platform === "darwin";
   if (!mac && machine.platform !== "linux") return no("The agents' computer runs on Linux or a Mac.", `So ${later}.`);
+  // Simple mode needs root as well: it makes the user the agents share.
   if (!mac && !machine.root) {
     return no(
-      "Each agent gets a user of its own on this machine, which needs root.",
-      `Run the setup as root, or ${later}.`,
+      "Making this machine your agents' computer needs root: the setup adds users and a service for them.",
+      `Run it as root, in this folder (curl -fsSL ${INSTALL_URL} | sudo sh -s -- --dir ${quoteEnvValue(dir)} --computer yes), or ${later}.`,
     );
   }
   if (!mac && !machine.systemd) {
@@ -1143,7 +1152,7 @@ export function decideComputer(p: {
         },
       };
     }
-    return { plan: { state: "skipped", why: p.offer.problem.error }, entries: {} };
+    return { plan: { state: "skipped", why: `${p.offer.problem.error} ${p.offer.problem.fix}` }, entries: {} };
   }
   const on = p.computer ? p.computer === "yes" : now ? now === "on" : p.answers.on;
   if (on === undefined) return { ask: "computer", yes: p.offer.yes };

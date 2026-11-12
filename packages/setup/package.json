@@ -1,6 +1,6 @@
 {
   "name": "@agenteschat/setup",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Sets up a self-hosted agentes.chat with Docker: private HTTPS on your Tailscale network by default, a public domain, or this machine only.",
   "license": "MIT",
   "type": "module",

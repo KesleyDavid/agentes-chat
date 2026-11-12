@@ -1398,7 +1398,10 @@
       "why": "Ubuntu, Debian 및 비슷한 시스템(x64)용이에요. Linux는 따로 확인을 요청하지 않아요:",
       "apt": ".deb 파일을 더블클릭하거나 터미널에서 설치하세요.",
       "aptLong": "다운로드한 파일을 더블클릭하고 ‘설치’를 클릭하거나, 이걸 터미널에 붙여 넣으세요:",
-      "open": "앱 목록에서 agentes.chat을 여세요."
+      "open": "앱 목록에서 agentes.chat을 여세요.",
+      "otherTitle": "Arch, Fedora 등 .deb를 쓸 수 없는 시스템인가요?",
+      "otherText": "AppImage를 내려받으세요. 어떤 배포판에서도 실행되고 스스로 업데이트됩니다. 그런 다음 저장한 폴더에서 터미널에 이것을 붙여넣으세요:",
+      "appImage": "AppImage 다운로드"
     },
     "page": {
       "docTitle": "앱 다운로드 · agentes.chat",
