@@ -52,6 +52,16 @@ describe("app icons (ADR 0179)", () => {
     expect(icoSizes(read("apps/web/public/favicon.ico"))).toEqual([16, 32, 48]);
     expect(sizeOf(read("apps/web/public/apple-touch-icon.png"))).toEqual([180, 180]);
     expect(sizeOf(read("apps/web/public/app-icons/night-sky.png"))).toEqual([512, 512]);
+    // The web app manifest's (ADR 0189), all opaque (a PNG's color type 2: RGB, no alpha).
+    for (const [name, size] of [
+      ["icon-192.png", 192],
+      ["icon-512.png", 512],
+      ["icon-maskable-512.png", 512],
+    ] as const) {
+      const bytes = read(`apps/web/public/${name}`);
+      expect(sizeOf(bytes)).toEqual([size, size]);
+      expect(bytes[25]).toBe(2);
+    }
   });
 
   test("the icons a person makes: the generator and the apps list the same parts", () => {
